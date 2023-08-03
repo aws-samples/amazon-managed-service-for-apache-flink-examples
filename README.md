@@ -1,17 +1,11 @@
-## My Project
+# Amazon Managed Service for Apache Flink Examples
 
-TODO: Fill this README out!
-
-Be sure to:
-
-* Change the title in this README
-* Edit your repository description on GitHub
+Example applications in Java, Python, Scala and SQL for Amazon Managed Service for Apache Flink (formerly known as Amazon Kinesis Data Analytics), illustrating various aspects of Apache Flink applications, and simple "getting started" base projects.
 
 ## Security
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
 
-## License
+## License Summary
 
-This library is licensed under the MIT-0 License. See the LICENSE file.
-
+This sample code is made available under the MIT-0 license. See the LICENSE file.
