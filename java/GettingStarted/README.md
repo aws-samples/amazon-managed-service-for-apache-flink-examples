@@ -1,4 +1,4 @@
-## Getting Started Flink Java project
+## Getting Started Flink Java project - DataStream API
 
 Skeleton project for a basic Flink Java application to run on Amazon MSF.
 
