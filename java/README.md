@@ -1,3 +1,3 @@
-# Flink Java examples
+## Flink Java examples
 
-This folder contains examples of Flink applications in Java
+This folder contains examples of Flink applications written in Java

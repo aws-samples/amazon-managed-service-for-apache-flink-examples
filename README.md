@@ -2,6 +2,9 @@
 
 Example applications in Java, Python, Scala and SQL for Amazon Managed Service for Apache Flink (formerly known as Amazon Kinesis Data Analytics), illustrating various aspects of Apache Flink applications, and simple "getting started" base projects.
 
+* [Java examples](./java)
+* [Python examples](./python)
+
 ## Security
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
