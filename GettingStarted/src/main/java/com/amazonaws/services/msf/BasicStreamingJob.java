@@ -61,16 +61,14 @@ public class BasicStreamingJob {
         // Set up the streaming execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        /* If you would like to use runtime configuration properties, uncomment the lines below
-         * DataStream<String> input = createSourceFromApplicationProperties(env);
-         */
+        // To use runtime configuration properties, from MSF application config, uncomment the next line
+//         DataStream<String> input = createSourceFromApplicationProperties(env);
         DataStream<String> input = createSourceFromStaticConfig(env);
 
-        /* If you would like to use runtime configuration properties, uncomment the lines below
-         * input.sinkTo(createSinkFromApplicationProperties())
-         */
+        // To use runtime configuration properties, from MSF application config, uncomment the next line
+//       input.sinkTo(createSinkFromApplicationProperties())
         input.sinkTo(createSinkFromStaticConfig());
 
-        env.execute("Flink Streaming Java API Skeleton");
+        env.execute("Flink streaming Java API skeleton");
     }
 }
