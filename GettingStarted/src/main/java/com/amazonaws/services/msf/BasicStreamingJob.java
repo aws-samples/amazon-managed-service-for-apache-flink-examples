@@ -14,7 +14,8 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * A basic Flink Java application to run on Amazon MSF, with Kinesis data streams as source and sink.
+ * A basic Flink Java application to run on Amazon MSF,
+ * with Kinesis Data Streams as source and sink.
  */
 public class BasicStreamingJob {
     private static final String region = "us-west-2";
