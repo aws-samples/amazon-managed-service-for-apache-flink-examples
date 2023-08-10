@@ -47,7 +47,7 @@ public class BasicTableJob {
             parameters = ParameterTool.fromArgs(args);
         } else {
             // Read the application runtime configuration, configuration group "FlinkApplicationProperties"
-            // when running on MSF
+            // when running on AWS
             Map<String, Properties> applicationProperties = KinesisAnalyticsRuntime.getApplicationProperties();
             Properties flinkProperties = applicationProperties.get("FlinkApplicationProperties");
             Map<String, String> configMap = new HashMap<>(flinkProperties.size());

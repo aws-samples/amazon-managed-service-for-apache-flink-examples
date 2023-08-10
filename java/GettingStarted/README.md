@@ -1,6 +1,6 @@
 ## Getting Started Flink Java project - DataStream API
 
-Skeleton project for a basic Flink Java application to run on Amazon MSF.
+Skeleton project for a basic Flink Java application to run on Amazon Managed Service for Apache Flink.
 
 * Flink version: 1.15.2
 * Flink API: DataStream API
