@@ -81,7 +81,7 @@
             </exclusions>
         </dependency>
 
-        <!-- Amazon MSF (formerly Kinesis Analytics) runtime-->
+        <!-- Amazon Managed Service for Apache Flink (formerly Amazon Kinesis Data Analytics) runtime-->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-kinesisanalytics-runtime</artifactId>

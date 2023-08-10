@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Sample Amazon MSF Flink application.
+ * Sample Flink application that can run in Amazon Managed Service for Apache Flink
  *
  * It reads from a Kafka topic temperature samples serialized as AVRO using Amazon Glue Schema Registry.
  * It calculates average room temperatures every minute, and publish them to another Kafka topic, again serialized as
@@ -54,7 +54,7 @@ public class StreamingJob {
     }
 
     /**
-     * Load application properties from MSF runtime or from a local resource, when the environment is local
+     * Load application properties from the service runtime or from a local resource, when the environment is local
      */
     private static Map<String, Properties> loadApplicationProperties(StreamExecutionEnvironment env) throws IOException {
         if (isLocal(env)) {
@@ -63,7 +63,7 @@ public class StreamingJob {
                     StreamingJob.class.getClassLoader()
                             .getResource(LOCAL_APPLICATION_PROPERTIES_RESOURCE).getPath());
         } else {
-            LOGGER.info("Loading application properties from MSF");
+            LOGGER.info("Loading application configuration from ");
             return KinesisAnalyticsRuntime.getApplicationProperties();
         }
     }
@@ -173,7 +173,7 @@ public class StreamingJob {
 
         // Local dev specific settings
         if (isLocal(env)) {
-            // Checkpointing and parallelism are set by MSF when running on AWS
+            // Checkpointing and parallelism are set by the service when running on AWS
             env.enableCheckpointing(60000);
             env.setParallelism(2);
         }

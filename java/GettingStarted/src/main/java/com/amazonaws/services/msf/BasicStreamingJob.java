@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * A basic Flink Java application to run on Amazon MSF,
+ * A basic Flink Java application to run on Amazon Managed Service for Apache Flink,
  * with Kinesis Data Streams as source and sink.
  */
 public class BasicStreamingJob {
@@ -61,11 +61,11 @@ public class BasicStreamingJob {
         // Set up the streaming execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        // To use runtime configuration properties, from MSF application config, uncomment the next line
+        // To use runtime configuration properties, from application config, uncomment the next line
 //         DataStream<String> input = createSourceFromApplicationProperties(env);
         DataStream<String> input = createSourceFromStaticConfig(env);
 
-        // To use runtime configuration properties, from MSF application config, uncomment the next line
+        // To use runtime configuration properties, from application config, uncomment the next line
 //       input.sinkTo(createSinkFromApplicationProperties())
         input.sinkTo(createSinkFromStaticConfig());
 

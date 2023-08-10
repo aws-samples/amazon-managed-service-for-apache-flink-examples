@@ -51,7 +51,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Amazon MSF (formerly Kinesis Analytics) runtime-->
+        <!-- Amazon Managed Service for Apache Flink (formerly Kinesis Analytics) runtime-->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-kinesisanalytics-runtime</artifactId>

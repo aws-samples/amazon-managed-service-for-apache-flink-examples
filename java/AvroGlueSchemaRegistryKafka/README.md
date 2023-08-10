@@ -21,7 +21,7 @@ message key.
 
 ## Flink compatibility
 
-**Note:** This project is compatible with Flink 1.15+ and Amazon Managed Service for Apache Flink (Amazon MSF)
+**Note:** This project is compatible with Flink 1.15+ and Amazon Managed Service for Apache Flink
 
 ### Flink API compatibility
 
