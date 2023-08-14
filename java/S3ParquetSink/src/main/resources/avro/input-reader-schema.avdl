@@ -1,0 +1,8 @@
+@namespace("com.amazonaws.services.msf.gsr.avro")
+protocol Trading {
+
+	record TradeCount {
+		string symbol;
+		int count;
+	}
+}
