@@ -31,7 +31,7 @@ import java.util.Properties;
 public class StreamingJob {
     private static final Logger LOGGER = LoggerFactory.getLogger(StreamingJob.class);
 
-    // Name of the local JSON resource with the application properties in the same format as they are received from the MSF runtime
+    // Name of the local JSON resource with the application properties in the same format as they are received from the Amazon Managed Service for Apache Flink runtime
     private static final String LOCAL_APPLICATION_PROPERTIES_RESOURCE = "flink-application-properties-dev.json";
 
     // Names of the configuration group containing the application properties
@@ -42,7 +42,7 @@ public class StreamingJob {
     }
 
     /**
-     * Load application properties from MSF runtime or from a local resource, when the environment is local
+     * Load application properties from Amazon Managed Service for Apache Flink runtime or from a local resource, when the environment is local
      */
     private static Map<String, Properties> loadApplicationProperties(StreamExecutionEnvironment env) throws IOException {
         if (isLocal(env)) {
@@ -51,7 +51,7 @@ public class StreamingJob {
                     StreamingJob.class.getClassLoader()
                             .getResource(LOCAL_APPLICATION_PROPERTIES_RESOURCE).getPath());
         } else {
-            LOGGER.info("Loading application properties from MSF");
+            LOGGER.info("Loading application properties from Amazon Managed Service for Apache Flink");
             return KinesisAnalyticsRuntime.getApplicationProperties();
         }
     }
@@ -149,7 +149,7 @@ public class StreamingJob {
 
         // Local dev specific settings
         if (isLocal(env)) {
-            // Checkpointing and parallelism are set by MSF when running on AWS
+            // Checkpointing and parallelism are set by Amazon Managed Service for Apache Flink when running on AWS
             env.enableCheckpointing(60000);
             env.setParallelism(2);
         }
