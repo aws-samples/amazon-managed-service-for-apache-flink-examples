@@ -32,10 +32,10 @@ It uses the `FlinkKinesisConsumer` and  `FileSink` (as opposed to `StreamingFile
 
 
 ### FileSink & S3 dependencies
-The following dependencies related to AVRO and AWS Glue Schema Registry are included (for FLink 1.15.2):
+The following dependencies related to FileSink Connector and Amazon S3 are included (for FLink 1.15.2):
 
 1. `org.apache.flink:flink-connector-files:1.15.2` - File Sink Connector
-2. `org.apache.flinko:flink-s3-fs-hadoop:1.15.2` - Support for writing to Amazon S3.
+2. `org.apache.flink:flink-s3-fs-hadoop:1.15.2` - Support for writing to Amazon S3.
 
 ### Running in Intellij
 
