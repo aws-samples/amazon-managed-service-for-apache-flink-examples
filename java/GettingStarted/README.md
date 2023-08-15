@@ -31,3 +31,9 @@ Configuration parameters:
 
 To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to 
 the classpath'*.
+
+### Generating data
+
+You can use [Kinesis Data Generator](https://github.com/awslabs/amazon-kinesis-data-generator), 
+also available in a [hosted version](https://awslabs.github.io/amazon-kinesis-data-generator/web/producer.html),
+to generate random data to Kinesis Data Stream and test the application.
