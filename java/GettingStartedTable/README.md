@@ -31,3 +31,9 @@ Configuration parameters:
 
 To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to
 the classpath'*.
+
+### Data generator
+
+The project includes a [simple Python script](./data-generator/generator.py) that generates data and publishes
+to Kafka. 
+Edit the script to change the boostrap brokers and topic name.
