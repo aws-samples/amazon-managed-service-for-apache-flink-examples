@@ -14,7 +14,7 @@
     <!-- set your AWS ID using key defined in org.apache.hadoop.fs.s3a.Constants -->
     <property>
         <name>fs.s3a.access.key</name>
-        <value>ACCESSKEY></value>
+        <value>ACCESSKEY</value>
     </property>
 
     <!-- set your AWS access key -->
