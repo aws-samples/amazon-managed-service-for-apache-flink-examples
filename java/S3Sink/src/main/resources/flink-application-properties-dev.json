@@ -3,8 +3,8 @@
     "PropertyGroupId": "FlinkApplicationProperties",
     "PropertyMap": {
       "input.stream": "<StreamName>",
-      "stream.region": "AWSRegion",
-      "s3.path": "<S3Path"
+      "stream.region": "<AWSRegion>",
+      "s3.path": "<S3Path>"
     }
   }
 ]

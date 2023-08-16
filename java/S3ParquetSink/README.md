@@ -24,7 +24,7 @@ You can modify the Flink Application, if you wish to perform the count on a diff
 
 ## Flink compatibility
 
-**Note:** This project is compatible with Flink 1.15+ and Kinesis Data Analytics for Apache Flink.
+**Note:** This project is compatible with Flink 1.15+ and Amazon Managed Service for Apache Flink.
 
 ### Flink API compatibility
 
