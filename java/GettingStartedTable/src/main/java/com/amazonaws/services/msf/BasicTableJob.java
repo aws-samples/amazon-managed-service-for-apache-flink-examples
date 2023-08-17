@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -31,39 +32,44 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import static org.apache.flink.table.api.Expressions.$;
-import static org.apache.flink.table.api.Expressions.dateFormat;
+import static org.apache.flink.table.api.Expressions.*;
 
 public class BasicTableJob {
     private static final Logger LOG = LoggerFactory.getLogger(BasicTableJob.class);
 
+    /**
+     * Get configuration properties from Amazon Managed Service for Apache Flink runtime properties
+     * GroupID "FlinkApplicationProperties", or from command line parameters when running locally
+     */
+    private static ParameterTool loadApplicationParameters(String[] args, StreamExecutionEnvironment env) throws IOException {
+        if (env instanceof LocalStreamEnvironment) {
+            return ParameterTool.fromArgs(args);
+        } else {
+            Map<String, Properties> applicationProperties = KinesisAnalyticsRuntime.getApplicationProperties();
+            Properties flinkProperties = applicationProperties.get("FlinkApplicationProperties");
+            if (flinkProperties == null) {
+                throw new RuntimeException("Unable to load FlinkApplicationProperties properties from the Kinesis Analytics Runtime.");
+            }
+            Map<String, String> map = new HashMap<>(flinkProperties.size());
+            flinkProperties.forEach((k, v) -> map.put((String) k, (String) v));
+            return ParameterTool.fromMap(map);
+        }
+    }
+
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        ParameterTool parameters;
-        if (env instanceof LocalStreamEnvironment) {
-            // Read the configuration from command line arguments
-            // when running locally
-            parameters = ParameterTool.fromArgs(args);
-        } else {
-            // Read the application runtime configuration, configuration group "FlinkApplicationProperties"
-            // when running on AWS
-            Map<String, Properties> applicationProperties = KinesisAnalyticsRuntime.getApplicationProperties();
-            Properties flinkProperties = applicationProperties.get("FlinkApplicationProperties");
-            Map<String, String> configMap = new HashMap<>(flinkProperties.size());
-            flinkProperties.forEach((k, v) -> configMap.put((String) k, (String) v));
-            parameters = ParameterTool.fromMap(configMap);
-        }
+        ParameterTool applicationParameters = loadApplicationParameters(args, env);
 
-        String kafkaTopic = parameters.get("kafka-topic", "TableTestTopic");
-        String brokers = parameters.get("brokers", "");
-        String s3Path = parameters.get("s3Path", "");
+        String kafkaTopic = applicationParameters.get("kafka-topic", "TableTestTopic");
+        String brokers = applicationParameters.get("brokers", "");
+        String s3Path = applicationParameters.get("s3Path", "");
 
         LOG.info("kafkaTopic is {}", kafkaTopic);
         LOG.info("brokers is {}", brokers);
         LOG.info("s3Path is {}", s3Path);
 
-        // Create Kafka consumer
+        // Create Kafka consumer properties
         Properties kafkaProps = new Properties();
         kafkaProps.setProperty("bootstrap.servers", brokers);
 
@@ -164,7 +170,6 @@ public class BasicTableJob {
         final String insertSql = "INSERT INTO sink_table SELECT event_time,ticker,price,DATE_FORMAT(event_time, 'yyyy-MM-dd') as dt, " +
                 "DATE_FORMAT(event_time, 'HH') as hh FROM StockRecord WHERE price > 50";
         streamTableEnvironment.executeSql(insertSql);
-
     }
 
 
