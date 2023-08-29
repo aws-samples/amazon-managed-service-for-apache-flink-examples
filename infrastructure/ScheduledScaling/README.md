@@ -1,8 +1,9 @@
 # Scheduled Scaling of Amazon Managed Service for Apache Flink app w/ Amazon EventBridge and AWS Lambda
 
 * Python 3.9 for Lambda Function
-* 
-IMPORTANT: <strong>We strongly recommend that you disable autoscaling within your Amazon Managed Service for Apache Flink application if using the approach described here.</strong>
+
+
+**IMPORTANT:** We strongly recommend that you disable autoscaling within your Amazon Managed Service for Apache Flink application if using the approach described here.
 
 This sample illustrates how to scale your Amazon Managed Service for Apache Flink application on a schedule using Amazon EventBridge and AWS Lambda. Here's the high level approach:
 
