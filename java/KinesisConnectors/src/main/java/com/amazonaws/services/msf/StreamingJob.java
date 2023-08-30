@@ -11,13 +11,13 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kinesis.FlinkKinesisConsumer;
 import org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants;
 
-import static org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants.*;
-import static org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants.RecordPublisherType.*;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
+import static org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants.*;
+import static org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants.RecordPublisherType.EFO;
 
 
 public class StreamingJob {
@@ -54,18 +54,18 @@ public class StreamingJob {
         // STREAM_INITIAL_POSITION: LATEST: consume messages that have arrived from the moment application has been deployed
         // STREAM_INITIAL_POSITION: TRIM_HORIZON: consume messages starting from first available in the Kinesis Stream
         Properties kinesisConsumerConfig = new Properties();
-        kinesisConsumerConfig.put(AWSConfigConstants.AWS_REGION, applicationProperties.get("kinesis.region",DEFAULT_AWS_REGION));
+        kinesisConsumerConfig.put(AWSConfigConstants.AWS_REGION, applicationProperties.get("kinesis.region", DEFAULT_AWS_REGION));
         kinesisConsumerConfig.put(STREAM_INITIAL_POSITION, "LATEST");
 
 
         // Set up publisher type: POLLING (standard consumer) or EFO (Enhanced Fan-Out)
         kinesisConsumerConfig.put(RECORD_PUBLISHER_TYPE, applicationProperties.get("kinesis.source.type", DEFAULT_PUBLISHER_TYPE));
-        if( kinesisConsumerConfig.getProperty(RECORD_PUBLISHER_TYPE).equals(EFO.name()) ) {
+        if (kinesisConsumerConfig.getProperty(RECORD_PUBLISHER_TYPE).equals(EFO.name())) {
             kinesisConsumerConfig.put(ConsumerConfigConstants.EFO_CONSUMER_NAME, applicationProperties.get("kinesis.source.efoConsumer", DEFAULT_EFO_CONSUMER_NAME));
         }
 
 
-        return new FlinkKinesisConsumer<>(applicationProperties.get("kinesis.source.stream",DEFAULT_SOURCE_STREAM), new SimpleStringSchema(), kinesisConsumerConfig);
+        return new FlinkKinesisConsumer<>(applicationProperties.get("kinesis.source.stream", DEFAULT_SOURCE_STREAM), new SimpleStringSchema(), kinesisConsumerConfig);
     }
 
     private static KinesisStreamsSink<String> createKinesisSink(
@@ -73,13 +73,13 @@ public class StreamingJob {
 
         Properties sinkProperties = new Properties();
         // Required
-        sinkProperties.put(AWSConfigConstants.AWS_REGION, applicationProperties.get("kinesis.region",DEFAULT_AWS_REGION));
+        sinkProperties.put(AWSConfigConstants.AWS_REGION, applicationProperties.get("kinesis.region", DEFAULT_AWS_REGION));
 
         return KinesisStreamsSink.<String>builder()
                 .setKinesisClientProperties(sinkProperties)
                 .setSerializationSchema(new SimpleStringSchema())
                 .setPartitionKeyGenerator(element -> String.valueOf(element.hashCode()))
-                .setStreamName(applicationProperties.get("kinesis.sink.stream",DEFAULT_SINK_STREAM))
+                .setStreamName(applicationProperties.get("kinesis.sink.stream", DEFAULT_SINK_STREAM))
                 .build();
     }
 
