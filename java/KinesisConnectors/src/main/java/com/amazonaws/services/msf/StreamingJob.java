@@ -16,12 +16,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import static org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants.*;
+import static org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants.RecordPublisherType.EFO;
+
 
 public class StreamingJob {
 
     private static final String DEFAULT_SOURCE_STREAM = "source";
+    private static final String DEFAULT_PUBLISHER_TYPE = RecordPublisherType.POLLING.name(); // "POLLING" for standard consumer, "EFO" for Enhanced Fan-Out
+    private static final String DEFAULT_EFO_CONSUMER_NAME = "sample-efo-flink-consumer";
     private static final String DEFAULT_SINK_STREAM = "destination";
-
     private static final String DEFAULT_AWS_REGION = "eu-west-1";
 
     /**
@@ -43,24 +47,25 @@ public class StreamingJob {
         }
     }
 
-    private static FlinkKinesisConsumer createKinesisSource(
+    private static FlinkKinesisConsumer<String> createKinesisSource(
             ParameterTool applicationProperties) {
 
         // Properties for Amazon Kinesis Data Streams Source, we need to specify from where we want to consume the data.
         // STREAM_INITIAL_POSITION: LATEST: consume messages that have arrived from the moment application has been deployed
         // STREAM_INITIAL_POSITION: TRIM_HORIZON: consume messages starting from first available in the Kinesis Stream
         Properties kinesisConsumerConfig = new Properties();
-        kinesisConsumerConfig.put(AWSConfigConstants.AWS_REGION, applicationProperties.get("kinesis.region",DEFAULT_AWS_REGION));
-        kinesisConsumerConfig.put(ConsumerConfigConstants.STREAM_INITIAL_POSITION, "LATEST");
+        kinesisConsumerConfig.put(AWSConfigConstants.AWS_REGION, applicationProperties.get("kinesis.region", DEFAULT_AWS_REGION));
+        kinesisConsumerConfig.put(STREAM_INITIAL_POSITION, "LATEST");
 
-        // If EFO consumer is needed, uncomment the following block.
-        /*
-        kinesisConsumerConfig.put(ConsumerConfigConstants.RECORD_PUBLISHER_TYPE,
-                ConsumerConfigConstants.RecordPublisherType.EFO.name());
-        kinesisConsumerConfig.put(ConsumerConfigConstants.EFO_CONSUMER_NAME,"my-efo-consumer");
-         */
 
-        return new FlinkKinesisConsumer<>(applicationProperties.get("kinesis.source",DEFAULT_SOURCE_STREAM), new SimpleStringSchema(), kinesisConsumerConfig);
+        // Set up publisher type: POLLING (standard consumer) or EFO (Enhanced Fan-Out)
+        kinesisConsumerConfig.put(RECORD_PUBLISHER_TYPE, applicationProperties.get("kinesis.source.type", DEFAULT_PUBLISHER_TYPE));
+        if (kinesisConsumerConfig.getProperty(RECORD_PUBLISHER_TYPE).equals(EFO.name())) {
+            kinesisConsumerConfig.put(ConsumerConfigConstants.EFO_CONSUMER_NAME, applicationProperties.get("kinesis.source.efoConsumer", DEFAULT_EFO_CONSUMER_NAME));
+        }
+
+
+        return new FlinkKinesisConsumer<>(applicationProperties.get("kinesis.source.stream", DEFAULT_SOURCE_STREAM), new SimpleStringSchema(), kinesisConsumerConfig);
     }
 
     private static KinesisStreamsSink<String> createKinesisSink(
@@ -68,13 +73,13 @@ public class StreamingJob {
 
         Properties sinkProperties = new Properties();
         // Required
-        sinkProperties.put(AWSConfigConstants.AWS_REGION, applicationProperties.get("kinesis.region",DEFAULT_AWS_REGION));
+        sinkProperties.put(AWSConfigConstants.AWS_REGION, applicationProperties.get("kinesis.region", DEFAULT_AWS_REGION));
 
         return KinesisStreamsSink.<String>builder()
                 .setKinesisClientProperties(sinkProperties)
                 .setSerializationSchema(new SimpleStringSchema())
                 .setPartitionKeyGenerator(element -> String.valueOf(element.hashCode()))
-                .setStreamName(applicationProperties.get("kinesis.sink",DEFAULT_SINK_STREAM))
+                .setStreamName(applicationProperties.get("kinesis.sink.stream", DEFAULT_SINK_STREAM))
                 .build();
     }
 
