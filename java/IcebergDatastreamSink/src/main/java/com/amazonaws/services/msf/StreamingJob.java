@@ -33,11 +33,11 @@ import java.util.*;
 
 
 public class StreamingJob {
-    private static final String DEFAULT_SOURCE_STREAM = "iceberg";
+    private static final String DEFAULT_SOURCE_STREAM = "kds-stream-name";
     private static final String DEFAULT_AWS_REGION = "eu-west-1";
-    private static final String DEFAULT_ICEBERG_S3_BUCKET = "s3://flink-bucket-742421395996/warehouse/iceberg";
+    private static final String DEFAULT_ICEBERG_S3_BUCKET = "s3://<s3Bucket>/warehouse/iceberg";
     private static final String DEFAULT_GLUE_DB = "iceberg";
-    private static final String DEFAULT_ICEBERG_TABLE_NAME = "icebergsortappend4";
+    private static final String DEFAULT_ICEBERG_TABLE_NAME = "<icebertTableName>";
     private static final String DEFAULT_ICEBERG_SORT_ORDER_FIELD = "accountNr";
     private static final String DEFAULT_ICEBERG_PARTITION_FIELDS = "symbol,accountNr";
     private static final String DEFAULT_ICEBERG_OPERATION = "append";
