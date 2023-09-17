@@ -14,11 +14,10 @@ import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsIni
 import org.apache.flink.runtime.util.EnvironmentInformation;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
+import org.apache.flink.streaming.api.windowing.assigners.SlidingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +28,7 @@ import java.util.Map;
 import java.util.Properties;
 
 
-public class TumblingWindowStreamingJob {
+public class SlidingWindowStreamingJobKafka {
 
     private static final String APPLICATION_CONFIG_GROUP = "FlinkApplicationProperties";
 
@@ -114,17 +113,19 @@ public class TumblingWindowStreamingJob {
         KafkaSink<String> sink = createKafkaSink(kafkaSinkTopic, kafkaProps);
 
         ObjectMapper jsonParser = new ObjectMapper();
-        DataStream<Tuple2<String, Integer>> aggregateCount = inputDataStream.map(value -> {
+
+        inputDataStream.map(value -> { // Parse the JSON
                     JsonNode jsonNode = jsonParser.readValue(value, JsonNode.class);
-                    return new Tuple2<>(jsonNode.get("ticker").toString(), 1);
-                }).returns(Types.TUPLE(Types.STRING, Types.INT))
-                .keyBy(value -> value.f0) // Logically partition the stream for each word
-                .window(TumblingProcessingTimeWindows.of(Time.seconds(5)))
-                .sum(1); // Sum the number of words per partition
+                    return new Tuple2<>(jsonNode.get("ticker").toString(), jsonNode.get("price").asDouble());
+                }).returns(Types.TUPLE(Types.STRING, Types.DOUBLE))
+                .keyBy(v -> v.f0) // Logically partition the stream per stock symbol
+                .window(SlidingProcessingTimeWindows.of(Time.seconds(10), Time.seconds(5)))
+                .min(1) // Calculate minimum price per stock over the window
+                .setParallelism(3) // Set parallelism for the min operator
+                .map(value -> value.f0 + String.format(",%.2f", value.f1) + "\n")
+                .sinkTo(sink);
 
-        aggregateCount.map(Tuple2::toString).sinkTo(sink);
-
-        env.execute("Tumbling Window Word Count");
+        env.execute("Min Stock Price");
     }
 
 }

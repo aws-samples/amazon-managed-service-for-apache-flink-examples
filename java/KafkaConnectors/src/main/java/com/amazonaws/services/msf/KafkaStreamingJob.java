@@ -51,12 +51,14 @@ public class KafkaStreamingJob {
                 .setGroupId("my-group")
                 .setStartingOffsets(OffsetsInitializer.earliest()) // Used when the application starts with no state
                 .setValueOnlyDeserializer(new SimpleStringSchema())
+                .setProperties(applicationProperties)
                 .build();
     }
 
     private static KafkaSink<String> createKafkaSink(ParameterTool applicationProperties) {
         return KafkaSink.<String>builder()
                 .setBootstrapServers(applicationProperties.get("sink.bootstrap.servers"))
+                .setKafkaProducerConfig(applicationProperties)
                 .setRecordSerializer(KafkaRecordSerializationSchema.builder()
                         .setTopic(applicationProperties.get("sink.topic", DEFAULT_SINK_TOPIC))
                         .setKeySerializationSchema(new SimpleStringSchema())
