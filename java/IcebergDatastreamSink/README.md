@@ -8,9 +8,17 @@
 This example demonstrate how to use
 [Flink Iceberg Sink Connector](https://iceberg.apache.org/docs/latest/flink-writes/) with the Glue Data Catalog
 
+This samples consumes messages from a Kinesis Data Stream in JSON and writes them into an Iceberg Table in Amazon S3. 
+It uses AVRO for
+* Passing the schema of the table to the application
+* Automatically converting input JSON messages into AVRO
+* Converting the messages automatically into Iceberg table schema
+
+AVRO is not used for serializing the input. It is mainly used to simplify the iceberg table creation and sink by getting the schema from AVRO.
+
 At the moment there are current limitations concerning Flink Iceberg integration
 * Doesn't support Iceberg Table with hidden partitioning
-* Doesn't support adding columns, removing columns, renmaing columns or changing columns.
+* Doesn't support adding columns, removing columns, renaming columns or changing columns.
 
 **Note** : Iceberg in Flink requires Checkpointing to be enabled. Flink will commit the records whenever checkpoint is being triggered.
 
@@ -35,10 +43,10 @@ Configuration parameters:
 * `iceberg.warehouse` S3 Bucket URI used for Iceberg Warehouse
 * `iceberg.db` Glue Database (Needs to be created before)
 * `iceberg.table` Iceberg Table Name
-* `iceberg.partition.fields` Fields used for partitioning the table
+* `iceberg.partition.fields` Fields used for partitioning the table. (Comma separated fields, Ex. symbol,accountNr)
 * `iceberg.sort.field` Field used for SortOrder in Iceberg Table
 * `iceberg.operation` Operation to be done in Iceberg Table (append,upsert,overwrite)
-* `iceberg.upsert.equality.fields` If doing upsert, fields to be used for performing upsert, it must match partition fields
+* `iceberg.upsert.equality.fields` If doing upsert, fields to be used for performing upsert, it must match partition fields. (Comma separated fields, Ex. symbol,accountNr)
 
 ### Running locally in IntelliJ
 

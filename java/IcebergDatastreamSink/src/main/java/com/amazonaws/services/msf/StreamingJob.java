@@ -37,7 +37,7 @@ public class StreamingJob {
     private static final String DEFAULT_AWS_REGION = "eu-west-1";
     private static final String DEFAULT_ICEBERG_S3_BUCKET = "s3://<s3Bucket>/warehouse/iceberg";
     private static final String DEFAULT_GLUE_DB = "iceberg";
-    private static final String DEFAULT_ICEBERG_TABLE_NAME = "<icebertTableName>";
+    private static final String DEFAULT_ICEBERG_TABLE_NAME = "trade_iceberg";
     private static final String DEFAULT_ICEBERG_SORT_ORDER_FIELD = "accountNr";
     private static final String DEFAULT_ICEBERG_PARTITION_FIELDS = "symbol,accountNr";
     private static final String DEFAULT_ICEBERG_OPERATION = "append";
@@ -93,23 +93,23 @@ public class StreamingJob {
         return partitionSpec;
     }
 
-    //If Iceberg Table has not been previously created, we will create it using the Partition Fields specified in the Properties, as well as add a Sort Field to improve query performance
+    // If Iceberg Table has not been previously created, we will create it using the Partition Fields specified in the Properties, as well as add a Sort Field to improve query performance
     private static void createTable(Catalog catalog, TableIdentifier outputTable, org.apache.iceberg.Schema icebergSchema, PartitionSpec partitionSpec, String sortField) {
-        //If table has been previously created we dont do any operation or modification
+        //If table has been previously created, we do not do any operation or modification
         if (!catalog.tableExists(outputTable)) {
             Table icebergTable = catalog.createTable(outputTable, icebergSchema, partitionSpec);
            // Modifying newly created iceberg table to have a sort field
             icebergTable.replaceSortOrder()
                     .asc(sortField,NullOrder.NULLS_LAST)
                     .commit();
-            // The catalog.create table creates an Iceberg V1 table. If we want to perform upserts, we need to upgrade the table version version to 2.
+            // The catalog.create table creates an Iceberg V1 table. If we want to perform upserts, we need to upgrade the table version to 2.
             TableOperations tableOperations = ((BaseTable) icebergTable).operations();
             TableMetadata appendTableMetadata = tableOperations.current();
             tableOperations.commit(appendTableMetadata, appendTableMetadata.upgradeToFormatVersion(2));
         }
     }
 
-    //Iceberg Flink Sink Builder
+    // Iceberg Flink Sink Builder
     private static FlinkSink.Builder createIcebergSinkBuilder(ParameterTool applicationProperties,DataStream<GenericRecord> dataStream, Schema avroSchema) {
         //Converting Avro Schema to Iceberg Schema, this will be used for creating the table
         org.apache.iceberg.Schema icebergSchema = AvroSchemaUtil.toIceberg(avroSchema);
@@ -149,18 +149,17 @@ public class StreamingJob {
                         FlinkCompatibilityUtil.toTypeInfo(rowType))
                     .tableLoader(tableLoader);
         // In Iceberg you can perform Appends, Upserts and Overwrites.
-
         String icebergOperation = applicationProperties.get("iceberg.operation",DEFAULT_ICEBERG_OPERATION);
-        //Flink Sink Builder for Upsert Operation
+        // Flink Sink Builder for Upsert Operation
         if (icebergOperation.equals("upsert")) {
             //Get from Application Properties the fields for which we want to upsert by. Remember if the table is partitioned, we must include the partition fields
             String equalityFieldsString = Preconditions.checkNotNull(applicationProperties.get("iceberg.upsert.equality.fields",DEFAULT_ICEBERG_UPSERT_FIELDS),"Iceberg Equality Fields not defined");
-            List<String> equalityFieldsListString = Arrays.asList(equalityFieldsString.split("\\s*,\\s*"));
+            List<String> equalityFieldsListString = Arrays.asList(equalityFieldsString.split("[, ]+"));
             return flinkSinkBuilder
                     .equalityFieldColumns(equalityFieldsListString)
                     .upsert(true);
         }
-        //Flink Sink Builder for Overwrite Operation
+        // Flink Sink Builder for Overwrite Operation
 
         else if (icebergOperation.equals("overwrite")) {
             return flinkSinkBuilder
@@ -173,9 +172,9 @@ public class StreamingJob {
     }
 
     public static void main(String[] args) throws Exception {
-        //Get Avro Schema from resources
+        // Get Avro Schema from resources
         Schema avroSchema = new Schema.Parser().parse(new File("./src/main/resources/trade.avsc"));
-        // Create Generic Record TypeInfo frmo schema.
+        // Create Generic Record TypeInfo from schema.
         GenericRecordAvroTypeInfo avroTypeInfo = new GenericRecordAvroTypeInfo(avroSchema);
         // set up the streaming execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -203,10 +202,10 @@ public class StreamingJob {
                 .map(new JsonStringToGenericRecordMapFunction())
                 .returns(avroTypeInfo);
 
-        //Flink Sink Builder
+        // Flink Sink Builder
         FlinkSink.Builder icebergSink = createIcebergSinkBuilder(applicationProperties,genericRecordDataStream,avroSchema);
 
-        //Sink to Iceberg Table
+        // Sink to Iceberg Table
         icebergSink.append();
 
         env.execute("Flink DataStream Sink");
