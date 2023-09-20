@@ -1,0 +1,24 @@
+{
+  "type":"record",
+  "name":"Trade",
+  "namespace":"com.amazonaws.services.msf.avro",
+  "fields":[
+    {
+      "name":"tradeId",
+      "type":"string"},
+    {
+      "name":"accountNr",
+      "type":"string"},
+
+    {
+      "name":"executionTime",
+      "type":"string"},
+    {
+      "name":"symbol",
+      "type":"string"},
+    {
+      "name":"price",
+      "type":"float"},
+    {
+      "name":"shares",
+      "type":"int"}]}
