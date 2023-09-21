@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Properties;
 
 
-public class SlidingWindowStreamingJobKafka {
+public class SlidingWindowStreamingJobKafkaWithParallelism {
 
     private static final String APPLICATION_CONFIG_GROUP = "FlinkApplicationProperties";
 

@@ -28,6 +28,14 @@ Configuration parameters:
 * `kafka-sink-topic` source topic
 * `brokers` source Kafka cluster boostrap servers 
 
+Additional parameters for IAM auth which is required for MSK Serverless
+* `sasl.mechanism=AWS_MSK_IAM`
+* `sasl.client.callback.handler.class=software.amazon.msk.auth.iam.IAMClientCallbackHandler`
+* `sasl.jaas.config=software.amazon.msk.auth.iam.IAMLoginModule required;"`
+* `security.protocol=SASL_SSL`
+* `ssl.truststore.location=/usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts`
+* `ssl.truststore.password=changeit`
+
 `SlidingWindowStreamingJob`:
 * `InputStreamRegion` region of the input stream (default: `us-east-1`)
 * `InputStreamName` name of the input Kinesis Data Stream (default: `ExampleInputStream`)
@@ -38,7 +46,58 @@ Configuration parameters:
 
 To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to
 the classpath'*.
+Provide arguments like following for Kafka windowing samples-
+```
+--brokers localhost:9092 --kafka-source-topic source --kafka-sink-topic sink --transaction.timeout.ms 1000
+```
+For Kinesis sample -
+```
+--InputStreamRegion us-east-1 --InputStreamName source-stream --OutputStreamRegion us-east-1 --OutputStreamName sink-stream
+```
 
+### Running locally through MVN command line
+Refer following samples -
+```
+ mvn exec:java  -Dexec.classpathScope="compile" -Dexec.mainClass="com.amazonaws.services.msf.windowing.SlidingWindowStreamingJobKafkaWithParallelism" -Dexec.args="--brokers localhost:9092 --kafka-source-topic source --kafka-sink-topic sink --transaction.timeout.ms 1000" 
+
+```
+```
+ mvn exec:java  -Dexec.classpathScope="compile" -Dexec.mainClass="com.amazonaws.services.msf.windowing.TumblingWindowStreamingJob" -Dexec.args="--brokers localhost:9092 --kafka-source-topic source --kafka-sink-topic sink --transaction.timeout.ms 1000" 
+
+```
+### Deploying using CloudFormation to Amazon Managed Service for Apache Flink
+Refer the sample CloudFormation template at `cloudformation/windowing-msk-serverless-cloudformation.yaml` .
+The sample assumes that both source and sink topics are on same cluster and clients need IAM auth.
+Edit `deploy-windowing-msk.sh` and execute following command. The command optionally builds jar and uploads to provided bucket.
+
+#### Tumbling window MSK Serverless 
+```
+./deploy-windowing-msk.sh TUMBLING <bucket-name-to-upload> <Y/N If build code and upload or not>
+```
+To build code and deploy run -  
+```
+./deploy-windowing-msk.sh TUMBLING <bucket-name-to-upload> 
+```
+This will build the jar with main class `com.amazonaws.services.msf.windowing.TumblingWindowStreamingJob` and upload to  `s3://<bucket-name-to-upload>/flink/tumbling-window-kafka-amazon-app-1.0.jar`
+
+If you are just changing CloudFormation parameters or jobs parameters , then the build may not be required. In that case run - 
+```
+./deploy-windowing-msk.sh TUMBLING <bucket-name-to-upload>  N
+```
+#### Sliding window MSK Serverless
+```
+./deploy-windowing-msk.sh SLIDING <bucket-name-to-upload> <Y/N If build code and upload or not>
+```
+To build code and deploy run -
+```
+./deploy-windowing-msk.sh  SLIDING <bucket-name-to-upload> 
+```
+This will build the jar with main class `com.amazonaws.services.msf.windowing.SlidingWindowStreamingJobKafkaWithParallelism` and upload to  `s3://<bucket-name-to-upload>/flink/sliding-window-kafka-amazon-app-1.0.jar`
+
+If you are just changing CloudFormation parameters or jobs parameters , then the build may not be required. In that case run -
+```
+./deploy-windowing-msk.sh SLIDING <bucket-name-to-upload>  N
+```
 ### Data generator - Kafka
 The project includes a [simple Python script](./data-generator/generator.py) that generates data and publishes
 to Kafka. 
@@ -58,3 +117,4 @@ RecordTemplate:
 })}}, "ticker":"{{random.arrayElement(
 ["AAPL","AMZN","MSFT","INTC","TBV"]
 )}}"}`
+
