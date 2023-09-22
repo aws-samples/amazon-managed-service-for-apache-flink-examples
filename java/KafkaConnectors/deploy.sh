@@ -1,27 +1,23 @@
 #!/bin/bash
 bucket=$1
 
-
 jar_name=kafka-connectors-1.0.jar
 stack_name=flink-kafka-sample
 application_name=flink-kafka-sample
 template_file=cloudformation/template-msf-iam-auth.yaml
-region=ap-south-1
 
-## Network configuration
+
+## Region and Network configuration
+region=ap-south-1
 SecurityGroup=sg-28d5f054
 SubnetOne=subnet-08710af059f886114
 SubnetTwo=subnet-7d90f906
 SubnetThree=subnet-02e1e451e78007768
 
-
-
-source_kafka_bootstrap_server="boot-z6eo0mfk.c1.kafka-serverless.ap-south-1.amazonaws.com:9098"
-source_cluster_name="demo-cluster-1"
+## MSK configuration
+kafka_bootstrap_server="boot-z6eo0mfk.c1.kafka-serverless.ap-south-1.amazonaws.com:9098"
 source_topic="flink-kafka-sample-source"
-sink_kafka_bootstrap_server="boot-z6eo0mfk.c1.kafka-serverless.ap-south-1.amazonaws.com:9098"
 sink_topic="flink-kafka-sample-sink"
-sink_cluster_name="demo-cluster-1"
 
 if [ -z "${bucket}" ]
 then
@@ -54,12 +50,10 @@ aws cloudformation deploy --template-file ${template_file} \
      SubnetOne=${SubnetOne} \
      SubnetTwo=${SubnetTwo} \
      SubnetThree=${SubnetThree} \
-     SinkKafkaBootstrapserver=${sink_kafka_bootstrap_server} \
-     SourceClustername=${source_cluster_name} \
-     SinkKafkaTopic=${sink_topic} \
-     SourceKafkaBootstrapserver=${source_kafka_bootstrap_server} \
-     SinkClustername=${sink_cluster_name} \
-     SourceKafkaTopic=${source_topic}
+     KafkaBootstrapserver=${kafka_bootstrap_server} \
+     SourceKafkaTopic=${source_topic} \
+     SinkKafkaTopic=${sink_topic}
+
 
 
 echo "Deployment completed"

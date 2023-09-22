@@ -11,6 +11,8 @@ source and sink.
 
 This example uses on `KafkaSource` and `KafkaSink`.
 
+![Flink Example](flink-example.png),
+
 Note that the old 
 [`FlinkKafkaConsumer`](https://nightlies.apache.org/flink/flink-docs-release-1.13/docs/connectors/datastream/kafka/#kafka-sourcefunction) 
 and [`FlinkKafkaProducers`](https://nightlies.apache.org/flink/flink-docs-release-1.13/docs/connectors/datastream/kafka/#kafka-producer)
@@ -34,28 +36,23 @@ Configuration parameters:
 * `sink.topic` sink topic (default: `destination`)
 * `sink.transaction.timeout.ms` Sink transaction timeout 
 
-If you are connecting with no-auth and no SSL, above will work. Else you need additional configuration for both source and sink. 
-
-#### For SSL
-                source.security.protocol: SSL
-                source.ssl.truststore.location: /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts
-                source.ssl.truststore.password: changeit
-                sink.security.protocol: SSL
-                sink.ssl.truststore.location: /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts
-                sink.ssl.truststore.password: changeit
+If you are connecting with no-auth and no SSL, above will work. Else you need additional configuration for both source and sink.
 #### For IAM Auth
-                source.sasl.mechanism: AWS_MSK_IAM
-                source.sasl.client.callback.handler.class: software.amazon.msk.auth.iam.IAMClientCallbackHandler
-                source.sasl.jaas.config: "software.amazon.msk.auth.iam.IAMLoginModule required;"
-                source.security.protocol: SASL_SSL
-                source.ssl.truststore.location: /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts
-                source.ssl.truststore.password: changeit
-                sink.sasl.mechanism: AWS_MSK_IAM
-                sink.sasl.client.callback.handler.class: software.amazon.msk.auth.iam.IAMClientCallbackHandler
-                sink.sasl.jaas.config: "software.amazon.msk.auth.iam.IAMLoginModule required;"
-                sink.security.protocol: SASL_SSL
-                sink.ssl.truststore.location: /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts
-                sink.ssl.truststore.password: changeit
+
+
+* `source.sasl.mechanism` AWS_MSK_IAM
+* `source.sasl.client.callback.handler.class` software.amazon.msk.auth.iam.IAMClientCallbackHandler
+* `source.sasl.jaas.config` "software.amazon.msk.auth.iam.IAMLoginModule required;"
+* `source.security.protocol` SASL_SSL
+* `source.ssl.truststore.location` /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts
+* `source.ssl.truststore.password` changeit
+* `sink.sasl.mechanism` AWS_MSK_IAM
+* `sink.sasl.client.callback.handler.class` software.amazon.msk.auth.iam.IAMClientCallbackHandler
+* `sink.sasl.jaas.config` "software.amazon.msk.auth.iam.IAMLoginModule required;"
+* `sink.security.protocol` SASL_SSL
+* `sink.ssl.truststore.location` /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts
+* `sink.ssl.truststore.password` changeit
+
 
 ### Running locally in IntelliJ
 
@@ -74,51 +71,41 @@ Refer following sample -
 ```
 
 ### Deploying using CloudFormation to Amazon Managed Service for Apache Flink
+This sample assumes that MSK Serverless cluster is created. The flink application routes data ingested in source topic to sink topic without any transformation. 
 
-#### Connecting to MSK Serverless using IAM Auth
-Refer the sample CloudFormation template at `cloudformation/template-iam-auth.yaml` . 
-The sample assumes that both source and sink clusters need IAM auth. 
-Edit `deploy-iam-auth.sh` and execute following command. The command optionally builds jar and uploads to provided bucket. 
+![Amazon Managed Service for Apache Flink , MSK Serverless example](flink-msk-serverless-example.png),
+#### Pre-requisite
+1. Create MSK serverless cluster while choosing 3 subnets. Refer https://docs.aws.amazon.com/msk/latest/developerguide/serverless-getting-started.html . 
+2. Once the cluster is created note down subnets ids of the cluster and security group.
+3. Ensure that security group has self referencing ingress rule that allows connection on port 9098. 
+
+#### Build and deployment
+
+1. Build Code. Execute the script below which will build the jar and upload the jar to S3 at s3://<bucket-name>/flink/kafka-connectors-1.0.jar. 
+```shell
+./build.sh <bucket-name-to-upload>
+```
+2. Edit `deploy.sh` to modify  "Region and Network configuration" . Modify following configurations -  
+* region= Deployment region
+* SecurityGroup= MSK Security Group. 
+* SubnetOne= MSK Subnet one
+* SubnetTwo= MSK Subnet two
+* SubnetThree= MSK Subnet three
+3. Edit `deploy.sh` to modify "MSK configuration". Modify following configurations -
+* kafka_bootstrap_server= MSK Serverless bootstrap server. 
+* source_topic= Source topic. 
+* sink_topic= Sink topic. 
+
+  Ensure that source and sink topics are created. 
+4. Run `deploy.sh` to deploy the CloudFormation template . Refer the sample CloudFormation template at `cloudformation/template-msf-iam-auth.yaml` . 
 The CloudFormation needs the jar to be there at s3://<bucket-name>/flink/kafka-connectors-1.0.jar. 
 
 ```
-./deploy-iam-auth.sh <bucket-name-to-upload> <Y/N If build code and upload or not>
-
--- For the first deployment when you want jar to be built run 
-./deploy-iam-auth.sh <bucket-name-to-upload> 
-
--- For subsequent deployments when there is only change in CloudFormation or parameters run 
-./deploy-iam-auth.sh <bucket-name-to-upload>  N
+./deploy.sh <bucket-name-to-upload> 
 ```
-
-#### Connecting to MSK Provisioned over SSL, no Auth
-Refer the sample CloudFormation template at `cloudformation/template-no-auth-ssl.yaml` .
-The sample assumes that both source and sink clusters  need no auth , but connects over SSL.
-Edit `deploy-no-auth-ssl.sh` and execute following command. The command optionally builds jar and uploads to provided bucket.
-The CloudFormation needs the jar to be there at s3://<bucket-name>/flink/kafka-connectors-1.0.jar.
-
-```
-./deploy-no-auth-ssl.sh <bucket-name-to-upload> <Y/N If build code and upload or not>
-
--- For the first deployment when you want jar to be built run 
-./deploy-no-auth-ssl.sh <bucket-name-to-upload> 
-
--- For subsequent deployments when there is only change in CloudFormation or parameters run 
-./deploy-no-auth-ssl.sh <bucket-name-to-upload>  N
-```
-
-#### Connecting to MSK Provisioned over plaintext , no Auth
-Refer the sample CloudFormation template at `cloudformation/template-no-auth-plaintext.yaml` .
-The sample assumes that both source and sink clusters  need no auth , and connect over plaintext.
-Edit `deploy-no-auth-plaintext.sh` and execute following command. The command optionally builds jar and uploads to provided bucket.
-The CloudFormation needs the jar to be there at s3://<bucket-name>/flink/kafka-connectors-1.0.jar.
-
-```
-./deploy-no-auth-plaintext.sh <bucket-name-to-upload> <Y/N If build code and upload or not>
-
--- For the first deployment when you want jar to be built run 
-./deploy-no-auth-plaintext.sh <bucket-name-to-upload> 
-
--- For subsequent deployments when there is only change in CloudFormation or parameters run 
-./deploy-no-auth-plaintext.sh <bucket-name-to-upload>  N
-```
+5. The template creates following resources -
+* Flink application with application name defined by application_name in deploy.sh. 
+* CloudWatch log group with name - /aws/amazon-msf/${application_name}
+* CloudWatch log stream under the log group created above by name amazon-msf-log-stream. 
+* IAM execution role for Flink application. The role permission on MSK cluster.
+* IAM managed policy. 

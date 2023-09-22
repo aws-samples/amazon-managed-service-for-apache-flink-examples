@@ -22,17 +22,11 @@ Parameters:
   Parallelism:
     Type: String
     Default: 1
-  SourceKafkaBootstrapserver:
-    Type: String
-  SourceClustername:
+  KafkaBootstrapserver:
     Type: String
   SourceKafkaTopic:
     Type: String
     Default: windowing-source
-  SinkKafkaBootstrapserver:
-    Type: String
-  SinkClustername:
-    Type: String
   SinkKafkaTopic:
     Type: String
     Default: windowing-sink
@@ -64,7 +58,7 @@ Resources:
           PropertyGroups:
             - PropertyGroupId: FlinkApplicationProperties
               PropertyMap:
-                source.bootstrap.servers: !Ref SourceKafkaBootstrapserver
+                source.bootstrap.servers: !Ref KafkaBootstrapserver
                 source.topic: !Ref SourceKafkaTopic
                 source.sasl.mechanism: AWS_MSK_IAM
                 source.sasl.client.callback.handler.class: software.amazon.msk.auth.iam.IAMClientCallbackHandler
@@ -72,7 +66,7 @@ Resources:
                 source.security.protocol: SASL_SSL
                 source.ssl.truststore.location: /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts
                 source.ssl.truststore.password: changeit
-                sink.bootstrap.servers: !Ref SinkKafkaBootstrapserver
+                sink.bootstrap.servers: !Ref KafkaBootstrapserver
                 sink.topic: !Ref SinkKafkaTopic
                 sink.transaction.timeout.ms: 1000
                 sink.sasl.mechanism: AWS_MSK_IAM
@@ -81,7 +75,6 @@ Resources:
                 sink.security.protocol: SASL_SSL
                 sink.ssl.truststore.location: /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts
                 sink.ssl.truststore.password: changeit
-
         FlinkApplicationConfiguration:
           MonitoringConfiguration:
             ConfigurationType: CUSTOM
@@ -92,16 +85,19 @@ Resources:
             AutoScalingEnabled: true
             Parallelism: !Ref Parallelism
             ParallelismPerKPU: 1
+
   FlinkApplicationLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       RetentionInDays: 7
-      LogGroupName: !Sub "/aws/kinesis-analytics/${ApplicationName}"
+      LogGroupName: !Sub "/aws/amazon-msf/${ApplicationName}"
+
   FlinkApplicationLogStream:
     Type: AWS::Logs::LogStream
     Properties:
       LogGroupName: !Ref FlinkApplicationLogGroup
-      LogStreamName: "kinesis-analytics-log-stream"
+      LogStreamName: "amazon-msf-log-stream"
+
   FlinkApplicationLoggingOption:
     Type: AWS::KinesisAnalyticsV2::ApplicationCloudWatchLoggingOption
     Properties:
@@ -117,7 +113,7 @@ Resources:
               - log-group
               - Ref: FlinkApplicationLogGroup
               - log-stream
-              - kinesis-analytics-log-stream
+              - amazon-msf-log-stream
 
   MSKIAMManagedPolicy:
     Type: 'AWS::IAM::ManagedPolicy'
@@ -133,29 +129,26 @@ Resources:
               - kafka-cluster:AlterCluster
               - kafka-cluster:DescribeCluster
             Resource:
-              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:cluster/${SinkClustername}/*"
-              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:cluster/${SourceClustername}/*"
+              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:cluster/*"
           - Effect: Allow
             Action:
               - kafka-cluster:*Topic*
               - kafka-cluster:WriteData
               - kafka-cluster:ReadData
             Resource:
-              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:cluster/${SinkClustername}/*"
-              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:cluster/${SourceClustername}/*"
+              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:topic/*"
           - Effect: Allow
             Action:
               - kafka-cluster:AlterGroup
               - kafka-cluster:AlterGroup
             Resource:
-              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:cluster/${SinkClustername}/*"
-              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:cluster/${SourceClustername}/*"
+              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:group/*"
           - Effect: Allow
             Action:
               - kafka-cluster:*TransactionalId*
             Resource:
-              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:cluster/${SinkClustername}/*"
-              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:cluster/${SourceClustername}/*"
+              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:transactional-id/*"
+
   FlinkApplicationServiceExecutionRole:
     Type: AWS::IAM::Role
     Properties:
