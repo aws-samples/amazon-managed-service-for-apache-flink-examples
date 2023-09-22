@@ -33,12 +33,18 @@ Parameters:
   Parallelism:
     Type: String
     Default: 1
-  SourceKafkaTopic:
+  InputStreamRegion:
     Type: String
-    Default: windowing-source
-  SinkKafkaTopic:
+    Default: ap-south-1
+  InputStreamName:
     Type: String
-    Default: windowing-sink
+    Default: stream-input
+  OutputStreamRegion:
+    Type: String
+    Default: ap-south-1
+  OutputStreamName:
+    Type: String
+    Default: stream-output
 
 Resources:
   FlinkApplication:
@@ -67,15 +73,10 @@ Resources:
           PropertyGroups:
             - PropertyGroupId: FlinkApplicationProperties
               PropertyMap:
-                brokers: !Ref KafkaBootstrapserver
-                kafka-source-topic: !Ref SourceKafkaTopic
-                kafka-sink-topic: !Ref SinkKafkaTopic
-                sasl.mechanism: AWS_MSK_IAM
-                sasl.client.callback.handler.class: software.amazon.msk.auth.iam.IAMClientCallbackHandler
-                sasl.jaas.config: "software.amazon.msk.auth.iam.IAMLoginModule required;"
-                security.protocol: SASL_SSL
-                ssl.truststore.location: /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts
-                ssl.truststore.password: changeit
+                InputStreamRegion: !Ref InputStreamRegion
+                InputStreamName: !Ref InputStreamName
+                OutputStreamRegion: !Ref OutputStreamRegion
+                OutputStreamName: !Ref OutputStreamName
         FlinkApplicationConfiguration:
           MonitoringConfiguration:
             ConfigurationType: CUSTOM
@@ -113,35 +114,27 @@ Resources:
               - log-stream
               - kinesis-analytics-log-stream
 
-  MSKIAMManagedPolicy:
+  KinesisIAMManagedPolicy:
     Type: 'AWS::IAM::ManagedPolicy'
     Properties:
-      Description: Policy for MSK access
+      Description: Policy for Kinesis access
       Path: /
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Action:
-              - kafka-cluster:Connect
-              - kafka-cluster:AlterCluster
-              - kafka-cluster:DescribeCluster
-            Resource: !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:cluster/${Clustername}/*"
+              - kinesis:DescribeStream
+              - kinesis:GetShardIterator
+              - kinesis:GetRecords
+              - kinesis:ListShards
+            Resource: !Sub "arn:aws:kinesis:${InputStreamRegion}:${AWS::AccountId}:stream/${InputStreamName}"
           - Effect: Allow
             Action:
-              - kafka-cluster:*Topic*
-              - kafka-cluster:WriteData
-              - kafka-cluster:ReadData
-            Resource: !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:topic/${Clustername}/*"
-          - Effect: Allow
-            Action:
-              - kafka-cluster:AlterGroup
-              - kafka-cluster:AlterGroup
-            Resource: !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:group/${Clustername}/*"
-          - Effect: Allow
-            Action:
-              - kafka-cluster:*TransactionalId*
-            Resource: !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:transactional-id/${Clustername}/*"
+              - kinesis:DescribeStream
+              - kinesis:PutRecord
+              - kinesis:PutRecords
+            Resource: !Sub "arn:aws:kafka:${OutputStreamRegion}:${AWS::AccountId}:topic/${OutputStreamName}"
   FlinkApplicationServiceExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -154,7 +147,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Path: /
       ManagedPolicyArns:
-        - !Ref MSKIAMManagedPolicy
+        - !Ref KinesisIAMManagedPolicy
       Policies:
         - PolicyName: ListCloudwatchLogGroups
           PolicyDocument:
