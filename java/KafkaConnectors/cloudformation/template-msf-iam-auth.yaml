@@ -8,37 +8,34 @@ Parameters:
     Default: FLINK-1_15
   CodeBucketArn:
     Type: String
-    Default: "arn:aws:s3:::aksh-code-binaries"
   CodeKey:
     Type: String
     Default: flink/kafka-connectors-1.0.jar
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup::Id
-    Default: sg-28d5f054
   SubnetOne:
     Type: AWS::EC2::Subnet::Id
-    Default: subnet-08710af059f886114
   SubnetTwo:
     Type: AWS::EC2::Subnet::Id
-    Default: subnet-7d90f906
   SubnetThree:
     Type: AWS::EC2::Subnet::Id
-    Default: subnet-02e1e451e78007768
   Parallelism:
     Type: String
     Default: 1
   SourceKafkaBootstrapserver:
     Type: String
-    Default: b-2.mskprovisioned.aff6b2.c3.kafka.ap-south-1.amazonaws.com:9092,b-1.mskprovisioned.aff6b2.c3.kafka.ap-south-1.amazonaws.com:9092
+  SourceClustername:
+    Type: String
   SourceKafkaTopic:
     Type: String
-    Default: plain-source
+    Default: windowing-source
   SinkKafkaBootstrapserver:
     Type: String
-    Default: b-2.mskprovisioned.aff6b2.c3.kafka.ap-south-1.amazonaws.com:9092,b-1.mskprovisioned.aff6b2.c3.kafka.ap-south-1.amazonaws.com:9092
+  SinkClustername:
+    Type: String
   SinkKafkaTopic:
     Type: String
-    Default: plain-sink
+    Default: windowing-sink
 
 Resources:
   FlinkApplication:
@@ -69,15 +66,22 @@ Resources:
               PropertyMap:
                 source.bootstrap.servers: !Ref SourceKafkaBootstrapserver
                 source.topic: !Ref SourceKafkaTopic
-                source.security.protocol: SSL
+                source.sasl.mechanism: AWS_MSK_IAM
+                source.sasl.client.callback.handler.class: software.amazon.msk.auth.iam.IAMClientCallbackHandler
+                source.sasl.jaas.config: "software.amazon.msk.auth.iam.IAMLoginModule required;"
+                source.security.protocol: SASL_SSL
                 source.ssl.truststore.location: /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts
                 source.ssl.truststore.password: changeit
                 sink.bootstrap.servers: !Ref SinkKafkaBootstrapserver
                 sink.topic: !Ref SinkKafkaTopic
                 sink.transaction.timeout.ms: 1000
-                sink.security.protocol: SSL
+                sink.sasl.mechanism: AWS_MSK_IAM
+                sink.sasl.client.callback.handler.class: software.amazon.msk.auth.iam.IAMClientCallbackHandler
+                sink.sasl.jaas.config: "software.amazon.msk.auth.iam.IAMLoginModule required;"
+                sink.security.protocol: SASL_SSL
                 sink.ssl.truststore.location: /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts
                 sink.ssl.truststore.password: changeit
+
         FlinkApplicationConfiguration:
           MonitoringConfiguration:
             ConfigurationType: CUSTOM
@@ -115,6 +119,43 @@ Resources:
               - log-stream
               - kinesis-analytics-log-stream
 
+  MSKIAMManagedPolicy:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      Description: Policy for MSK access
+      Path: /
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - kafka-cluster:Connect
+              - kafka-cluster:AlterCluster
+              - kafka-cluster:DescribeCluster
+            Resource:
+              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:cluster/${SinkClustername}/*"
+              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:cluster/${SourceClustername}/*"
+          - Effect: Allow
+            Action:
+              - kafka-cluster:*Topic*
+              - kafka-cluster:WriteData
+              - kafka-cluster:ReadData
+            Resource:
+              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:cluster/${SinkClustername}/*"
+              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:cluster/${SourceClustername}/*"
+          - Effect: Allow
+            Action:
+              - kafka-cluster:AlterGroup
+              - kafka-cluster:AlterGroup
+            Resource:
+              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:cluster/${SinkClustername}/*"
+              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:cluster/${SourceClustername}/*"
+          - Effect: Allow
+            Action:
+              - kafka-cluster:*TransactionalId*
+            Resource:
+              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:cluster/${SinkClustername}/*"
+              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:cluster/${SourceClustername}/*"
   FlinkApplicationServiceExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -126,6 +167,8 @@ Resources:
               Service: kinesisanalytics.amazonaws.com
             Action: 'sts:AssumeRole'
       Path: /
+      ManagedPolicyArns:
+        - !Ref MSKIAMManagedPolicy
       Policies:
         - PolicyName: ListCloudwatchLogGroups
           PolicyDocument:
