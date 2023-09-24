@@ -4,7 +4,7 @@ bucket=$1
 jar_name=kafka-connectors-1.0.jar
 stack_name=flink-kafka-sample
 application_name=flink-kafka-sample
-template_file=cloudformation/template-msf-iam-auth.yaml
+template_file=cloudformation/msf-msk-iam-auth.yaml
 
 
 ## Region and Network configuration

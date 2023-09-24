@@ -8,43 +8,28 @@ Parameters:
     Default: FLINK-1_15
   CodeBucketArn:
     Type: String
-    Default: "arn:aws:s3:::aksh-code-binaries"
   CodeKey:
     Type: String
     Default: flink/amazon-msf-slidingwindow-app-1.0.jar
-  KafkaBootstrapserver:
-    Type: String
-    Default: boot-z6eo0mfk.c1.kafka-serverless.ap-south-1.amazonaws.com:9098
-  Clustername:
-    Type: String
-    Default: demo-cluster-1
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup::Id
-    Default: sg-28d5f054
   SubnetOne:
     Type: AWS::EC2::Subnet::Id
-    Default: subnet-08710af059f886114
   SubnetTwo:
     Type: AWS::EC2::Subnet::Id
-    Default: subnet-7d90f906
   SubnetThree:
     Type: AWS::EC2::Subnet::Id
-    Default: subnet-02e1e451e78007768
   Parallelism:
     Type: String
     Default: 1
   InputStreamRegion:
     Type: String
-    Default: ap-south-1
   InputStreamName:
     Type: String
-    Default: stream-input
   OutputStreamRegion:
     Type: String
-    Default: ap-south-1
   OutputStreamName:
     Type: String
-    Default: stream-output
 
 Resources:
   FlinkApplication:
@@ -87,16 +72,19 @@ Resources:
             AutoScalingEnabled: true
             Parallelism: !Ref Parallelism
             ParallelismPerKPU: 1
+
   FlinkApplicationLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       RetentionInDays: 7
-      LogGroupName: !Sub "/aws/kinesis-analytics/${ApplicationName}"
+      LogGroupName: !Sub "/aws/amazon-msf/${ApplicationName}"
+
   FlinkApplicationLogStream:
     Type: AWS::Logs::LogStream
     Properties:
       LogGroupName: !Ref FlinkApplicationLogGroup
-      LogStreamName: "kinesis-analytics-log-stream"
+      LogStreamName: "amazon-msf-log-stream"
+
   FlinkApplicationLoggingOption:
     Type: AWS::KinesisAnalyticsV2::ApplicationCloudWatchLoggingOption
     Properties:
@@ -112,7 +100,7 @@ Resources:
               - log-group
               - Ref: FlinkApplicationLogGroup
               - log-stream
-              - kinesis-analytics-log-stream
+              - amazon-msf-log-stream
 
   KinesisIAMManagedPolicy:
     Type: 'AWS::IAM::ManagedPolicy'

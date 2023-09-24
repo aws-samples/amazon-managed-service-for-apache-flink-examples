@@ -97,7 +97,7 @@ This sample assumes that MSK Serverless cluster is created. The flink applicatio
 * sink_topic= Sink topic. 
 
   Ensure that source and sink topics are created. 
-4. Run `deploy.sh` to deploy the CloudFormation template . Refer the sample CloudFormation template at `cloudformation/template-msf-iam-auth.yaml` . 
+4. Run `deploy.sh` to deploy the CloudFormation template . Refer the sample CloudFormation template at `cloudformation/msf-msk-iam-auth.yaml` . 
 The CloudFormation needs the jar to be there at s3://<bucket-name>/flink/kafka-connectors-1.0.jar. 
 
 ```

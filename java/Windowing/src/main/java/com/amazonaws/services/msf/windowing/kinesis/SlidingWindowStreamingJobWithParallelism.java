@@ -1,4 +1,4 @@
-package com.amazonaws.services.msf.windowing;
+package com.amazonaws.services.msf.windowing.kinesis;
 
 import com.amazonaws.services.kinesisanalytics.runtime.KinesisAnalyticsRuntime;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
@@ -69,7 +69,7 @@ public class SlidingWindowStreamingJobWithParallelism
         return KinesisStreamsSink.<String>builder()
                 .setKinesisClientProperties(outputProperties)
                 .setSerializationSchema(new SimpleStringSchema())
-                .setStreamName(outputProperties.getProperty("OutputStreamName", DEFAULT_OUTPUT_STREAM))
+                .setStreamName(applicationProperties.get("OutputStreamName", DEFAULT_OUTPUT_STREAM))
                 .setPartitionKeyGenerator(element -> String.valueOf(element.hashCode()))
                 .build();
     }
@@ -85,6 +85,7 @@ public class SlidingWindowStreamingJobWithParallelism
 
         ObjectMapper jsonParser = new ObjectMapper();
         input.map(value -> { // Parse the JSON
+                    System.out.println(value);
                     JsonNode jsonNode = jsonParser.readValue(value, JsonNode.class);
                     return new Tuple2<>(jsonNode.get("ticker").toString(), jsonNode.get("price").asDouble());
                 }).returns(Types.TUPLE(Types.STRING, Types.DOUBLE))
