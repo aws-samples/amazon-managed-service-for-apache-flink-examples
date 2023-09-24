@@ -59,12 +59,6 @@ Resources:
                 brokers: !Ref KafkaBootstrapserver
                 kafka-source-topic: !Ref SourceKafkaTopic
                 kafka-sink-topic: !Ref SinkKafkaTopic
-                sasl.mechanism: AWS_MSK_IAM
-                sasl.client.callback.handler.class: software.amazon.msk.auth.iam.IAMClientCallbackHandler
-                sasl.jaas.config: "software.amazon.msk.auth.iam.IAMLoginModule required;"
-                security.protocol: SASL_SSL
-                ssl.truststore.location: /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts
-                ssl.truststore.password: changeit
         FlinkApplicationConfiguration:
           MonitoringConfiguration:
             ConfigurationType: CUSTOM
@@ -105,40 +99,6 @@ Resources:
               - log-stream
               - amazon-msf-log-stream
 
-  MSKIAMManagedPolicy:
-    Type: 'AWS::IAM::ManagedPolicy'
-    Properties:
-      Description: Policy for MSK access
-      Path: /
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Action:
-              - kafka-cluster:Connect
-              - kafka-cluster:AlterCluster
-              - kafka-cluster:DescribeCluster
-            Resource:
-              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:cluster/*"
-          - Effect: Allow
-            Action:
-              - kafka-cluster:*Topic*
-              - kafka-cluster:WriteData
-              - kafka-cluster:ReadData
-            Resource:
-              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:topic/*"
-          - Effect: Allow
-            Action:
-              - kafka-cluster:AlterGroup
-              - kafka-cluster:AlterGroup
-            Resource:
-              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:group/*"
-          - Effect: Allow
-            Action:
-              - kafka-cluster:*TransactionalId*
-            Resource:
-              - !Sub "arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:transactional-id/*"
-
   FlinkApplicationServiceExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -150,8 +110,6 @@ Resources:
               Service: kinesisanalytics.amazonaws.com
             Action: 'sts:AssumeRole'
       Path: /
-      ManagedPolicyArns:
-        - !Ref MSKIAMManagedPolicy
       Policies:
         - PolicyName: ListCloudwatchLogGroups
           PolicyDocument:
