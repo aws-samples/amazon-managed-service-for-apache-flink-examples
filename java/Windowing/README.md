@@ -119,13 +119,13 @@ the classpath'*.
 
 3. Build Code. Execute the script below which will build the jar and upload the jar to S3 at s3://<bucket-name>/flink/kafka-windowing-tumbling-1.0.jar.
 ```shell
-./build-kafka-sample.sh <bucket-name-to-upload>
+./build-kafka-sample.sh <BUCKET_NAME>
 ```
 4. Run `deploy-kafka-sample.sh` to deploy the CloudFormation template . Refer the sample CloudFormation template at `cloudformation/msf-msk-iam-auth-windowing.yaml` .
-   The CloudFormation needs the jar to be there at s3://<bucket-name>/flink/kafka-windowing-tumbling-1.0.jar.
+   The CloudFormation needs the jar to be there at s3://BUCKET_NAME/flink/kafka-windowing-tumbling-1.0.jar.
 
 ```
-./deploy-kafka-sample.sh <bucket-name-to-upload> 
+./deploy-kafka-sample.sh <BUCKET_NAME> 
 ```
 5. The template creates following resources -
 * Flink application with application name defined by application_name in deploy.sh.
@@ -152,15 +152,15 @@ the classpath'*.
 * output_stream= Output stream name
   Ensure that source and sink streams are created.
 
-3. Build Code. Execute the script below which will build the jar and upload the jar to S3 at s3://<bucket-name>/flink/kinesis-windowing-sliding-1.0.jar.
+3. Build Code. Execute the script below which will build the jar and upload the jar to S3 at s3://BUCKET_NAME/flink/kinesis-windowing-sliding-1.0.jar.
 ```shell
-./build-kinesis-sample.sh <bucket-name-to-upload>
+./build-kinesis-sample.sh <BUCKET_NAME>
 ```
 4. Run `deploy-kafka-sample.sh` to deploy the CloudFormation template . Refer the sample CloudFormation template at `cloudformation/msf-kinesis-stream-windowing.yaml` .
-   The CloudFormation needs the jar to be there at s3://<bucket-name>/flink/kinesis-windowing-sliding-1.0.jar.
+   The CloudFormation needs the jar to be there at s3://BUCKET_NAME/flink/kinesis-windowing-sliding-1.0.jar.
 
 ```
-./deploy-kafka-sample.sh <bucket-name-to-upload> 
+./deploy-kafka-sample.sh <BUCKET_NAME> 
 ```
 5. The template creates following resources -
 * Flink application with application name defined by application_name in deploy.sh.
