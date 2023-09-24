@@ -10,7 +10,7 @@ Example of project for a basic Flink Java application using Tumbling and Sliding
 The project can run both on Amazon Managed Service for Apache Flink, and locally for development.
 There are two sample applications which show windowing example. 
 
-*Kafka - Tumbling window*
+### Kafka - Tumbling window*
 `com.amazonaws.services.msf.windowing.kafka.TumblingWindowStreamingJob`
 
 ![Flink Example](flink-kafka-example.png),
@@ -18,7 +18,7 @@ There are two sample applications which show windowing example.
 The application reads from a Kafka source topic and writes to Kafka destination topic, 
 showing how to implement a simple events count using tumbling window assigner.
 
-*Kinesis - Sliding window*
+### Kinesis - Sliding window*
 `com.amazonaws.services.msf.windowing.kinesis.SlidingWindowStreamingJobWithParallelism`
 
 ![Flink Example](flink-kinesis-example.png),
@@ -39,7 +39,7 @@ They are all case-sensitive.
 
 Configuration parameters:
 
-*Kafka - Tumbling window* `kafka.TumblingWindowStreamingJob`:
+### Kafka - Tumbling window* `kafka.TumblingWindowStreamingJob`:
 * `kafka-source-topic` source topic
 * `kafka-sink-topic` source topic
 * `brokers` source Kafka cluster boostrap servers 
@@ -52,7 +52,7 @@ Additional parameters for IAM auth which is required for MSK Serverless
 * `ssl.truststore.location=/usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts`
 * `ssl.truststore.password=changeit`
 
-*Kinesis - Sliding window* `kinesis.SlidingWindowStreamingJobWithParallelism`:
+### Kinesis - Sliding window* `kinesis.SlidingWindowStreamingJobWithParallelism`:
 * `InputStreamRegion` region of the input stream (default: `us-east-1`)
 * `InputStreamName` name of the input Kinesis Data Stream (default: `ExampleInputStream`)
 * `OutputStreamRegion` region of the input stream (default: `us-east-1`)
@@ -62,24 +62,26 @@ Additional parameters for IAM auth which is required for MSK Serverless
 
 To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to
 the classpath'*.
-*Kafka - Tumbling window* `kafka.TumblingWindowStreamingJob` :
+### Kafka - Tumbling window* `kafka.TumblingWindowStreamingJob` :
 ```
 --brokers localhost:9092 --kafka-source-topic windowing-source --kafka-sink-topic windowing-tumbling-sink
 ```
-*Kinesis - Sliding window* `kinesis.SlidingWindowStreamingJobWithParallelism` :
+
+### Kinesis - Sliding window* `kinesis.SlidingWindowStreamingJobWithParallelism` :
 ```
 --InputStreamRegion ap-south-1 --InputStreamName stream-input --OutputStreamRegion ap-south-1 --OutputStreamName stream-windowing-sliding-output
 ```
 
 ## Running locally through MVN command line
-*Kafka - Tumbling window* `kafka.TumblingWindowStreamingJob` :
+### Kafka - Tumbling window* `kafka.TumblingWindowStreamingJob` :
 ```
  mvn exec:java  -Dexec.classpathScope="compile" \
  -Dexec.mainClass="com.amazonaws.services.msf.windowing.kafka.TumblingWindowStreamingJob" \
  -Dexec.args="--brokers localhost:9092 --kafka-source-topic windowing-source --kafka-sink-topic windowing-tumbling-sink" 
 
 ```
-*Kinesis - Sliding window* `kinesis.SlidingWindowStreamingJobWithParallelism` :
+
+### Kinesis - Sliding window* `kinesis.SlidingWindowStreamingJobWithParallelism` :
 ```
  mvn exec:java  -Dexec.classpathScope="compile" \
  -Dexec.mainClass="com.amazonaws.services.msf.windowing.kinesis.SlidingWindowStreamingJobWithParallelism" \
