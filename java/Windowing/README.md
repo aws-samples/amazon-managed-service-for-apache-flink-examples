@@ -13,7 +13,7 @@ There are two sample applications which show windowing example.
 ### Kafka - Tumbling window*
 `com.amazonaws.services.msf.windowing.kafka.TumblingWindowStreamingJob`
 
-![Flink Example](flink-kafka-example.png),
+![Flink Example](images/flink-kafka-example.png),
 
 The application reads from a Kafka source topic and writes to Kafka destination topic, 
 showing how to implement a simple events count using tumbling window assigner.
@@ -21,7 +21,7 @@ showing how to implement a simple events count using tumbling window assigner.
 ### Kinesis - Sliding window*
 `com.amazonaws.services.msf.windowing.kinesis.SlidingWindowStreamingJobWithParallelism`
 
-![Flink Example](flink-kinesis-example.png),
+![Flink Example](images/flink-kinesis-example.png),
 
 The application reads from a Kinesis source stream and writes to Kinesis destination stream,
 showing how to implement a simple minimum price calculation for each stock using sliding window assigner.

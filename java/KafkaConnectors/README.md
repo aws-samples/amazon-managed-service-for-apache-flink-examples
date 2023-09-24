@@ -11,7 +11,7 @@ source and sink.
 
 This example uses on `KafkaSource` and `KafkaSink`.
 
-![Flink Example](flink-example.png),
+![Flink Example](images/flink-example.png),
 
 Note that the old 
 [`FlinkKafkaConsumer`](https://nightlies.apache.org/flink/flink-docs-release-1.13/docs/connectors/datastream/kafka/#kafka-sourcefunction) 
@@ -73,7 +73,7 @@ Refer following sample -
 ## Deploying using CloudFormation to Amazon Managed Service for Apache Flink
 This sample assumes that MSK Serverless cluster is created. The flink application routes data ingested in source topic to sink topic without any transformation. 
 
-![Amazon Managed Service for Apache Flink , MSK Serverless example](flink-msk-serverless-example.png),
+![Amazon Managed Service for Apache Flink , MSK Serverless example](images/flink-msk-serverless-example.png),
 ### Pre-requisite
 1. Create MSK serverless cluster while choosing 3 subnets. Refer https://docs.aws.amazon.com/msk/latest/developerguide/serverless-getting-started.html . 
 2. Once the cluster is created note down subnets ids of the cluster and security group.
