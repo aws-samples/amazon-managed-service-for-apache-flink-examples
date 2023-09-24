@@ -1,4 +1,4 @@
-## Getting Started Flink Java project - Windowing
+# Getting Started Flink Java project - Windowing
 
 Example of project for a basic Flink Java application using Tumbling and Sliding windows.
 
@@ -23,7 +23,7 @@ The application reads from a Kinesis source stream and writes to Kinesis destina
 showing how to implement a simple minimum price calculation for each stock using sliding window assigner.
 
 
-### Runtime configuration
+## Runtime configuration
 
 The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for
 Apache Flink, or from command line parameters, when running locally.
@@ -54,7 +54,7 @@ Additional parameters for IAM auth which is required for MSK Serverless
 * `OutputStreamRegion` region of the input stream (default: `us-east-1`)
 * `OutputStreamName` name of the input Kinesis Data Stream (default: `ExampleOutputStream`)
 
-### Running in IntelliJ
+## Running in IntelliJ
 
 To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to
 the classpath'*.
@@ -67,7 +67,7 @@ the classpath'*.
 --InputStreamRegion ap-south-1 --InputStreamName stream-input --OutputStreamRegion ap-south-1 --OutputStreamName stream-windowing-sliding-output
 ```
 
-### Running locally through MVN command line
+## Running locally through MVN command line
 *Kafka - Tumbling window* `kafka.TumblingWindowStreamingJob` :
 ```
  mvn exec:java  -Dexec.classpathScope="compile" \
@@ -82,16 +82,16 @@ the classpath'*.
  -Dexec.args="--InputStreamRegion ap-south-1 --InputStreamName stream-input --OutputStreamRegion ap-south-1 --OutputStreamName stream-windowing-sliding-output" 
 
 ```
-### Deploying using CloudFormation to Amazon Managed Service for Apache Flink
+## Deploying using CloudFormation to Amazon Managed Service for Apache Flink
 
-#### Kafka - Tumbling window `kafka.TumblingWindowStreamingJob` 
+### Kafka - Tumbling window `kafka.TumblingWindowStreamingJob` 
 
-##### Pre-requisite
+#### Pre-requisite
 1. Create MSK serverless cluster while choosing 3 subnets. Refer https://docs.aws.amazon.com/msk/latest/developerguide/serverless-getting-started.html .
 2. Once the cluster is created note down subnets ids of the cluster and security group.
 3. Ensure that security group has self referencing ingress rule that allows connection on port 9098.
 
-##### Build and deployment
+#### Build and deployment
 
 1. Build Code. Execute the script below which will build the jar and upload the jar to S3 at s3://<bucket-name>/flink/kafka-windowing-tumbling-1.0.jar.
 ```shell
@@ -122,12 +122,12 @@ the classpath'*.
 * IAM execution role for Flink application. The role permission on MSK cluster.
 * IAM managed policy.
 
-#### Kinesis - Sliding window `kinesis.SlidingWindowStreamingJobWithParallelism`
-##### Pre-requisite
+### Kinesis - Sliding window `kinesis.SlidingWindowStreamingJobWithParallelism`
+#### Pre-requisite
 1. Source and sink stream. 
 2. Create subnets and security groups for the Flink application. If you are using private subnets , ensure that VPC endpoint for Kinesis is created. 
 
-##### Build and deployment
+#### Build and deployment
 
 1. Build Code. Execute the script below which will build the jar and upload the jar to S3 at s3://<bucket-name>/flink/kinesis-windowing-sliding-1.0.jar.
 ```shell
@@ -156,12 +156,12 @@ the classpath'*.
 * CloudWatch log stream under the log group created above by name amazon-msf-log-stream.
 * IAM execution role for Flink application. The role permission on MSK cluster.
 * IAM managed policy.
-### Data generator - Kafka
+## Data generator - Kafka
 The project includes a [simple Python script](./data-generator/generator.py) that generates data and publishes
 to Kafka. 
 Edit the script to change the boostrap brokers and topic name.
 
-### Data generator - Kinesis
+## Data generator - Kinesis
 You can use [Kinesis Data Generator](https://github.com/awslabs/amazon-kinesis-data-generator),
 also available in a [hosted version](https://awslabs.github.io/amazon-kinesis-data-generator/web/producer.html),
 to generate random data to Kinesis Data Stream and test the application.
