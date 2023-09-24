@@ -1,4 +1,4 @@
-## Flink Kafka Source & Sink Examples
+# Flink Kafka Source & Sink Examples
 
 * Flink version: 1.15.2
 * Flink API: DataStream API
@@ -18,7 +18,7 @@ Note that the old
 and [`FlinkKafkaProducers`](https://nightlies.apache.org/flink/flink-docs-release-1.13/docs/connectors/datastream/kafka/#kafka-producer)
 are deprecated since Flink 1.15
 
-### Runtime configuration
+## Runtime configuration
 
 The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for Apache Flink,
 or from command line parameters, when running locally.
@@ -37,7 +37,7 @@ Configuration parameters:
 * `sink.transaction.timeout.ms` Sink transaction timeout 
 
 If you are connecting with no-auth and no SSL, above will work. Else you need additional configuration for both source and sink.
-#### For IAM Auth
+### For IAM Auth
 
 
 * `source.sasl.mechanism` AWS_MSK_IAM
@@ -54,7 +54,7 @@ If you are connecting with no-auth and no SSL, above will work. Else you need ad
 * `sink.ssl.truststore.password` changeit
 
 
-### Running locally in IntelliJ
+## Running locally in IntelliJ
 
 To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*.
 
@@ -63,23 +63,23 @@ Provide arguments like following -
 --source.bootstrap.servers localhost:9092 --source.topic source --sink.bootstrap.servers localhost:9092 --sink.topic sink --sink.transaction.timeout.ms 1000
 ```
 
-### Running locally through MVN command line
+## Running locally through MVN command line
 Refer following sample -
 ```
  mvn exec:java -Dexec.classpathScope="compile" -Dexec.mainClass="com.amazonaws.services.msf.KafkaStreamingJob" -Dexec.args="--source.bootstrap.servers localhost:9092 --source.topic source --sink.bootstrap.servers localhost:9092 --sink.topic sink --sink.transaction.timeout.ms 1000" 
 
 ```
 
-### Deploying using CloudFormation to Amazon Managed Service for Apache Flink
+## Deploying using CloudFormation to Amazon Managed Service for Apache Flink
 This sample assumes that MSK Serverless cluster is created. The flink application routes data ingested in source topic to sink topic without any transformation. 
 
 ![Amazon Managed Service for Apache Flink , MSK Serverless example](flink-msk-serverless-example.png),
-#### Pre-requisite
+### Pre-requisite
 1. Create MSK serverless cluster while choosing 3 subnets. Refer https://docs.aws.amazon.com/msk/latest/developerguide/serverless-getting-started.html . 
 2. Once the cluster is created note down subnets ids of the cluster and security group.
 3. Ensure that security group has self referencing ingress rule that allows connection on port 9098. 
 
-#### Build and deployment
+### Build and deployment
 
 1. Build Code. Execute the script below which will build the jar and upload the jar to S3 at s3://<bucket-name>/flink/kafka-connectors-1.0.jar. 
 ```shell
