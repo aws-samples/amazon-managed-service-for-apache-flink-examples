@@ -104,23 +104,23 @@ the classpath'*.
 3. Ensure that security group has self referencing ingress rule that allows connection on port 9098.
 
 #### Build and deployment
-
-1. Build Code. Execute the script below which will build the jar and upload the jar to S3 at s3://<bucket-name>/flink/kafka-windowing-tumbling-1.0.jar.
-```shell
-./build-kafka-sample.sh <bucket-name-to-upload>
-```
-2. Edit `deploy-kafka-sample.sh` to modify  "Region and Network configuration" . Modify following configurations -
+1. Edit `deploy-kafka-sample.sh` to modify  "Region and Network configuration" . Modify following configurations -
 * region= Deployment region
 * SecurityGroup= MSK Security Group.
 * SubnetOne= MSK Subnet one
 * SubnetTwo= MSK Subnet two
 * SubnetThree= MSK Subnet three
-3. Edit `deploy-kafka-sample.sh` to modify "MSK configuration". Modify following configurations -
+
+2. Edit `deploy-kafka-sample.sh` to modify "MSK configuration". Modify following configurations -
 * kafka_bootstrap_server= MSK Serverless bootstrap server.
 * source_topic= Source topic.
 * sink_topic= Sink topic.
-
   Ensure that source and sink topics are created.
+
+3. Build Code. Execute the script below which will build the jar and upload the jar to S3 at s3://<bucket-name>/flink/kafka-windowing-tumbling-1.0.jar.
+```shell
+./build-kafka-sample.sh <bucket-name-to-upload>
+```
 4. Run `deploy-kafka-sample.sh` to deploy the CloudFormation template . Refer the sample CloudFormation template at `cloudformation/msf-msk-iam-auth-windowing.yaml` .
    The CloudFormation needs the jar to be there at s3://<bucket-name>/flink/kafka-windowing-tumbling-1.0.jar.
 
@@ -140,22 +140,22 @@ the classpath'*.
 2. Create subnets and security groups for the Flink application. If you are using private subnets , ensure that VPC endpoint for Kinesis is created. 
 
 #### Build and deployment
-
-1. Build Code. Execute the script below which will build the jar and upload the jar to S3 at s3://<bucket-name>/flink/kinesis-windowing-sliding-1.0.jar.
-```shell
-./build-kinesis-sample.sh <bucket-name-to-upload>
-```
-2. Edit `deploy-kinesis-sample.sh` to modify  "Region and Network configuration" . Modify following configurations -
+1. Edit `deploy-kinesis-sample.sh` to modify  "Region and Network configuration" . Modify following configurations -
 * region= Deployment region
 * SecurityGroup= MSK Security Group.
 * SubnetOne= MSK Subnet one
 * SubnetTwo= MSK Subnet two
 * SubnetThree= MSK Subnet three
-3. Edit `deploy-kinesis-sample.sh` to modify "Kinesis configuration". Modify following configurations -
+
+2. Edit `deploy-kinesis-sample.sh` to modify "Kinesis configuration". Modify following configurations -
 * input_stream= Input Kinesis stream name.
 * output_stream= Output stream name
-
   Ensure that source and sink streams are created.
+
+3. Build Code. Execute the script below which will build the jar and upload the jar to S3 at s3://<bucket-name>/flink/kinesis-windowing-sliding-1.0.jar.
+```shell
+./build-kinesis-sample.sh <bucket-name-to-upload>
+```
 4. Run `deploy-kafka-sample.sh` to deploy the CloudFormation template . Refer the sample CloudFormation template at `cloudformation/msf-kinesis-stream-windowing.yaml` .
    The CloudFormation needs the jar to be there at s3://<bucket-name>/flink/kinesis-windowing-sliding-1.0.jar.
 
