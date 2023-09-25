@@ -55,7 +55,7 @@ aws cloudformation deploy --template-file ${template_file} \
      SubnetTwo=${SubnetTwo} \
      SubnetThree=${SubnetThree} \
      Parallelism=${parallelism} \
-     InputRegion=${region} \
-     InputStream=${input_stream} \
-     OutputRegion=${region} \
-     OutputStream=${output_stream}
+     InputStreamRegion=${region} \
+     InputStreamName=${input_stream} \
+     OutputStreamRegion=${region} \
+     OutputStreamName=${output_stream}

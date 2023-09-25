@@ -35,7 +35,7 @@ SubnetTwo=subnet-7d90f906
 SubnetThree=subnet-02e1e451e78007768
 
 ## MSK configuration
-kafka_bootstrap_server="boot-z6eo0mfk.c1.kafka-serverless.ap-south-1.amazonaws.com:9092"
+kafka_bootstrap_server="b-2.mskprovisioned2.xe3lni.c3.kafka.ap-south-1.amazonaws.com:9092,b-1.mskprovisioned2.xe3lni.c3.kafka.ap-south-1.amazonaws.com:9092,b-3.mskprovisioned2.xe3lni.c3.kafka.ap-south-1.amazonaws.com:9092"
 source_topic=windowing-source
 sink_topic=windowing-tumbling-sink
 

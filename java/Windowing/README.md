@@ -80,7 +80,7 @@ the classpath'*.
 *Kafka - Tumbling window* `kafka.TumblingWindowStreamingJob` :
 
 ```
- mvn exec:java  -Dexec.classpathScope="compile" \
+ mvn clean compile exec:java  -Dexec.classpathScope="compile" \
  -Dexec.mainClass="com.amazonaws.services.msf.windowing.kafka.TumblingWindowStreamingJob" \
  -Dexec.args="--brokers localhost:9092 --kafka-source-topic windowing-source --kafka-sink-topic windowing-tumbling-sink" 
 
@@ -89,7 +89,7 @@ the classpath'*.
 *Kinesis - Sliding window* `kinesis.SlidingWindowStreamingJobWithParallelism` :
 
 ```
- mvn exec:java  -Dexec.classpathScope="compile" \
+ mvn clean compile exec:java  -Dexec.classpathScope="compile" \
  -Dexec.mainClass="com.amazonaws.services.msf.windowing.kinesis.SlidingWindowStreamingJobWithParallelism" \
  -Dexec.args="--InputStreamRegion ap-south-1 --InputStreamName stream-input --OutputStreamRegion ap-south-1 --OutputStreamName stream-windowing-sliding-output" 
 
