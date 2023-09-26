@@ -10,16 +10,8 @@ Example of project for a basic Flink Java application using Tumbling and Sliding
 The project can run both on Amazon Managed Service for Apache Flink, and locally for development.
 There are two sample applications which show windowing example. 
 
-### Kafka - Tumbling window*
-`com.amazonaws.services.msf.windowing.kafka.TumblingWindowStreamingJob`
-
-![Flink Example](images/flink-kafka-example.png),
-
-The application reads from a Kafka source topic and writes to Kafka destination topic, 
-showing how to implement a simple events count using tumbling window assigner.
-
-### Kinesis - Sliding window*
-`com.amazonaws.services.msf.windowing.kinesis.SlidingWindowStreamingJobWithParallelism`
+### Kinesis - Tumbling window*
+`com.amazonaws.services.msf.windowing.kinesis.TumblingWindowStreamingJob`
 
 ![Flink Example](images/flink-kinesis-example.png),
 
@@ -38,21 +30,7 @@ Command line parameters should be prepended by `--`.
 They are all case-sensitive.
 
 Configuration parameters:
-
-### Kafka - Tumbling window `kafka.TumblingWindowStreamingJob`:
-* `kafka-source-topic` source topic
-* `kafka-sink-topic` source topic
-* `brokers` source Kafka cluster boostrap servers 
-
-Additional parameters for IAM auth which is required for MSK Serverless
-* `sasl.mechanism=AWS_MSK_IAM`
-* `sasl.client.callback.handler.class=software.amazon.msk.auth.iam.IAMClientCallbackHandler`
-* `sasl.jaas.config=software.amazon.msk.auth.iam.IAMLoginModule required;"`
-* `security.protocol=SASL_SSL`
-* `ssl.truststore.location=/usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts`
-* `ssl.truststore.password=changeit`
-
-### Kinesis - Sliding window `kinesis.SlidingWindowStreamingJobWithParallelism`:
+### Kinesis - Tumbling window `kinesis.TumblingWindowStreamingJob`:
 * `InputStreamRegion` region of the input stream (default: `us-east-1`)
 * `InputStreamName` name of the input Kinesis Data Stream (default: `ExampleInputStream`)
 * `OutputStreamRegion` region of the input stream (default: `us-east-1`)
@@ -63,13 +41,7 @@ Additional parameters for IAM auth which is required for MSK Serverless
 To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to
 the classpath'*.
 
-*Kafka - Tumbling window* `kafka.TumblingWindowStreamingJob` :
-
-```
---brokers localhost:9092 --kafka-source-topic windowing-source --kafka-sink-topic windowing-tumbling-sink
-```
-
-*Kinesis - Sliding window* `kinesis.SlidingWindowStreamingJobWithParallelism` :
+*Kinesis - Tumbling window* `kinesis.TumblingWindowStreamingJob` :
 
 ```
 --InputStreamRegion ap-south-1 --InputStreamName stream-input --OutputStreamRegion ap-south-1 --OutputStreamName stream-windowing-sliding-output
@@ -77,70 +49,21 @@ the classpath'*.
 
 ## Running locally through MVN command line
 
-*Kafka - Tumbling window* `kafka.TumblingWindowStreamingJob` :
+
+*Kinesis - Tumbling window* `kinesis.TumblingWindowStreamingJob` :
 
 ```
  mvn clean compile exec:java  -Dexec.classpathScope="compile" \
- -Dexec.mainClass="com.amazonaws.services.msf.windowing.kafka.TumblingWindowStreamingJob" \
- -Dexec.args="--brokers localhost:9092 --kafka-source-topic windowing-source --kafka-sink-topic windowing-tumbling-sink" 
-
-```
-
-*Kinesis - Sliding window* `kinesis.SlidingWindowStreamingJobWithParallelism` :
-
-```
- mvn clean compile exec:java  -Dexec.classpathScope="compile" \
- -Dexec.mainClass="com.amazonaws.services.msf.windowing.kinesis.SlidingWindowStreamingJobWithParallelism" \
+ -Dexec.mainClass="com.amazonaws.services.msf.windowing.kinesis.TumblingWindowStreamingJob" \
  -Dexec.args="--InputStreamRegion ap-south-1 --InputStreamName stream-input --OutputStreamRegion ap-south-1 --OutputStreamName stream-windowing-sliding-output" 
 
 ```
 ## Deploying using CloudFormation to Amazon Managed Service for Apache Flink
-
-### Kafka - Tumbling window `kafka.TumblingWindowStreamingJob` 
-
-#### Pre-requisite
-1. Create MSK serverless cluster while choosing 3 subnets. Refer https://docs.aws.amazon.com/msk/latest/developerguide/serverless-getting-started.html .
-2. Once the cluster is created note down subnets ids of the cluster and security group.
-3. Ensure that security group has self referencing ingress rule that allows connection on port 9098.
-
-#### Build and deployment
-1. The steps below create stack with [CloudFormation Template](./cloudformation/msf-msk-iam-auth-windowing.yaml).
-2. The script `deploy.sh` creates the stack using AWS CLI. Ensure that AWS CLI is configured and your user has permissions to create CloudFormation stack.
-3. Alternatively you can deploy using  [CloudFormation Template](./cloudformation/msf-msk-iam-auth-windowing.yaml) from Console and pass required parameters.
-4. Edit `deploy-kafka-sample.sh` to modify  "Region and Network configuration" . Modify following configurations -
-* region= Deployment region
-* SecurityGroup= MSK Security Group.
-* SubnetOne= MSK Subnet one
-* SubnetTwo= MSK Subnet two
-* SubnetThree= MSK Subnet three
-
-5. Edit `deploy-kafka-sample.sh` to modify "MSK configuration". Modify following configurations -
-* kafka_bootstrap_server= MSK Serverless bootstrap server.
-* source_topic= Source topic.
-* sink_topic= Sink topic.
-  Ensure that source and sink topics are created.
-
-6. Build Code. Execute the script below which will build the jar and upload the jar to S3 at s3://<bucket-name>/flink/kafka-windowing-tumbling-1.0.jar.
-```shell
-./build-kafka-sample.sh <BUCKET_NAME>
-```
-7. Run `deploy-kafka-sample.sh` to deploy the CloudFormation template . Refer the sample CloudFormation template at `cloudformation/msf-msk-iam-auth-windowing.yaml` .
-   The CloudFormation needs the jar to be there at s3://BUCKET_NAME/flink/kafka-windowing-tumbling-1.0.jar.
-
-```
-./deploy-kafka-sample.sh <BUCKET_NAME> 
-```
-8. The template creates following resources -
-* Flink application with application name defined by application_name in deploy.sh.
-* CloudWatch log group with name - /aws/amazon-msf/${application_name}
-* CloudWatch log stream under the log group created above by name amazon-msf-log-stream.
-* IAM execution role for Flink application. The role permission on MSK cluster.
-* IAM managed policy.
-
-### Kinesis - Sliding window `kinesis.SlidingWindowStreamingJobWithParallelism`
+### Kinesis - Tumbling window `kinesis.TumblingWindowStreamingJob`
 #### Pre-requisite
 1. Source and sink stream. 
 2. Create subnets and security groups for the Flink application. If you are using private subnets , ensure that VPC endpoint for Kinesis is created. 
+3. You have a user credential using which you can create CloudFormation stack from console or CLI.
 
 #### Build and deployment
 1. The steps below create stack with [CloudFormation Template](./cloudformation/msf-kinesis-stream-windowing.yaml).
@@ -160,7 +83,7 @@ the classpath'*.
 
 6. Build Code. Execute the script below which will build the jar and upload the jar to S3 at s3://BUCKET_NAME/flink/kinesis-windowing-sliding-1.0.jar.
 ```shell
-./build-kinesis-sample.sh <BUCKET_NAME>
+./build.sh <BUCKET_NAME>
 ```
 7. Run `deploy-kafka-sample.sh` to deploy the CloudFormation template . Refer the sample CloudFormation template at `cloudformation/msf-kinesis-stream-windowing.yaml` .
    The CloudFormation needs the jar to be there at s3://BUCKET_NAME/flink/kinesis-windowing-sliding-1.0.jar.

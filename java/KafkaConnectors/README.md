@@ -78,6 +78,7 @@ This sample assumes that MSK Serverless cluster is created. The flink applicatio
 1. Create MSK serverless cluster while choosing 3 subnets. Refer https://docs.aws.amazon.com/msk/latest/developerguide/serverless-getting-started.html . 
 2. Once the cluster is created note down subnets ids of the cluster and security group.
 3. Ensure that security group has self referencing ingress rule that allows connection on port 9098. 
+4. You have a user credential using which you can create CloudFormation stack from console or CLI. 
 
 
 ### Build and deployment

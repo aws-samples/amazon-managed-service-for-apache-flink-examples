@@ -1,18 +1,17 @@
 #!/bin/bash
 bucket=$1
 
-template_file=cloudformation/msf-msk-iam-auth-windowing.yaml
+template_file=cloudformation/msf-kinesis-stream.yaml
 
-echo "Tumbling window"
-## For Kafka tumbling window example
-jar_name=kafka-windowing-tumbling-1.0.jar
-application_name=flink-kafka-windowing-tumbling
-parallelism=1
+echo "Sliding window"
+## For Kafka sliding window example
+jar_name=kinesis-connectors-1.0.jar
+application_name=flink-kinesis-connectors
 
 if [ -z "${bucket}" ]
 then
     echo "Bucket name is required"
-    echo "Usage: deploy-kafka-sample.sh <bucket_name>"
+    echo "Usage: deploy.sh <bucket_name>"
     exit 1
 else
     echo "Bucket name is ${bucket}"
@@ -22,7 +21,7 @@ aws s3 ls s3://${bucket}/flink/${jar_name}
 if [ $? -ne 0 ]
 then
     echo "s3://${bucket}/flink/${jar_name} does not exist"
-    echo "Please execute: build-kafka-sample.sh <bucket_name>"
+    echo "Please execute: build.sh <bucket_name>"
     echo "Then try again"
     exit 1
 fi
@@ -34,10 +33,12 @@ SubnetOne=subnet-08710af059f886114
 SubnetTwo=subnet-7d90f906
 SubnetThree=subnet-02e1e451e78007768
 
-## MSK configuration
-kafka_bootstrap_server="b-2.mskprovisioned2.xe3lni.c3.kafka.ap-south-1.amazonaws.com:9092,b-1.mskprovisioned2.xe3lni.c3.kafka.ap-south-1.amazonaws.com:9092,b-3.mskprovisioned2.xe3lni.c3.kafka.ap-south-1.amazonaws.com:9092"
-source_topic=windowing-source
-sink_topic=windowing-tumbling-sink
+## Kinesis configuration
+input_stream="stream-input"
+output_stream="stream-output"
+source_type="POLLING"
+
+
 
 
 echo "Deploying Provisioned"
@@ -53,11 +54,7 @@ aws cloudformation deploy --template-file ${template_file} \
      SubnetOne=${SubnetOne} \
      SubnetTwo=${SubnetTwo} \
      SubnetThree=${SubnetThree} \
-     KafkaBootstrapserver=${kafka_bootstrap_server} \
-     Parallelism=${parallelism} \
-     SinkKafkaTopic=${sink_topic} \
-     SourceKafkaTopic=${source_topic}
-
-
-
-
+     InputStreamName=${input_stream} \
+     OutputStreamName=${output_stream} \
+     Region=${region} \
+     SourceType=${source_type}

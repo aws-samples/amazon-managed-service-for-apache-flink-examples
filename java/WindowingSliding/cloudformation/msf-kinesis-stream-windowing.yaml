@@ -22,11 +22,13 @@ Parameters:
   Parallelism:
     Type: String
     Default: 1
-  KafkaBootstrapserver:
+  InputStreamRegion:
     Type: String
-  SourceKafkaTopic:
+  InputStreamName:
     Type: String
-  SinkKafkaTopic:
+  OutputStreamRegion:
+    Type: String
+  OutputStreamName:
     Type: String
 
 Resources:
@@ -56,9 +58,10 @@ Resources:
           PropertyGroups:
             - PropertyGroupId: FlinkApplicationProperties
               PropertyMap:
-                brokers: !Ref KafkaBootstrapserver
-                kafka-source-topic: !Ref SourceKafkaTopic
-                kafka-sink-topic: !Ref SinkKafkaTopic
+                InputStreamRegion: !Ref InputStreamRegion
+                InputStreamName: !Ref InputStreamName
+                OutputStreamRegion: !Ref OutputStreamRegion
+                OutputStreamName: !Ref OutputStreamName
         FlinkApplicationConfiguration:
           MonitoringConfiguration:
             ConfigurationType: CUSTOM
@@ -99,6 +102,27 @@ Resources:
               - log-stream
               - amazon-msf-log-stream
 
+  KinesisIAMManagedPolicy:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      Description: Policy for Kinesis access
+      Path: /
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - kinesis:DescribeStream
+              - kinesis:GetShardIterator
+              - kinesis:GetRecords
+              - kinesis:ListShards
+            Resource: !Sub "arn:aws:kinesis:${InputStreamRegion}:${AWS::AccountId}:stream/${InputStreamName}"
+          - Effect: Allow
+            Action:
+              - kinesis:DescribeStream
+              - kinesis:PutRecord
+              - kinesis:PutRecords
+            Resource: !Sub "arn:aws:kinesis:${OutputStreamRegion}:${AWS::AccountId}:stream/${OutputStreamName}"
   FlinkApplicationServiceExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -110,6 +134,8 @@ Resources:
               Service: kinesisanalytics.amazonaws.com
             Action: 'sts:AssumeRole'
       Path: /
+      ManagedPolicyArns:
+        - !Ref KinesisIAMManagedPolicy
       Policies:
         - PolicyName: ListCloudwatchLogGroups
           PolicyDocument:

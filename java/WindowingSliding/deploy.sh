@@ -5,7 +5,7 @@ template_file=cloudformation/msf-kinesis-stream-windowing.yaml
 
 echo "Sliding window"
 ## For Kafka sliding window example
-jar_name=kinesis-windowing-sliding-1.0.jar
+jar_name=amazon-msf-windowing-sliding-app-1.0.jar
 application_name=flink-kinesis-windowing-sliding
 parallelism=3
 

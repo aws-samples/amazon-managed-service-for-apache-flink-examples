@@ -22,14 +22,15 @@ Parameters:
   Parallelism:
     Type: String
     Default: 1
-  InputStreamRegion:
-    Type: String
   InputStreamName:
-    Type: String
-  OutputStreamRegion:
     Type: String
   OutputStreamName:
     Type: String
+  Region:
+    Type: String
+  SourceType:
+    Type: String
+
 
 Resources:
   FlinkApplication:
@@ -58,10 +59,10 @@ Resources:
           PropertyGroups:
             - PropertyGroupId: FlinkApplicationProperties
               PropertyMap:
-                InputStreamRegion: !Ref InputStreamRegion
-                InputStreamName: !Ref InputStreamName
-                OutputStreamRegion: !Ref OutputStreamRegion
-                OutputStreamName: !Ref OutputStreamName
+                kinesis.source.stream: !Ref InputStreamName
+                kinesis.sink.stream: !Ref OutputStreamName
+                kinesis.region: !Ref Region
+                kinesis.source.type: !Ref SourceType
         FlinkApplicationConfiguration:
           MonitoringConfiguration:
             ConfigurationType: CUSTOM
@@ -116,13 +117,13 @@ Resources:
               - kinesis:GetShardIterator
               - kinesis:GetRecords
               - kinesis:ListShards
-            Resource: !Sub "arn:aws:kinesis:${InputStreamRegion}:${AWS::AccountId}:stream/${InputStreamName}"
+            Resource: !Sub "arn:aws:kinesis:${Region}:${AWS::AccountId}:stream/${InputStreamName}"
           - Effect: Allow
             Action:
               - kinesis:DescribeStream
               - kinesis:PutRecord
               - kinesis:PutRecords
-            Resource: !Sub "arn:aws:kafka:${OutputStreamRegion}:${AWS::AccountId}:topic/${OutputStreamName}"
+            Resource: !Sub "arn:aws:kinesis:${Region}:${AWS::AccountId}:stream/${OutputStreamName}"
   FlinkApplicationServiceExecutionRole:
     Type: AWS::IAM::Role
     Properties:

@@ -11,15 +11,15 @@ else
 fi
 
 echo "Windowing type is sliding"
-class_name=com.amazonaws.services.msf.windowing.kinesis.SlidingWindowStreamingJobWithParallelism
-jar_name=kinesis-windowing-sliding-1.0.jar
+class_name=com.amazonaws.services.msf.windowing.kinesis.TumblingWindowStreamingJob
+jar_name=amazon-msf-windowing-tumbling-app-1.0.jar
 
 echo "main class is ${class_name}"
 echo "jar will be uploaded to s3://${bucket}/flink/${jar_name}"
 echo "Building code"
 mvn -q clean package -DskipTests -Dshade.mainClass=${class_name}
 echo "Copying jar"
-aws s3 cp target/amazon-msf-windowing-app-1.0.jar s3://${bucket}/flink/${jar_name}
+aws s3 cp target/${jar_name} s3://${bucket}/flink/${jar_name}
 
 echo "Done"
 
