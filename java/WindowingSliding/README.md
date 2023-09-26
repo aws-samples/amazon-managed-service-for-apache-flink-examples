@@ -13,7 +13,7 @@ There is one sample application which shows sliding windowing example.
 ### Kinesis - Sliding window*
 `com.amazonaws.services.msf.windowing.kinesis.SlidingWindowStreamingJobWithParallelism`
 
-![Flink Example](images/flink-kinesis-example.png),
+![Flink Example](images/flink-kinesis-example.png)
 
 The application reads from a Kinesis source stream and writes to Kinesis destination stream,
 showing how to implement a simple minimum price calculation for each stock using sliding window assigner.

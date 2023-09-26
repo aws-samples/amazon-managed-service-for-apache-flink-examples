@@ -11,6 +11,7 @@ It also shows how to set up an **Enhanced Fan-Out (EFO)** source.
 
 This example uses [`FlinkKinesisConsumer` and `KinesisStreamsSink` connectors](https://nightlies.apache.org/flink/flink-docs-release-1.15/docs/connectors/datastream/kinesis/).
 
+![Flink Example](images/flink-kinesis-example.png)
 ### Runtime configuration
 
 The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for Apache Flink,

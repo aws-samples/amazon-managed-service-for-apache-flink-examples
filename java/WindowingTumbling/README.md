@@ -13,7 +13,7 @@ There is one sample application which shows tumbling windowing example.
 ### Kinesis - Tumbling window*
 `com.amazonaws.services.msf.windowing.kinesis.TumblingWindowStreamingJob`
 
-![Flink Example](images/flink-kinesis-example.png),
+![Flink Example](images/flink-kinesis-example.png)
 
 The application reads from a Kinesis source stream and writes to Kinesis destination stream,
 showing how to implement a simple count calculation for each stock ticks using tumbling window assigner.
