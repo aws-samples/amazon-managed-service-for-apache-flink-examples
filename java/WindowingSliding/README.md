@@ -63,14 +63,14 @@ the classpath'*.
 1. The steps below create stack with `./cloudformation/msf-kinesis-stream-windowing.yaml`.
 2. The script `deploy.sh` creates the stack using AWS CLI. Ensure that AWS CLI is configured and your user has permissions to create CloudFormation stack.
 3. Alternatively you can deploy using  `./cloudformation/msf-kinesis-stream-windowing.yaml` from Console and pass required parameters.
-4. Edit `deploy-kinesis-sample.sh` to modify  "Region and Network configuration" . Modify following configurations -
+4. Edit `deploy.sh` to modify  "Region and Network configuration" . Modify following configurations -
 * region= Deployment region
 * SecurityGroup= MSK Security Group.
 * SubnetOne= MSK Subnet one
 * SubnetTwo= MSK Subnet two
 * SubnetThree= MSK Subnet three
 
-5. Edit `deploy-kinesis-sample.sh` to modify "Kinesis configuration". Modify following configurations -
+5. Edit `deploy.sh` to modify "Kinesis configuration". Modify following configurations -
 * input_stream= Input Kinesis stream name.
 * output_stream= Output stream name
   Ensure that source and sink streams are created.
@@ -79,11 +79,11 @@ the classpath'*.
 ```shell
 ./build.sh <BUCKET_NAME>
 ```
-7. Run `deploy-kafka-sample.sh` to deploy the CloudFormation template . Refer the sample CloudFormation template at `cloudformation/msf-kinesis-stream-windowing.yaml` .
+7. Run `deploy.sh` to deploy the CloudFormation template . Refer the sample CloudFormation template at `cloudformation/msf-kinesis-stream-windowing.yaml` .
    The CloudFormation needs the jar to be there at s3://BUCKET_NAME/flink/kinesis-windowing-sliding-1.0.jar.
 
 ```
-./deploy-kafka-sample.sh <BUCKET_NAME> 
+./deploy.sh <BUCKET_NAME> 
 ```
 8. The template creates following resources -
 * Flink application with application name defined by application_name in deploy.sh.
