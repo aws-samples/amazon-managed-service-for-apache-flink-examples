@@ -30,7 +30,7 @@ Command line parameters should be prepended by `--`.
 They are all case-sensitive.
 
 Configuration parameters:
-### Kinesis - Tumbling window `kinesis.TumblingWindowStreamingJob`:
+
 * `InputStreamRegion` region of the input stream (default: `us-east-1`)
 * `InputStreamName` name of the input Kinesis Data Stream (default: `ExampleInputStream`)
 * `OutputStreamRegion` region of the input stream (default: `us-east-1`)
@@ -41,16 +41,12 @@ Configuration parameters:
 To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to
 the classpath'*.
 
-*Kinesis - Tumbling window* `kinesis.TumblingWindowStreamingJob` :
-
 ```
 --InputStreamRegion ap-south-1 --InputStreamName stream-input --OutputStreamRegion ap-south-1 --OutputStreamName stream-windowing-sliding-output
 ```
 
 ## Running locally through MVN command line
 
-
-*Kinesis - Tumbling window* `kinesis.TumblingWindowStreamingJob` :
 
 ```
  mvn clean compile exec:java  -Dexec.classpathScope="compile" \
@@ -59,7 +55,6 @@ the classpath'*.
 
 ```
 ## Deploying using CloudFormation to Amazon Managed Service for Apache Flink
-### Kinesis - Tumbling window `kinesis.TumblingWindowStreamingJob`
 #### Pre-requisite
 1. Source and sink stream. 
 2. Create subnets and security groups for the Flink application. If you are using private subnets , ensure that VPC endpoint for Kinesis is created. 
@@ -97,6 +92,7 @@ the classpath'*.
 * CloudWatch log stream under the log group created above by name amazon-msf-log-stream.
 * IAM execution role for Flink application. The role permission on MSK cluster.
 * IAM managed policy.
+
 ## Data generator - Kafka
 The project includes a [simple Python script](./data-generator/generator.py) that generates data and publishes
 to Kafka. 

@@ -32,8 +32,6 @@ They are all case-sensitive.
 
 Configuration parameters:
 
-
-### Kinesis - Sliding window `kinesis.SlidingWindowStreamingJobWithParallelism`:
 * `InputStreamRegion` region of the input stream (default: `us-east-1`)
 * `InputStreamName` name of the input Kinesis Data Stream (default: `ExampleInputStream`)
 * `OutputStreamRegion` region of the input stream (default: `us-east-1`)
@@ -44,15 +42,11 @@ Configuration parameters:
 To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to
 the classpath'*.
 
-*Kinesis - Sliding window* `kinesis.SlidingWindowStreamingJobWithParallelism` :
-
 ```
 --InputStreamRegion ap-south-1 --InputStreamName stream-input --OutputStreamRegion ap-south-1 --OutputStreamName stream-windowing-sliding-output
 ```
 
 ## Running locally through MVN command line
-
-*Kinesis - Sliding window* `kinesis.SlidingWindowStreamingJobWithParallelism` :
 
 ```
  mvn clean compile exec:java  -Dexec.classpathScope="compile" \
@@ -61,13 +55,12 @@ the classpath'*.
 
 ```
 ## Deploying using CloudFormation to Amazon Managed Service for Apache Flink
-### Kinesis - Sliding window `kinesis.SlidingWindowStreamingJobWithParallelism`
-#### Pre-requisite
+### Pre-requisite
 1. Source and sink stream. 
 2. Create subnets and security groups for the Flink application. If you are using private subnets , ensure that VPC endpoint for Kinesis is created. 
 3. You have a user credential using which you can create CloudFormation stack from console or CLI.
 
-#### Build and deployment
+### Build and deployment
 1. The steps below create stack with [CloudFormation Template](./cloudformation/msf-kinesis-stream-windowing.yaml).
 2. The script `deploy.sh` creates the stack using AWS CLI. Ensure that AWS CLI is configured and your user has permissions to create CloudFormation stack.
 3. Alternatively you can deploy using  [CloudFormation Template](./cloudformation/msf-kinesis-stream-windowing.yaml) from Console and pass required parameters.
@@ -99,6 +92,7 @@ the classpath'*.
 * CloudWatch log stream under the log group created above by name amazon-msf-log-stream.
 * IAM execution role for Flink application. The role permission on MSK cluster.
 * IAM managed policy.
+
 ## Data generator - Kafka
 The project includes a [simple Python script](./data-generator/generator.py) that generates data and publishes
 to Kafka. 
