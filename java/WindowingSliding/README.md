@@ -10,7 +10,6 @@ Example of project for a basic Flink Java application using Tumbling and Sliding
 The project can run both on Amazon Managed Service for Apache Flink, and locally for development.
 There are two sample applications which show windowing example. 
 
-
 ### Kinesis - Sliding window*
 `com.amazonaws.services.msf.windowing.kinesis.SlidingWindowStreamingJobWithParallelism`
 
@@ -61,9 +60,9 @@ the classpath'*.
 3. You have a user credential using which you can create CloudFormation stack from console or CLI.
 
 ### Build and deployment
-1. The steps below create stack with [CloudFormation Template](./cloudformation/msf-kinesis-stream-windowing.yaml).
+1. The steps below create stack with `./cloudformation/msf-kinesis-stream-windowing.yaml`.
 2. The script `deploy.sh` creates the stack using AWS CLI. Ensure that AWS CLI is configured and your user has permissions to create CloudFormation stack.
-3. Alternatively you can deploy using  [CloudFormation Template](./cloudformation/msf-kinesis-stream-windowing.yaml) from Console and pass required parameters.
+3. Alternatively you can deploy using  `./cloudformation/msf-kinesis-stream-windowing.yaml` from Console and pass required parameters.
 4. Edit `deploy-kinesis-sample.sh` to modify  "Region and Network configuration" . Modify following configurations -
 * region= Deployment region
 * SecurityGroup= MSK Security Group.

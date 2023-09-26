@@ -47,7 +47,6 @@ the classpath'*.
 
 ## Running locally through MVN command line
 
-
 ```
  mvn clean compile exec:java  -Dexec.classpathScope="compile" \
  -Dexec.mainClass="com.amazonaws.services.msf.windowing.kinesis.TumblingWindowStreamingJob" \
@@ -55,15 +54,15 @@ the classpath'*.
 
 ```
 ## Deploying using CloudFormation to Amazon Managed Service for Apache Flink
-#### Pre-requisite
+### Pre-requisite
 1. Source and sink stream. 
 2. Create subnets and security groups for the Flink application. If you are using private subnets , ensure that VPC endpoint for Kinesis is created. 
 3. You have a user credential using which you can create CloudFormation stack from console or CLI.
 
-#### Build and deployment
-1. The steps below create stack with [CloudFormation Template](./cloudformation/msf-kinesis-stream-windowing.yaml).
+### Build and deployment
+1. The steps below create stack with `./cloudformation/msf-kinesis-stream-windowing.yaml`.
 2. The script `deploy.sh` creates the stack using AWS CLI. Ensure that AWS CLI is configured and your user has permissions to create CloudFormation stack.
-3. Alternatively you can deploy using  [CloudFormation Template](./cloudformation/msf-kinesis-stream-windowing.yaml) from Console and pass required parameters.
+3. Alternatively you can deploy using  `./cloudformation/msf-kinesis-stream-windowing.yaml` from Console and pass required parameters.
 4. Edit `deploy-kinesis-sample.sh` to modify  "Region and Network configuration" . Modify following configurations -
 * region= Deployment region
 * SecurityGroup= MSK Security Group.
