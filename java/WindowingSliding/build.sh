@@ -4,7 +4,7 @@ bucket=$1
 if [ -z "${bucket}" ]
 then
     echo "Bucket name is required"
-    echo "Usage: build-kinesis-sample.sh <bucket_name>"
+    echo "Usage: build.sh <bucket_name>"
     exit 1
 else
     echo "Bucket name is ${bucket}"

@@ -3,7 +3,6 @@ bucket=$1
 
 template_file=cloudformation/msf-kinesis-stream.yaml
 
-echo "Sliding window"
 ## For Kafka sliding window example
 jar_name=kinesis-connectors-1.0.jar
 application_name=flink-kinesis-connectors

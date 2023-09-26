@@ -3,16 +3,16 @@ bucket=$1
 
 template_file=cloudformation/msf-kinesis-stream-windowing.yaml
 
-echo "Sliding window"
+echo "Tumbling window"
 ## For Kafka sliding window example
 jar_name=amazon-msf-windowing-tumbling-app-1.0.jar
-application_name=flink-kinesis-windowing-sliding
+application_name=flink-kinesis-windowing-tumbling
 parallelism=3
 
 if [ -z "${bucket}" ]
 then
     echo "Bucket name is required"
-    echo "Usage: deploy-kinesis-sample.sh <bucket_name>"
+    echo "Usage: deploy.sh <bucket_name>"
     exit 1
 else
     echo "Bucket name is ${bucket}"
@@ -22,7 +22,7 @@ aws s3 ls s3://${bucket}/flink/${jar_name}
 if [ $? -ne 0 ]
 then
     echo "s3://${bucket}/flink/${jar_name} does not exist"
-    echo "Please execute: build-kinesis-sample.sh <bucket_name>"
+    echo "Please execute: build.sh <bucket_name>"
     echo "Then try again"
     exit 1
 fi
@@ -36,7 +36,7 @@ SubnetThree=subnet-02e1e451e78007768
 
 ## Kinesis configuration
 input_stream="stream-input"
-output_stream="stream-windowing-sliding-output"
+output_stream="stream-windowing-tumbling-output"
 
 
 

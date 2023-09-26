@@ -12,7 +12,7 @@ parallelism=3
 if [ -z "${bucket}" ]
 then
     echo "Bucket name is required"
-    echo "Usage: deploy-kinesis-sample.sh <bucket_name>"
+    echo "Usage: deploy.sh <bucket_name>"
     exit 1
 else
     echo "Bucket name is ${bucket}"
@@ -22,7 +22,7 @@ aws s3 ls s3://${bucket}/flink/${jar_name}
 if [ $? -ne 0 ]
 then
     echo "s3://${bucket}/flink/${jar_name} does not exist"
-    echo "Please execute: build-kinesis-sample.sh <bucket_name>"
+    echo "Please execute: build.sh <bucket_name>"
     echo "Then try again"
     exit 1
 fi

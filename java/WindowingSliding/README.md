@@ -8,7 +8,7 @@ Example of project for a basic Flink Java application using Tumbling and Sliding
 * Language: Java (11)
 
 The project can run both on Amazon Managed Service for Apache Flink, and locally for development.
-There are two sample applications which show windowing example. 
+There is one sample application which shows sliding windowing example.
 
 ### Kinesis - Sliding window*
 `com.amazonaws.services.msf.windowing.kinesis.SlidingWindowStreamingJobWithParallelism`
@@ -57,12 +57,12 @@ the classpath'*.
 ### Pre-requisite
 1. Source and sink stream. 
 2. Create subnets and security groups for the Flink application. If you are using private subnets , ensure that VPC endpoint for Kinesis is created. 
-3. You have a user credential using which you can create CloudFormation stack from console or CLI.
+3. AWS user credential using which you can create CloudFormation stack from console or CLI.
 
 ### Build and deployment
-1. The steps below create stack with `./cloudformation/msf-kinesis-stream-windowing.yaml`.
+1. The steps below create stack using `./cloudformation/msf-kinesis-stream-windowing.yaml`.
 2. The script `deploy.sh` creates the stack using AWS CLI. Ensure that AWS CLI is configured and your user has permissions to create CloudFormation stack.
-3. Alternatively you can deploy using  `./cloudformation/msf-kinesis-stream-windowing.yaml` from Console and pass required parameters.
+3. Alternatively you can deploy from console using `./cloudformation/msf-kinesis-stream-windowing.yaml` and pass required parameters.
 4. Edit `deploy.sh` to modify  "Region and Network configuration" . Modify following configurations -
 * region= Deployment region
 * SecurityGroup= MSK Security Group.
@@ -75,12 +75,12 @@ the classpath'*.
 * output_stream= Output stream name
   Ensure that source and sink streams are created.
 
-6. Build Code. Execute the script below which will build the jar and upload the jar to S3 at s3://BUCKET_NAME/flink/kinesis-windowing-sliding-1.0.jar.
+6. Build Code. Execute the script below which will build the jar and upload the jar to S3 at s3://BUCKET_NAME/flink/amazon-msf-windowing-sliding-app-1.0.jar.
 ```shell
 ./build.sh <BUCKET_NAME>
 ```
 7. Run `deploy.sh` to deploy the CloudFormation template . Refer the sample CloudFormation template at `cloudformation/msf-kinesis-stream-windowing.yaml` .
-   The CloudFormation needs the jar to be there at s3://BUCKET_NAME/flink/kinesis-windowing-sliding-1.0.jar.
+   The CloudFormation needs the jar to be there at s3://BUCKET_NAME/flink/amazon-msf-windowing-sliding-app-1.0.jar.
 
 ```
 ./deploy.sh <BUCKET_NAME> 
