@@ -2,7 +2,6 @@ Description: Simple KDA Flink application
 Parameters:
   ApplicationName:
     Type: String
-    Default: kafka-sample-app
   FlinkRuntimeEnvironment:
     Type: String
     Default: FLINK-1_15
@@ -10,7 +9,6 @@ Parameters:
     Type: String
   CodeKey:
     Type: String
-    Default: flink/kafka-connectors-1.0.jar
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup::Id
   SubnetOne:
