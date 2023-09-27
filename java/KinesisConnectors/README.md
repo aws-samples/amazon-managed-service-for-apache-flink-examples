@@ -44,7 +44,7 @@ To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'A
 ```
 
 
-## Running locally through MVN command line
+## Running locally through Maven command line
 
 ```
  mvn clean compile exec:java  -Dexec.classpathScope="compile" \

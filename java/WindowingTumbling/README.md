@@ -18,6 +18,14 @@ There is one sample application which shows tumbling windowing example.
 The application reads from a Kinesis source stream and writes to Kinesis destination stream,
 showing how to implement a simple count calculation for each stock ticks using tumbling window assigner.
 
+### Sample Input
+```json
+{"price": 10.0, "ticker":"AMZN"}
+```
+### Sample Output
+```
+("AMZN",58)
+```
 
 ## Runtime configuration
 
@@ -45,7 +53,7 @@ the classpath'*.
 --InputStreamRegion ap-south-1 --InputStreamName stream-input --OutputStreamRegion ap-south-1 --OutputStreamName stream-windowing-sliding-output
 ```
 
-## Running locally through MVN command line
+## Running locally through Maven command line
 
 ```
  mvn clean compile exec:java  -Dexec.classpathScope="compile" \
@@ -92,10 +100,6 @@ the classpath'*.
 * IAM execution role for Flink application. The role permission on MSK cluster.
 * IAM managed policy.
 
-## Data generator - Kafka
-The project includes a [simple Python script](./data-generator/generator.py) that generates data and publishes
-to Kafka. 
-Edit the script to change the boostrap brokers and topic name.
 
 ## Data generator - Kinesis
 You can use [Kinesis Data Generator](https://github.com/awslabs/amazon-kinesis-data-generator),

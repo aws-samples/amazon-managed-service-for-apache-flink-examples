@@ -18,6 +18,15 @@ There is one sample application which shows sliding windowing example.
 The application reads from a Kinesis source stream and writes to Kinesis destination stream,
 showing how to implement a simple minimum price calculation for each stock using sliding window assigner.
 
+### Sample Input
+```json
+{"price": 10.0, "ticker":"AMZN"}
+```
+### Sample Output
+```
+"AMZN",12.80
+```
+
 
 ## Runtime configuration
 
@@ -45,7 +54,7 @@ the classpath'*.
 --InputStreamRegion ap-south-1 --InputStreamName stream-input --OutputStreamRegion ap-south-1 --OutputStreamName stream-windowing-sliding-output
 ```
 
-## Running locally through MVN command line
+## Running locally through Maven command line
 
 ```
  mvn clean compile exec:java  -Dexec.classpathScope="compile" \
