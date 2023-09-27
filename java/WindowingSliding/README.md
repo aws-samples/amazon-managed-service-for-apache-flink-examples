@@ -101,10 +101,6 @@ the classpath'*.
 * IAM execution role for Flink application. The role permission on MSK cluster.
 * IAM managed policy.
 
-## Data generator - Kafka
-The project includes a [simple Python script](./data-generator/generator.py) that generates data and publishes
-to Kafka. 
-Edit the script to change the boostrap brokers and topic name.
 
 ## Data generator - Kinesis
 You can use [Kinesis Data Generator](https://github.com/awslabs/amazon-kinesis-data-generator),
