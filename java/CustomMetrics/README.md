@@ -28,6 +28,10 @@ They are all case-sensitive.
 * `aws.region` Kinesis Data Stream to be used for sink
 * `flink.stream.initpos` Kinesis Data Streams starting position. Provide `LATEST` to start from the latest record of the stream
 
+**WordCount** Configuration parameters:
+No configuration parameter is required for this application as the input and output stream are hardcoded. 
+Aware that it's a malpractice but the Amazon Managed Service for Apache Flink documentation is using the static config.
+
 ### Running locally in IntelliJ
 
 To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*.
