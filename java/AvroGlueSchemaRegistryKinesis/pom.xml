@@ -8,7 +8,7 @@
   <artifactId>flink-kds-gsr</artifactId>
   <version>1.0-SNAPSHOT</version>
 
-  <name>flink-kds-gsr</name>
+  <name>avro-gsr-kds-flink</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -19,11 +19,9 @@
     <scala.binary.version>2.12</scala.binary.version>
     <avro.version>1.10.2</avro.version>
 
-    <flink.version>1.15.2</flink.version>
+    <flink.version>1.15.4</flink.version>
     <kda.connectors.version>2.1.0</kda.connectors.version>
     <kda.runtime.version>1.2.0</kda.runtime.version>
-    <!-- We are not using 1.15.2 because there are known bugs that were fixed in 1.15.3 for FlinkKinesisConsumer not respecting Credential Provider configuration for EFO FLINK-29205-->
-    <flink.kds.connector.version>1.15.3</flink.kds.connector.version>
 
     <slf4j.version>1.7.32</slf4j.version>
     <log4j.version>2.17.2</log4j.version>
@@ -74,12 +72,12 @@
     <dependency>
       <groupId>org.apache.flink</groupId>
       <artifactId>flink-connector-kinesis</artifactId>
-      <version>${flink.kds.connector.version}</version>
+      <version>${flink.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.flink</groupId>
       <artifactId>flink-connector-aws-kinesis-streams</artifactId>
-      <version>${flink.kds.connector.version}</version>
+      <version>${flink.version}</version>
     </dependency>
 
     <!-- AVRO -->
