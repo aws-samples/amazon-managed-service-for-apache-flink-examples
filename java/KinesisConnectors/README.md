@@ -1,6 +1,6 @@
 # Flink Kinesis Source & Sink examples (standard and EFO)
 
-* Flink version: 1.15.2
+* Flink version: 1.15
 * Flink API: DataStream API
 * Language: Java (11)
 

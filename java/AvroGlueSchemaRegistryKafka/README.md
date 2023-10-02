@@ -1,6 +1,6 @@
 ## AVRO serialization in KafkaSource and KafkaSink using AWS Glue Schema Registry
 
-* Flink version: 1.15.2
+* Flink version: 1.15
 * Flink API: DataStream API
 * Language: Java (11)
 

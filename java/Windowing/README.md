@@ -2,7 +2,7 @@
 
 Example of project for a basic Flink Java application using Tumbling and Sliding windows.
 
-* Flink version: 1.15.2
+* Flink version: 1.15
 * Flink API: DataStream API
 * Flink Connectors: Kafka Connector, Kinesis Connector
 * Language: Java (11)
