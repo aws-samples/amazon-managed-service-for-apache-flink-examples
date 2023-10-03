@@ -1,6 +1,8 @@
     package com.amazonaws.services.msf;
      
     import com.amazonaws.services.kinesisanalytics.runtime.KinesisAnalyticsRuntime;
+
+    import java.io.IOException;
     import java.util.Map;
     import java.util.Properties;
     import org.apache.flink.api.common.functions.FilterFunction;
@@ -10,6 +12,7 @@
     import org.apache.flink.connector.kinesis.sink.KinesisStreamsSink;
     import org.apache.flink.metrics.Gauge;
     import org.apache.flink.streaming.api.datastream.DataStream;
+    import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
     import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
     import org.apache.flink.streaming.connectors.kinesis.FlinkKinesisConsumer;
     import org.slf4j.Logger;
@@ -22,11 +25,22 @@
     public class RecordCountApplication {
      
         private static final Logger LOG = LoggerFactory.getLogger(RecordCountApplication.class);
+        private static final String LOCAL_APPLICATION_PROPERTIES_RESOURCE = "flink-application-properties-dev.json";
+
+        private static Map<String, Properties> loadApplicationProperties(StreamExecutionEnvironment env) throws IOException {
+            if (env instanceof LocalStreamEnvironment) {
+                return KinesisAnalyticsRuntime.getApplicationProperties(RecordCountApplication.class.getClassLoader()
+                        .getResource(LOCAL_APPLICATION_PROPERTIES_RESOURCE).getPath());
+            } else {
+                return KinesisAnalyticsRuntime.getApplicationProperties();
+            }
+        }
      
         public static void main(String[] args) throws Exception {
             StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-            Map<String, Properties> runConfigurations = KinesisAnalyticsRuntime.getApplicationProperties();
-     
+
+            Map<String, Properties> runConfigurations = loadApplicationProperties(env);
+
             // Get the Flink application properties from runtime configuration
             Properties inputConfig = runConfigurations.get("FlinkApplicationProperties");
             String inputStreamName = inputConfig.getProperty("input.stream.name");
@@ -70,7 +84,7 @@
                     inputStreamName, inputStartingPosition, outputStreamName);
             env.execute("RecordCountApplication Job");
         }
-     
+
         /**
          * NoOp mapper function which acts as a pass through for the records. It would also publish the custom metric for
          * the number of received records.

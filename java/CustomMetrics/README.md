@@ -1,6 +1,6 @@
 # Custom Metrics
 
-* Flink version: 1.15.2
+* Flink version: 1.15.4
 * Flink API: DataStream API
 * Language: Java (11)
 
@@ -8,8 +8,8 @@
 This example demonstrate how to create your own metrics to track application-specific data, such as processing events or accessing external resources and publish it to Cloudwatch.
 
 The custom metrics is explained by two different application -
-**RecordCount** - This application shows how to create a custom record count metric and publish it to Cloudwatch.
-**WordCount** - This application shows how to create a custom word count metric and publish it to Cloudwatch.
+* **RecordCount** - This application shows how to create a custom record count metric and publish it to Cloudwatch.
+* **WordCount** - This application shows how to create a custom word count metric and publish it to Cloudwatch.
 
 ### Runtime configuration
 
@@ -30,7 +30,7 @@ They are all case-sensitive.
 
 **WordCount** Configuration parameters:
 No configuration parameter is required for this application as the input and output stream are hardcoded. 
-Aware that it's a malpractice but the Amazon Managed Service for Apache Flink documentation is using the static config.
+Although that it's not a recommended practice but AWS documentation refers to the section of code. This code will be updated later.
 
 ### Running locally in IntelliJ
 
