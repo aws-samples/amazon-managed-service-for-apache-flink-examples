@@ -17,6 +17,7 @@
         <flink.version>1.15.4</flink.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
         <log4j.version>2.17.1</log4j.version>
+        <slf4j.version>2.0.9</slf4j.version>
     </properties>
 
     <dependencies>
@@ -67,6 +68,16 @@
             <artifactId>log4j-core</artifactId>
             <version>${log4j.version}</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
         <!-- MSK IAM Authentication -->
         <dependency>

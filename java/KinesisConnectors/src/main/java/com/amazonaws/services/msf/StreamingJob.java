@@ -10,6 +10,8 @@ import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kinesis.FlinkKinesisConsumer;
 import org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -21,6 +23,7 @@ import static org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfi
 
 
 public class StreamingJob {
+    private static final Logger LOG = LoggerFactory.getLogger(StreamingJob.class);
 
     private static final String DEFAULT_SOURCE_STREAM = "source";
     private static final String DEFAULT_PUBLISHER_TYPE = RecordPublisherType.POLLING.name(); // "POLLING" for standard consumer, "EFO" for Enhanced Fan-Out
@@ -87,6 +90,7 @@ public class StreamingJob {
         // set up the streaming execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         final ParameterTool applicationProperties = loadApplicationParameters(args, env);
+        LOG.info("Application properties: {}", applicationProperties.toMap());
 
         FlinkKinesisConsumer<String> source = createKinesisSource(applicationProperties);
         DataStream<String> input = env.addSource(source, "Kinesis source");

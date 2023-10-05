@@ -7,11 +7,9 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.assigners.SlidingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.kinesis.FlinkKinesisConsumer;
@@ -83,11 +81,10 @@ public class SlidingWindowStreamingJobWithParallelism
     public static void main(String[] args) throws Exception {
         final StreamExecutionEnvironment env =
                 StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
 
         // Load application parameters
         final ParameterTool applicationParameters = loadApplicationParameters(args, env);
-        LOG.info(applicationParameters.getProperties()+"");
+        LOG.info("Application properties: {}", applicationParameters.toMap());
 
         DataStream<String> input = createSourceFromStaticConfig(env, applicationParameters);
 

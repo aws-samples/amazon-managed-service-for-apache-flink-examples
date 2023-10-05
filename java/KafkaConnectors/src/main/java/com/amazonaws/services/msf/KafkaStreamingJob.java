@@ -12,6 +12,8 @@ import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsIni
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -25,6 +27,9 @@ public class KafkaStreamingJob {
     private static final String DEFAULT_SOURCE_TOPIC = "source";
     private static final String DEFAULT_SINK_TOPIC = "destination";
     private static final String DEFAULT_CLUSTER = "localhost:9092";
+
+    private static final Logger LOG = LoggerFactory.getLogger(KafkaStreamingJob.class);
+
 
     /**
      * Get configuration properties from Amazon Managed Service for Apache Flink runtime properties
@@ -65,7 +70,7 @@ public class KafkaStreamingJob {
                             });
 
         });
-        System.out.println("Kafka Properties: "+properties);
+        LOG.info(startsWith+" Kafka Properties: "+properties);
         return properties;
     }
 
@@ -90,6 +95,7 @@ public class KafkaStreamingJob {
         // set up the streaming execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         final ParameterTool applicationProperties = loadApplicationParameters(args, env);
+        LOG.info("Application properties: {}", applicationProperties.toMap());
 
         KafkaSource<String> source = createKafkaSource(applicationProperties);
         DataStream<String> input = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka source");

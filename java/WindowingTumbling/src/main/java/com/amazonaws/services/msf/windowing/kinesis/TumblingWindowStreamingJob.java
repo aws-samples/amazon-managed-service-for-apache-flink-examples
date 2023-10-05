@@ -11,12 +11,13 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMap
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.windowing.assigners.SlidingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.kinesis.FlinkKinesisConsumer;
 import org.apache.flink.streaming.connectors.kinesis.config.AWSConfigConstants;
 import org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -29,6 +30,8 @@ public class TumblingWindowStreamingJob
     private static final String DEFAULT_REGION = "us-east-1";
     private static final String DEFAULT_INPUT_STREAM = "input-stream";
     private static final String DEFAULT_OUTPUT_STREAM = "output-stream";
+
+    private static final Logger LOG = LoggerFactory.getLogger(TumblingWindowStreamingJob.class);
 
 
     /**
@@ -81,6 +84,7 @@ public class TumblingWindowStreamingJob
 
         // Load application parameters
         final ParameterTool applicationParameters = loadApplicationParameters(args, env);
+        LOG.info("Application properties: {}", applicationParameters.toMap());
 
         DataStream<String> input = createSourceFromStaticConfig(env, applicationParameters);
 
@@ -93,7 +97,7 @@ public class TumblingWindowStreamingJob
                 .window(TumblingProcessingTimeWindows.of(Time.seconds(5)))
                 .sum(1)
                 .map(Tuple2::toString)
-                .sinkTo(createSinkFromStaticConfig(applicationParameters)); ;
+                .sinkTo(createSinkFromStaticConfig(applicationParameters));
 
 
         env.execute("Tumbling Window Word Count");

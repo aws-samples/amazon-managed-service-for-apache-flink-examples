@@ -50,7 +50,7 @@ To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'A
 the classpath'*.
 
 ```
---InputStreamRegion ap-south-1 --InputStreamName stream-input --OutputStreamRegion ap-south-1 --OutputStreamName stream-windowing-sliding-output
+--InputStreamRegion ap-south-1 --InputStreamName stream-input --OutputStreamRegion ap-south-1 --OutputStreamName stream-windowing-tumbling-output
 ```
 
 ## Running locally through Maven command line
@@ -58,7 +58,7 @@ the classpath'*.
 ```
  mvn clean compile exec:java  -Dexec.classpathScope="compile" \
  -Dexec.mainClass="com.amazonaws.services.msf.windowing.kinesis.TumblingWindowStreamingJob" \
- -Dexec.args="--InputStreamRegion ap-south-1 --InputStreamName stream-input --OutputStreamRegion ap-south-1 --OutputStreamName stream-windowing-sliding-output" 
+ -Dexec.args="--InputStreamRegion ap-south-1 --InputStreamName stream-input --OutputStreamRegion ap-south-1 --OutputStreamName stream-windowing-tumbling-output" 
 
 ```
 ## Deploying using CloudFormation to Amazon Managed Service for Apache Flink
