@@ -12,6 +12,7 @@ else
     echo "Bucket name is ${bucket}"
 fi
 
+echo "jar will be uploaded to s3://${bucket}/flink/${jar_name}"
 echo "Building code"
 mvn -q  clean package -DskipTests
 echo "Copying jar"

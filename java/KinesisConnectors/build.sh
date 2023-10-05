@@ -12,7 +12,6 @@ fi
 
 jar_name=kinesis-connectors-1.0.jar
 
-echo "main class is ${class_name}"
 echo "jar will be uploaded to s3://${bucket}/flink/${jar_name}"
 echo "Building code"
 mvn -q clean package -DskipTests
