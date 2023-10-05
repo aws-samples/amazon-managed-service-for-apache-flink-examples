@@ -2,7 +2,7 @@
 
 Example of project for a basic Flink Java application using the TableAPI or SQL.
 
-* Flink version: 1.15.2
+* Flink version: 1.15
 * Flink API: Table API or SQL
 * Language: Java (11)
 
