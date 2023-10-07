@@ -54,6 +54,8 @@ the classpath'*.
 --InputStreamRegion ap-south-1 --InputStreamName stream-input --OutputStreamRegion ap-south-1 --OutputStreamName stream-windowing-sliding-output
 ```
 
+Following is the screenshot of run configuration
+![Run Configuration](images/runConfiguration.png)
 ## Running locally through Maven command line
 
 ```

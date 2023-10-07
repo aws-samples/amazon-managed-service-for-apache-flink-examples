@@ -63,6 +63,9 @@ Provide arguments like following -
 --source.bootstrap.servers localhost:9092 --source.topic source --sink.bootstrap.servers localhost:9092 --sink.topic sink --sink.transaction.timeout.ms 1000
 ```
 
+Following is the screenshot of run configuration
+![Run Configuration](images/runConfiguration.png)
+
 ## Running locally through Maven command line
 Refer following sample -
 ```

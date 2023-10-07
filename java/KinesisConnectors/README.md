@@ -40,9 +40,11 @@ To use EFO for the Kinesis Data Stream source, set up two additional configurati
 To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*.
 
 ```
---kinesis.source.stream stream-input --kinesis.sink.stream stream-windowing-sliding-output --kinesis.region ap-south-1 --kinesis.source.type POLLING
+--kinesis.source.stream stream-input --kinesis.sink.stream stream-output --kinesis.region ap-south-1 --kinesis.source.type POLLING
 ```
 
+Following is the screenshot of run configuration
+![Run Configuration](images/runConfiguration.png)
 
 ## Running locally through Maven command line
 
