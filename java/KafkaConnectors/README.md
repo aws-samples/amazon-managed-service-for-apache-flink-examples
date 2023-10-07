@@ -69,7 +69,9 @@ Following is the screenshot of run configuration
 ## Running locally through Maven command line
 Refer following sample -
 ```
- mvn clean compile exec:java -Dexec.classpathScope="compile" -Dexec.mainClass="com.amazonaws.services.msf.KafkaStreamingJob" -Dexec.args="--source.bootstrap.servers localhost:9092 --source.topic source --sink.bootstrap.servers localhost:9092 --sink.topic sink --sink.transaction.timeout.ms 1000" 
+ mvn clean compile exec:java -Dexec.classpathScope="compile" \
+ -Dexec.mainClass="com.amazonaws.services.msf.KafkaStreamingJob" \
+ -Dexec.args="--source.bootstrap.servers localhost:9092 --source.topic source --sink.bootstrap.servers localhost:9092 --sink.topic sink --sink.transaction.timeout.ms 1000" 
 
 ```
 
