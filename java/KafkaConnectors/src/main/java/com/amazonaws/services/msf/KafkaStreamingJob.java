@@ -70,7 +70,7 @@ public class KafkaStreamingJob {
                             });
 
         });
-        LOG.info(startsWith+" Kafka Properties: "+properties);
+        LOG.warn(startsWith+" Kafka Properties: "+properties);
         return properties;
     }
 
@@ -95,7 +95,7 @@ public class KafkaStreamingJob {
         // set up the streaming execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         final ParameterTool applicationProperties = loadApplicationParameters(args, env);
-        LOG.info("Application properties: {}", applicationProperties.toMap());
+        LOG.warn("Application properties: {}", applicationProperties.toMap());
 
         KafkaSource<String> source = createKafkaSource(applicationProperties);
         DataStream<String> input = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka source");

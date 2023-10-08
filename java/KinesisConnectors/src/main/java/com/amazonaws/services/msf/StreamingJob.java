@@ -90,7 +90,7 @@ public class StreamingJob {
         // set up the streaming execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         final ParameterTool applicationProperties = loadApplicationParameters(args, env);
-        LOG.info("Application properties: {}", applicationProperties.toMap());
+        LOG.warn("Application properties: {}", applicationProperties.toMap());
 
         FlinkKinesisConsumer<String> source = createKinesisSource(applicationProperties);
         DataStream<String> input = env.addSource(source, "Kinesis source");

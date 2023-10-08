@@ -84,7 +84,7 @@ public class SlidingWindowStreamingJobWithParallelism
 
         // Load application parameters
         final ParameterTool applicationParameters = loadApplicationParameters(args, env);
-        LOG.info("Application properties: {}", applicationParameters.toMap());
+        LOG.warn("Application properties: {}", applicationParameters.toMap());
 
         DataStream<String> input = createSourceFromStaticConfig(env, applicationParameters);
 
