@@ -27,7 +27,6 @@ showing how to implement a simple minimum price calculation for each stock using
 "AMZN",12.80
 ```
 
-
 ## Runtime configuration
 
 The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for
@@ -46,22 +45,27 @@ Configuration parameters:
 * `OutputStreamName` name of the input Kinesis Data Stream (default: `ExampleOutputStream`)
 
 ## Running in IntelliJ
-
-To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to
+To run this example locally -
+* Create source and sink Kinesis streams.
+* Ensure that use profile is configured and user has required permission to read/write from Kinesis streams. 
+* To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to
 the classpath'*.
 
 ```
---InputStreamRegion ap-south-1 --InputStreamName stream-input --OutputStreamRegion ap-south-1 --OutputStreamName stream-windowing-sliding-output
+--InputStreamRegion ap-south-1 --InputStreamName stream-input --OutputStreamRegion ap-south-1 --OutputStreamName stream-windowing-output
 ```
 
 Following is the screenshot of run configuration
 ![Run Configuration](images/runConfiguration.png)
 ## Running locally through Maven command line
-
+To run this example locally -
+* Create source and sink Kinesis streams.
+* Ensure that use profile is configured and user has required permission to read/write from Kinesis streams.
+* Execute following command from the project home directory -
 ```
  mvn clean compile exec:java  -Dexec.classpathScope="compile" \
  -Dexec.mainClass="com.amazonaws.services.msf.windowing.kinesis.SlidingWindowStreamingJobWithParallelism" \
- -Dexec.args="--InputStreamRegion ap-south-1 --InputStreamName stream-input --OutputStreamRegion ap-south-1 --OutputStreamName stream-windowing-sliding-output" 
+ -Dexec.args="--InputStreamRegion ap-south-1 --InputStreamName stream-input --OutputStreamRegion ap-south-1 --OutputStreamName stream-windowing-output" 
 
 ```
 ## Deploying using CloudFormation to Amazon Managed Service for Apache Flink

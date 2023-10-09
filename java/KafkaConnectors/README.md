@@ -56,7 +56,10 @@ If you are connecting with no-auth and no SSL, above will work. Else you need ad
 
 ## Running locally in IntelliJ
 
-To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*.
+To run this example locally - 
+* Run a cluster locally. You can refer https://kafka.apache.org/quickstart download and start Kafka locally.
+* Create `source` and `sink` topics. 
+* To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*.
 
 Provide arguments like following -
 ```
@@ -67,7 +70,10 @@ Following is the screenshot of run configuration
 ![Run Configuration](images/runConfiguration.png)
 
 ## Running locally through Maven command line
-Refer following sample -
+To run this example locally -
+* Run a cluster locally. You can refer https://kafka.apache.org/quickstart download and start Kafka locally.
+* Create `source` and `sink` topics.
+* Execute following command from the project home directory -
 ```
  mvn clean compile exec:java -Dexec.classpathScope="compile" \
  -Dexec.mainClass="com.amazonaws.services.msf.KafkaStreamingJob" \

@@ -36,8 +36,10 @@ To use EFO for the Kinesis Data Stream source, set up two additional configurati
 * `kinesis.source.efoConsumer` Kinesis Data Stream EFO Consumer name; only used if `kinesis.source.type=EFO` (default: `sample-efo-flink-consumer`)
 
 ### Running locally in IntelliJ
-
-To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*.
+To run this example locally -
+* Create source and sink Kinesis streams. 
+* Ensure that use profile is configured and user has required permission to read/write from Kinesis streams. 
+* To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*.
 
 ```
 --kinesis.source.stream stream-input --kinesis.sink.stream stream-output --kinesis.region ap-south-1 --kinesis.source.type POLLING
@@ -47,6 +49,10 @@ Following is the screenshot of run configuration
 ![Run Configuration](images/runConfiguration.png)
 
 ## Running locally through Maven command line
+To run this example locally -
+* Create source and sink Kinesis streams.
+* Ensure that use profile is configured and user has required permission to read/write from Kinesis streams.
+* Execute following command from the project home directory -
 
 ```
  mvn clean compile exec:java  -Dexec.classpathScope="compile" \
