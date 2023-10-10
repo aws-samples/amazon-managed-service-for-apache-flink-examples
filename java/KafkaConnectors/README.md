@@ -57,7 +57,7 @@ If you are connecting with no-auth and no SSL, above will work. Else you need ad
 ## Running locally in IntelliJ
 
 To run this example locally - 
-* Run a Kafka cluster locally. You can refer https://kafka.apache.org/quickstart download and start Kafka locally.
+* Run a Kafka cluster locally. You can refer https://kafka.apache.org/quickstart to download and start Kafka locally.
 * Create `source` and `sink` topics. 
 * To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*.
 
@@ -71,7 +71,7 @@ Following is the screenshot of run configuration
 
 ## Running locally through Maven command line
 To run this example locally -
-* Run a Kafka cluster locally. You can refer https://kafka.apache.org/quickstart download and start Kafka locally.
+* Run a Kafka cluster locally. You can refer https://kafka.apache.org/quickstart to download and start Kafka locally.
 * Create `source` and `sink` topics.
 * Execute following command from the project home directory -
 ```
