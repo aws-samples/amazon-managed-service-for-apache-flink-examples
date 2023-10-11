@@ -1,33 +1,37 @@
-package com.amazonaws.services.msf.windowing;
+package com.amazonaws.services.msf.windowing.kinesis;
 
 import com.amazonaws.services.kinesisanalytics.runtime.KinesisAnalyticsRuntime;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.connector.kinesis.sink.KinesisStreamsSink;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.windowing.assigners.SlidingProcessingTimeWindows;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.kinesis.FlinkKinesisConsumer;
-import org.apache.flink.connector.kinesis.sink.KinesisStreamsSink;
 import org.apache.flink.streaming.connectors.kinesis.config.AWSConfigConstants;
 import org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-public class SlidingWindowStreamingJobWithParallelism
+public class TumblingWindowStreamingJob
 {
     private static final String APPLICATION_CONFIG_GROUP = "FlinkApplicationProperties";
     private static final String DEFAULT_REGION = "us-east-1";
     private static final String DEFAULT_INPUT_STREAM = "input-stream";
     private static final String DEFAULT_OUTPUT_STREAM = "output-stream";
+
+    private static final Logger LOG = LoggerFactory.getLogger(TumblingWindowStreamingJob.class);
 
 
     /**
@@ -69,7 +73,7 @@ public class SlidingWindowStreamingJobWithParallelism
         return KinesisStreamsSink.<String>builder()
                 .setKinesisClientProperties(outputProperties)
                 .setSerializationSchema(new SimpleStringSchema())
-                .setStreamName(outputProperties.getProperty("OutputStreamName", DEFAULT_OUTPUT_STREAM))
+                .setStreamName(applicationProperties.get("OutputStreamName", DEFAULT_OUTPUT_STREAM))
                 .setPartitionKeyGenerator(element -> String.valueOf(element.hashCode()))
                 .build();
     }
@@ -80,22 +84,23 @@ public class SlidingWindowStreamingJobWithParallelism
 
         // Load application parameters
         final ParameterTool applicationParameters = loadApplicationParameters(args, env);
+        LOG.warn("Application properties: {}", applicationParameters.toMap());
 
         DataStream<String> input = createSourceFromStaticConfig(env, applicationParameters);
 
         ObjectMapper jsonParser = new ObjectMapper();
         input.map(value -> { // Parse the JSON
                     JsonNode jsonNode = jsonParser.readValue(value, JsonNode.class);
-                    return new Tuple2<>(jsonNode.get("ticker").toString(), jsonNode.get("price").asDouble());
-                }).returns(Types.TUPLE(Types.STRING, Types.DOUBLE))
-                .keyBy(v -> v.f0) // Logically partition the stream per stock symbol
-                .window(SlidingProcessingTimeWindows.of(Time.seconds(10), Time.seconds(5)))
-                .min(1) // Calculate minimum price per stock over the window
-                .setParallelism(3) // Set parallelism for the min operator
-                .map(value -> value.f0 + String.format(",%.2f", value.f1) + "\n")
+                    return new Tuple2<>(jsonNode.get("ticker").toString(), 1);
+                }).returns(Types.TUPLE(Types.STRING, Types.INT))
+                .keyBy(value -> value.f0) // Logically partition the stream per stock symbol
+                .window(TumblingProcessingTimeWindows.of(Time.seconds(5)))
+                .sum(1)
+                .map(Tuple2::toString)
                 .sinkTo(createSinkFromStaticConfig(applicationParameters));
 
-        env.execute("Min Stock Price");
+
+        env.execute("Tumbling Window Word Count");
     }
 
 }
