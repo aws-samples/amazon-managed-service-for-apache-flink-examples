@@ -1,10 +1,7 @@
 #!/bin/bash
 bucket=$1
 
-template_file=cloudformation/msf-kinesis-stream-s3sink.yaml
-
-echo "Sliding window"
-## For Kafka sliding window example
+template_file=cloudformation/msf-deploy.yaml
 jar_name=flink-kds-s3.jar
 application_name=flink-kinesis-s3-sink
 parallelism=1
