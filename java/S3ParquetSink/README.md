@@ -12,6 +12,23 @@ The Flink application consumes data in String format from a Kinesis Data Streams
 parses the JSON and performs a count of number of symbols processed in a Tumbling Window of 1 minute, 
 using processing time. It sinks the results in parquet format using Avro Writer to an S3 Bucket.
 
+![Flink Example](images/flink-kinesis-s3.png)
+
+### Sample Input
+```json
+{"price": 36, "product":"AMZN"}
+
+```
+### Sample Output
+```
+"AMZN" count: 2
+
+"IBM" count: 3
+
+"INFY" count: 2
+
+```
+
 ## Pre-requisites
 
 In order for to have this sample running locally or in Amazon Managed Service For Apache Flink, you will need the following:
