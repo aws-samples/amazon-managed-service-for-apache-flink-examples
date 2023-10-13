@@ -20,12 +20,34 @@ using processing time. It sinks the results in parquet format using Avro Writer 
 
 ```
 ### Sample Output
+The data gets written to S3 path. 
+Following is the sample output of `aws s3 ls --recursive s3://<BUCKET-NAME>/flink/msf/` if the output gets written to `s3://<BUCKET-NAME>/flink/msf/` -
+```shell
+2023-10-13 13:36:01        736 flink/msf/year=2023/month=10/day=13/hour=13/part-06887bc3-7ba4-4c77-8688-5a673a947175-0.parquet
+2023-10-13 13:39:01        747 flink/msf/year=2023/month=10/day=13/hour=13/part-34cea3b7-7f3e-4039-8ecb-3ba3ab5a5845-0.parquet
+2023-10-13 13:40:01        747 flink/msf/year=2023/month=10/day=13/hour=13/part-34cea3b7-7f3e-4039-8ecb-3ba3ab5a5845-1.parquet
+2023-10-13 13:41:01        747 flink/msf/year=2023/month=10/day=13/hour=13/part-34cea3b7-7f3e-4039-8ecb-3ba3ab5a5845-2.parquet
+2023-10-13 13:36:01        747 flink/msf/year=2023/month=10/day=13/hour=13/part-419f4d33-0c28-40ca-936c-a34d9f6e8c8c-0.parquet
+2023-10-13 13:39:01        736 flink/msf/year=2023/month=10/day=13/hour=13/part-df8700ad-679c-48f1-8bc3-7fd002efa38b-0.parquet
+2023-10-13 13:40:01        736 flink/msf/year=2023/month=10/day=13/hour=13/part-df8700ad-679c-48f1-8bc3-7fd002efa38b-1.parquet
+2023-10-13 13:41:01        736 flink/msf/year=2023/month=10/day=13/hour=13/part-df8700ad-679c-48f1-8bc3-7fd002efa38b-2.parquet
+
 ```
-"AMZN" count: 2
 
-"IBM" count: 3
-
-"INFY" count: 2
+The sample content of file is -
+```
+{
+  "symbol": "\"TBV\"",
+  "count": 758
+}
+{
+  "symbol": "\"AMZN\"",
+  "count": 749
+}
+{
+  "symbol": "\"AAPL\"",
+  "count": 777
+}
 
 ```
 
@@ -171,7 +193,6 @@ to generate random data to Kinesis Data Stream and test the application.
 RecordTemplate:
 ```json
 {
-"price": {{random.number.float({"min":1,"max":99,"precision": 0.01})}}, 
 "symbol":"{{random.arrayElement(["AAPL","AMZN","MSFT","INTC","TBV"])}}"
 }
 ```
