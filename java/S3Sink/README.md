@@ -20,6 +20,17 @@ using processing time. It sinks the results to an S3 Bucket.
 
 ```
 ### Sample Output
+
+The data gets written to S3 path.
+Following is the sample output of `aws s3 ls --recursive s3://<BUCKET-NAME>/flink/msf/` if the output gets written to `s3://<BUCKET-NAME>/flink/msf/` -
+```shell
+2023-10-13 13:29:33         74 flink/msf2/2023-10-13--13/_part-84f63a7b-ba44-46f9-96a7-8fdf248767c8-0_tmp_d252d9b4-6382-4d6f-9e65-3fa3f058e9c5
+2023-10-13 13:29:33        109 flink/msf2/2023-10-13--13/_part-a87f5ad1-b920-463d-a2bc-bfc3c8ee2c81-0_tmp_fd16d35a-1297-4eb0-98cd-25301b1d12ba
+
+```
+
+The sample content of file is -
+
 ```
 "AMZN" count: 2
 
