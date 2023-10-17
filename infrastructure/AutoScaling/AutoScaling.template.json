@@ -1,0 +1,1421 @@
+{
+ "Metadata": {
+  "AWS::CloudFormation::Interface" : {
+  "ParameterGroups": [
+   {
+    "Label": {
+     "default": "Amazon Managed Flink AutoScaling"
+    },
+    "Parameters": [
+     "AmazonManagedFlinkApplicationName",
+     "AutoScalemetric",
+     "MaxKPU",
+     "MinKPU"
+    ]
+   },
+   {
+    "Label": {
+     "default": "CloudWatch Alarm Configuration"
+    },
+    "Parameters": [
+     "ScalingEvaluationperiod",
+     "DataPointstoTriggerAlarm",
+     "ScalingGracingPeriod"
+    ]
+   },
+   {
+    "Label": {
+     "default": "Scale In/Out Parameters"
+    },
+    "Parameters": [
+     "ScaleOperation",
+     "ScaleInFactor",
+     "ScaleInThreshold",
+     "ScaleOutFactor",
+     "ScaleOutThreshold"
+    ]
+   },
+   {
+    "Label": {
+     "default": "Kafka Configuration (If you choose a Kafka Metric)"
+    },
+    "Parameters": [
+     "AmazonMSKClusterName",
+     "KafkaTopicName",
+     "KafkaConsumerGroupName"
+    ]
+   },
+   {
+    "Label": {
+     "default": "Kinesis Configuration (If you choose a Kinesis Metric)"
+    },
+    "Parameters": [
+     "KinesisDataStreamName"
+    ]
+   }
+  ],
+  "ParameterLabels": {
+   "AmazonManagedFlinkApplicationName": {
+    "default": "Amazon Managed Service for Apache Flink Application Name"
+   },
+   "AutoScalemetric": {
+    "default": "Auto Scale Metric"
+   },
+   "MaxKPU": {
+    "default": "Maximum KPU for Apache Flink Application"
+   },
+   "MinKPU": {
+    "default": "Minimum KPU for Apache Flink Application"
+   },
+   "ScalingEvaluationperiod": {
+    "default": "Evaluation Period for Metric"
+   },
+   "DataPointstoTriggerAlarm": {
+    "default": "Number of Data Points to Trigger Alarm"
+   },
+   "ScalingGracingPeriod": {
+    "default": "Grace Period for Alarm"
+   },
+   "ScaleOperation": {
+    "default": "Scale Operation for Apache Flink Application"
+   },
+   "ScaleOutFactor": {
+    "default": "Scale Out Factor for Apache Flink Application"
+   },
+   "ScaleInFactor": {
+    "default": "Scale In Factor for Apache Flink Application"
+   },
+   "ScaleInThreshold": {
+    "default": "Treshold for Metric to Scale Down"
+   },
+   "ScaleOutThreshold": {
+    "default": "Treshold for Metric to Scale Up"
+   },
+   "AmazonMSKClusterName": {
+    "default": "Amazon MSK Cluster Name"
+   },
+   "KafkaTopicName": {
+    "default": "Kafka Topic Name"
+   },
+   "KafkaConsumerGroupName": {
+    "default": "Kafka Consumer Group"
+   },
+   "KinesisDataStreamName": {
+    "default": "Kinesis Data Streams Name"
+   }
+  }
+ }},
+ "Parameters": {
+  "AmazonManagedFlinkApplicationName": {
+   "Type": "String",
+   "Description": "The name of the Amazon Managed Apache Flink Application you would want to Auto Scale"
+  },
+  "AutoScalemetric": {
+   "Type": "String",
+   "Default": "millisBehindLatest",
+   "AllowedValues": [
+    "containerMemoryUtilization",
+    "containerCPUUtilization",
+    "busyTimeMsPerSecond",
+    "millisBehindLatest",
+    "MaxOffsetLag",
+    "SumOffsetLag",
+    "EstimatedMaxTimeLag",
+    "IncomingRecords"
+   ],
+   "Description": "Available metrics to use for Autoscaling. If using Kinesis Data Stream, you can choose: millisBehindLatest. If using MSK, you can choose Lag metrics. You can also use Amazon Kinesis Data Streams Metric as IncomingRecords."
+  },
+  "MaxKPU": {
+   "Type": "Number",
+   "Default": "10",
+   "Description": "Maximum number of KPUs you want the Managed Flink Application to Scale"
+  },
+  "MinKPU": {
+   "Type": "Number",
+   "Default": "1",
+   "Description": "Minimum number of KPUs you want the Managed Flink Application to Scale"
+  },
+  "KinesisDataStreamName": {
+   "Type": "String",
+   "Description": "If you choose MillisBehindLatest as metric to scale, you need to provide the Kinesis Data Stream Name for monitoring"
+  },
+  "KafkaTopicName": {
+   "Type": "String",
+   "Description": "If you choose topic metrics (MaxOffsetLag, SumOffsetLag or EstimatedMaxTimeLag) as metric to scale, you need to provide the Kafka Topic for monitoring"
+  },
+  "KafkaConsumerGroupName": {
+   "Type": "String",
+   "Description": "If you choose topic metrics (MaxOffsetLag, SumOffsetLag or EstimatedMaxTimeLag) as metric to scale, you need to provide the Consumer Group name for monitoring"
+  },
+  "AmazonMSKClusterName": {
+   "Type": "String",
+   "Description": "If you choose topic metrics (MaxOffsetLag, SumOffsetLag or EstimatedMaxTimeLag) as metric to scale, you need to provide the name of the MSK Cluster for monitoring"
+  },
+  "ScaleInThreshold": {
+   "Type": "Number",
+   "Default": 0,
+   "Description": "Choose the threshold for when the Scale In Rule should be in Alarm State"
+  },
+  "ScaleOutThreshold": {
+   "Type": "Number",
+   "Default": 70,
+   "Description": "Choose the threshold for when the Scale Out Rule should be in Alarm State"
+  },
+  "ScalingEvaluationperiod": {
+   "Type": "Number",
+   "Default": 5,
+   "Description": "Period to be used in the evaluation for scaling in or out"
+  },
+  "DataPointstoTriggerAlarm": {
+   "Type": "Number",
+   "Default": 5,
+   "Description": "Number of Data Points during Evaluation period Metric has to be over threshold for rule to be in Alarm State"
+  },
+  "ScalingGracingPeriod": {
+   "Type": "Number",
+   "Default": 200,
+   "Description": "Time given to application after scaling to have alarms go to OK status"
+  },
+  "ScaleInFactor": {
+   "Type": "Number",
+   "Default": 2,
+   "Description": "Factor by which you want to reduce the number of KPUs in your Flink Application"
+  },
+  "ScaleOutFactor": {
+   "Type": "Number",
+   "Default": 3,
+   "Description": "Factor by which you want to increase the number of KPUs in your Flink Application"
+  },
+  "ScaleOperation": {
+   "Type": "String",
+   "AllowedValues": [
+    "Multiply/Divide",
+    "Add/Substract"
+   ],
+   "Description": "Scale Out/In Operation (Multiply/Divide or Add/Substract)"
+  }
+ },
+ "Conditions": {
+  "FlowMetricCondition": {
+   "Fn::Equals": [
+    {
+     "Ref": "AutoScalemetric"
+    },
+    "millisBehindLatest"
+   ]
+  },
+  "ApplicationMetricCondition": {
+   "Fn::Or": [
+    {
+     "Fn::Equals": [
+      {
+       "Ref": "AutoScalemetric"
+      },
+      "containerMemoryUtilization"
+     ]
+    },
+    {
+     "Fn::Equals": [
+      {
+       "Ref": "AutoScalemetric"
+      },
+      "containerCPUUtilization"
+     ]
+    },
+    {
+     "Fn::Equals": [
+      {
+       "Ref": "AutoScalemetric"
+      },
+      "busyTimeMsPerSecond"
+     ]
+    }
+   ]
+  },
+  "TopicMetricCondition": {
+   "Fn::Or": [
+    {
+     "Fn::Equals": [
+      {
+       "Ref": "AutoScalemetric"
+      },
+      "MaxOffsetLag"
+     ]
+    },
+    {
+     "Fn::Equals": [
+      {
+       "Ref": "AutoScalemetric"
+      },
+      "SumOffsetLag"
+     ]
+    },
+    {
+     "Fn::Equals": [
+      {
+       "Ref": "AutoScalemetric"
+      },
+      "EstimatedMaxTimeLag"
+     ]
+    }
+   ]
+  },
+  "kinesisMetricCondition": {
+   "Fn::Equals": [
+    {
+     "Ref": "AutoScalemetric"
+    },
+    "IncomingRecords"
+   ]
+  },
+  "CDKMetadataAvailable": {
+   "Fn::Or": [
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "af-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ca-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-northwest-1"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-3"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "me-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "sa-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-2"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-west-2"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "Resources": {
+  "ScaleOutKinesisAlarm5786563A": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "ComparisonOperator": "GreaterThanThreshold",
+    "EvaluationPeriods": {
+     "Ref": "ScalingEvaluationperiod"
+    },
+    "AlarmName": {
+     "Fn::Join": [
+      "",
+      [
+       "ScaleOutAlarm-",
+       {
+        "Ref": "AmazonManagedFlinkApplicationName"
+       }
+      ]
+     ]
+    },
+    "DatapointsToAlarm": {
+     "Ref": "DataPointstoTriggerAlarm"
+    },
+    "Dimensions": [
+     {
+      "Name": "StreamName",
+      "Value": {
+       "Ref": "KinesisDataStreamName"
+      }
+     }
+    ],
+    "MetricName": {
+     "Ref": "AutoScalemetric"
+    },
+    "Namespace": "AWS/Kinesis",
+    "Period": 60,
+    "Statistic": "Sum",
+    "Threshold": {
+     "Ref": "ScaleOutThreshold"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "KdaAutoscalingStack/Scale Out Kinesis Alarm/Resource"
+   },
+   "Condition": "kinesisMetricCondition"
+  },
+  "ScaleInKinesisAlarm52B36338": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "ComparisonOperator": "LessThanOrEqualToThreshold",
+    "EvaluationPeriods": {
+     "Ref": "ScalingEvaluationperiod"
+    },
+    "AlarmName": {
+     "Fn::Join": [
+      "",
+      [
+       "ScaleInAlarm-",
+       {
+        "Ref": "AmazonManagedFlinkApplicationName"
+       }
+      ]
+     ]
+    },
+    "DatapointsToAlarm": {
+     "Ref": "DataPointstoTriggerAlarm"
+    },
+    "Dimensions": [
+     {
+      "Name": "StreamName",
+      "Value": {
+       "Ref": "KinesisDataStreamName"
+      }
+     }
+    ],
+    "MetricName": {
+     "Ref": "AutoScalemetric"
+    },
+    "Namespace": "AWS/Kinesis",
+    "Period": 60,
+    "Statistic": "Sum",
+    "Threshold": {
+     "Ref": "ScaleInThreshold"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "KdaAutoscalingStack/Scale In Kinesis Alarm/Resource"
+   },
+   "Condition": "kinesisMetricCondition"
+  },
+  "ScaleOutTopicAlarmA6129BF8": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "ComparisonOperator": "GreaterThanThreshold",
+    "EvaluationPeriods": {
+     "Ref": "ScalingEvaluationperiod"
+    },
+    "AlarmName": {
+     "Fn::Join": [
+      "",
+      [
+       "ScaleOutAlarm-",
+       {
+        "Ref": "AmazonManagedFlinkApplicationName"
+       }
+      ]
+     ]
+    },
+    "DatapointsToAlarm": {
+     "Ref": "DataPointstoTriggerAlarm"
+    },
+    "Dimensions": [
+     {
+      "Name": "Cluster Name",
+      "Value": {
+       "Ref": "AmazonMSKClusterName"
+      }
+     },
+     {
+      "Name": "Consumer Group",
+      "Value": {
+       "Ref": "KafkaConsumerGroupName"
+      }
+     },
+     {
+      "Name": "Topic",
+      "Value": {
+       "Ref": "KafkaTopicName"
+      }
+     }
+    ],
+    "MetricName": {
+     "Ref": "AutoScalemetric"
+    },
+    "Namespace": "AWS/Kafka",
+    "Period": 60,
+    "Statistic": "Average",
+    "Threshold": {
+     "Ref": "ScaleOutThreshold"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "KdaAutoscalingStack/Scale Out Topic Alarm/Resource"
+   },
+   "Condition": "TopicMetricCondition"
+  },
+  "ScaleOutFlowAlarm5E72218E": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "ComparisonOperator": "GreaterThanThreshold",
+    "EvaluationPeriods": {
+     "Ref": "ScalingEvaluationperiod"
+    },
+    "AlarmName": {
+     "Fn::Join": [
+      "",
+      [
+       "ScaleOutAlarm-",
+       {
+        "Ref": "AmazonManagedFlinkApplicationName"
+       }
+      ]
+     ]
+    },
+    "DatapointsToAlarm": {
+     "Ref": "DataPointstoTriggerAlarm"
+    },
+    "Dimensions": [
+     {
+      "Name": "Application",
+      "Value": {
+       "Ref": "AmazonManagedFlinkApplicationName"
+      }
+     },
+     {
+      "Name": "Flow",
+      "Value": "Input"
+     },
+     {
+      "Name": "Id",
+      "Value": {
+       "Ref": "KinesisDataStreamName"
+      }
+     }
+    ],
+    "MetricName": {
+     "Ref": "AutoScalemetric"
+    },
+    "Namespace": "AWS/KinesisAnalytics",
+    "Period": 60,
+    "Statistic": "Average",
+    "Threshold": {
+     "Ref": "ScaleOutThreshold"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "KdaAutoscalingStack/Scale Out Flow Alarm/Resource"
+   },
+   "Condition": "FlowMetricCondition"
+  },
+  "ScaleApplicationOutAlarm0DC8844A": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "ComparisonOperator": "GreaterThanThreshold",
+    "EvaluationPeriods": {
+     "Ref": "ScalingEvaluationperiod"
+    },
+    "AlarmName": {
+     "Fn::Join": [
+      "",
+      [
+       "ScaleOutAlarm-",
+       {
+        "Ref": "AmazonManagedFlinkApplicationName"
+       }
+      ]
+     ]
+    },
+    "DatapointsToAlarm": {
+     "Ref": "DataPointstoTriggerAlarm"
+    },
+    "Dimensions": [
+     {
+      "Name": "Application",
+      "Value": {
+       "Ref": "AmazonManagedFlinkApplicationName"
+      }
+     }
+    ],
+    "MetricName": {
+     "Ref": "AutoScalemetric"
+    },
+    "Namespace": "AWS/KinesisAnalytics",
+    "Period": 60,
+    "Statistic": "Average",
+    "Threshold": {
+     "Ref": "ScaleOutThreshold"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "KdaAutoscalingStack/Scale Application Out Alarm/Resource"
+   },
+   "Condition": "ApplicationMetricCondition"
+  },
+  "ScaleInTopicAlarm12A99205": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "ComparisonOperator": "LessThanOrEqualToThreshold",
+    "EvaluationPeriods": {
+     "Ref": "ScalingEvaluationperiod"
+    },
+    "AlarmName": {
+     "Fn::Join": [
+      "",
+      [
+       "ScaleInAlarm-",
+       {
+        "Ref": "AmazonManagedFlinkApplicationName"
+       }
+      ]
+     ]
+    },
+    "DatapointsToAlarm": {
+     "Ref": "DataPointstoTriggerAlarm"
+    },
+    "Dimensions": [
+     {
+      "Name": "Cluster Name",
+      "Value": {
+       "Ref": "AmazonMSKClusterName"
+      }
+     },
+     {
+      "Name": "Consumer Group",
+      "Value": {
+       "Ref": "KafkaConsumerGroupName"
+      }
+     },
+     {
+      "Name": "Topic",
+      "Value": {
+       "Ref": "KafkaTopicName"
+      }
+     }
+    ],
+    "MetricName": {
+     "Ref": "AutoScalemetric"
+    },
+    "Namespace": "AWS/Kafka",
+    "Period": 60,
+    "Statistic": "Average",
+    "Threshold": {
+     "Ref": "ScaleInThreshold"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "KdaAutoscalingStack/Scale In Topic Alarm/Resource"
+   },
+   "Condition": "TopicMetricCondition"
+  },
+  "ScaleInFlowAlarm54D9D953": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "ComparisonOperator": "LessThanOrEqualToThreshold",
+    "EvaluationPeriods": {
+     "Ref": "ScalingEvaluationperiod"
+    },
+    "AlarmName": {
+     "Fn::Join": [
+      "",
+      [
+       "ScaleInAlarm-",
+       {
+        "Ref": "AmazonManagedFlinkApplicationName"
+       }
+      ]
+     ]
+    },
+    "DatapointsToAlarm": {
+     "Ref": "DataPointstoTriggerAlarm"
+    },
+    "Dimensions": [
+     {
+      "Name": "Application",
+      "Value": {
+       "Ref": "AmazonManagedFlinkApplicationName"
+      }
+     },
+     {
+      "Name": "Flow",
+      "Value": "Input"
+     },
+     {
+      "Name": "Id",
+      "Value": {
+       "Ref": "KinesisDataStreamName"
+      }
+     }
+    ],
+    "MetricName": {
+     "Ref": "AutoScalemetric"
+    },
+    "Namespace": "AWS/KinesisAnalytics",
+    "Period": 60,
+    "Statistic": "Average",
+    "Threshold": {
+     "Ref": "ScaleInThreshold"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "KdaAutoscalingStack/Scale In Flow Alarm/Resource"
+   },
+   "Condition": "FlowMetricCondition"
+  },
+  "ScaleInApplicationAlarmD8293ECA": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "ComparisonOperator": "LessThanOrEqualToThreshold",
+    "EvaluationPeriods": {
+     "Ref": "ScalingEvaluationperiod"
+    },
+    "AlarmName": {
+     "Fn::Join": [
+      "",
+      [
+       "ScaleInAlarm-",
+       {
+        "Ref": "AmazonManagedFlinkApplicationName"
+       }
+      ]
+     ]
+    },
+    "DatapointsToAlarm": {
+     "Ref": "DataPointstoTriggerAlarm"
+    },
+    "Dimensions": [
+     {
+      "Name": "Application",
+      "Value": {
+       "Ref": "AmazonManagedFlinkApplicationName"
+      }
+     }
+    ],
+    "MetricName": {
+     "Ref": "AutoScalemetric"
+    },
+    "Namespace": "AWS/KinesisAnalytics",
+    "Period": 60,
+    "Statistic": "Average",
+    "Threshold": {
+     "Ref": "ScaleInThreshold"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "KdaAutoscalingStack/Scale In Application Alarm/Resource"
+   },
+   "Condition": "ApplicationMetricCondition"
+  },
+  "Topicrule059A496A": {
+   "Type": "AWS::Events::Rule",
+   "Properties": {
+    "EventPattern": {
+     "source": [
+      "aws.cloudwatch"
+     ],
+     "detail-type": [
+      "CloudWatch Alarm State Change"
+     ],
+     "resources": [
+      {
+       "Fn::GetAtt": [
+        "ScaleOutTopicAlarmA6129BF8",
+        "Arn"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "ScaleInTopicAlarm12A99205",
+        "Arn"
+       ]
+      }
+     ],
+     "detail": {
+      "state": {
+       "value": [
+        "ALARM"
+       ]
+      }
+     }
+    },
+    "Name": {
+     "Fn::Join": [
+      "",
+      [
+       "scalingRule-",
+       {
+        "Ref": "AmazonManagedFlinkApplicationName"
+       }
+      ]
+     ]
+    },
+    "State": "ENABLED",
+    "Targets": [
+     {
+      "Arn": {
+       "Ref": "StateMachine2E01A3A5"
+      },
+      "Id": "Target0",
+      "RoleArn": {
+       "Fn::GetAtt": [
+        "EventBridgeRoleCF15D7EA",
+        "Arn"
+       ]
+      }
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "KdaAutoscalingStack/Topic rule/Resource"
+   },
+   "Condition": "TopicMetricCondition"
+  },
+  "Kinesisrule2982C6E9": {
+   "Type": "AWS::Events::Rule",
+   "Properties": {
+    "EventPattern": {
+     "source": [
+      "aws.cloudwatch"
+     ],
+     "detail-type": [
+      "CloudWatch Alarm State Change"
+     ],
+     "resources": [
+      {
+       "Fn::GetAtt": [
+        "ScaleOutKinesisAlarm5786563A",
+        "Arn"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "ScaleInKinesisAlarm52B36338",
+        "Arn"
+       ]
+      }
+     ],
+     "detail": {
+      "state": {
+       "value": [
+        "ALARM"
+       ]
+      }
+     }
+    },
+    "Name": {
+     "Fn::Join": [
+      "",
+      [
+       "scalingRule-",
+       {
+        "Ref": "AmazonManagedFlinkApplicationName"
+       }
+      ]
+     ]
+    },
+    "State": "ENABLED",
+    "Targets": [
+     {
+      "Arn": {
+       "Ref": "StateMachine2E01A3A5"
+      },
+      "Id": "Target0",
+      "RoleArn": {
+       "Fn::GetAtt": [
+        "EventBridgeRoleCF15D7EA",
+        "Arn"
+       ]
+      }
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "KdaAutoscalingStack/Kinesis rule/Resource"
+   },
+   "Condition": "kinesisMetricCondition"
+  },
+  "FlowruleF0A42A3A": {
+   "Type": "AWS::Events::Rule",
+   "Properties": {
+    "EventPattern": {
+     "source": [
+      "aws.cloudwatch"
+     ],
+     "detail-type": [
+      "CloudWatch Alarm State Change"
+     ],
+     "resources": [
+      {
+       "Fn::GetAtt": [
+        "ScaleOutFlowAlarm5E72218E",
+        "Arn"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "ScaleInFlowAlarm54D9D953",
+        "Arn"
+       ]
+      }
+     ],
+     "detail": {
+      "state": {
+       "value": [
+        "ALARM"
+       ]
+      }
+     }
+    },
+    "Name": {
+     "Fn::Join": [
+      "",
+      [
+       "scalingRule-",
+       {
+        "Ref": "AmazonManagedFlinkApplicationName"
+       }
+      ]
+     ]
+    },
+    "State": "ENABLED",
+    "Targets": [
+     {
+      "Arn": {
+       "Ref": "StateMachine2E01A3A5"
+      },
+      "Id": "Target0",
+      "RoleArn": {
+       "Fn::GetAtt": [
+        "EventBridgeRoleCF15D7EA",
+        "Arn"
+       ]
+      }
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "KdaAutoscalingStack/Flow rule/Resource"
+   },
+   "Condition": "FlowMetricCondition"
+  },
+  "Applicationrule295458DD": {
+   "Type": "AWS::Events::Rule",
+   "Properties": {
+    "EventPattern": {
+     "source": [
+      "aws.cloudwatch"
+     ],
+     "detail-type": [
+      "CloudWatch Alarm State Change"
+     ],
+     "resources": [
+      {
+       "Fn::GetAtt": [
+        "ScaleApplicationOutAlarm0DC8844A",
+        "Arn"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "ScaleInApplicationAlarmD8293ECA",
+        "Arn"
+       ]
+      }
+     ],
+     "detail": {
+      "state": {
+       "value": [
+        "ALARM"
+       ]
+      }
+     }
+    },
+    "Name": {
+     "Fn::Join": [
+      "",
+      [
+       "scalingApplicationRule-",
+       {
+        "Ref": "AmazonManagedFlinkApplicationName"
+       }
+      ]
+     ]
+    },
+    "State": "ENABLED",
+    "Targets": [
+     {
+      "Arn": {
+       "Ref": "StateMachine2E01A3A5"
+      },
+      "Id": "Target0",
+      "RoleArn": {
+       "Fn::GetAtt": [
+        "EventBridgeRoleCF15D7EA",
+        "Arn"
+       ]
+      }
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "KdaAutoscalingStack/Application rule/Resource"
+   },
+   "Condition": "ApplicationMetricCondition"
+  },
+  "ScalingFunctionRoleD3892470": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Description": "Lambda Scaling Role",
+    "Policies": [
+     {
+      "PolicyDocument": {
+       "Statement": [
+        {
+         "Action": "logs:*",
+         "Effect": "Allow",
+         "Resource": "*"
+        }
+       ],
+       "Version": "2012-10-17"
+      },
+      "PolicyName": "AccessCWLogsPolicy"
+     },
+     {
+      "PolicyDocument": {
+       "Statement": [
+        {
+         "Action": "kinesisanalytics:*",
+         "Effect": "Allow",
+         "Resource": "*"
+        }
+       ],
+       "Version": "2012-10-17"
+      },
+      "PolicyName": "AccessKDA"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "KdaAutoscalingStack/Scaling Function Role/Resource"
+   }
+  },
+  "ScalingFunctionD5B913F7": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "ZipFile": "import boto3\nimport json\nimport os\n\nclient_kda = boto3.client('kinesisanalyticsv2')\nclient_ssm = boto3.client('ssm')\nclient_cloudwatch = boto3.client('cloudwatch')\nclient_cloudformation = boto3.client('cloudformation')\nclient_aas = boto3.client('application-autoscaling')\nclient_iam = boto3.resource('iam')\n\ndef update_parallelism(context, desiredCapacity, resourceName, appVersionId):\n    # Update parallelism to the new Desired Capacity value\n    try:\n        response = client_kda.update_application(\n            ApplicationName=resourceName,\n            CurrentApplicationVersionId=appVersionId,\n            ApplicationConfigurationUpdate={\n                'FlinkApplicationConfigurationUpdate': {\n                    'ParallelismConfigurationUpdate': {\n                        'ConfigurationTypeUpdate': 'CUSTOM',\n                        'ParallelismUpdate': int(desiredCapacity),\n                        'AutoScalingEnabledUpdate': False\n                    }\n                }\n            }\n        )\n\n        print(\"In update_parallelism; response: \")\n        print(response)\n        scalingStatus = \"InProgress\"\n\n    # In case of error of updating the sharding, raise an exception.\n    except Exception as e:\n        print(e)\n        failureReason = str(e)\n        scalingStatus = \"Failed\"\n        pass\n\n    return scalingStatus\n\ndef response_function(status_code, response_body):\n    return_json = {\n        'statusCode': status_code,\n        'body': response_body,\n        'headers': {\n            'Content-Type': 'application/json',\n        },\n    }\n    # log response\n    print(return_json)\n    return return_json\n\n\ndef handler(event, context):\n    print(event)\n    resourceName = os.environ['flinkApplicationName']\n    scaleInFactor = int(os.environ['scaleInFactor'])\n    scaleOutFactor = int(os.environ['scaleOutFactor'])\n    scaleOperation = os.environ['scaleOperation']\n    alarm_status = event['detail']['state']['value']\n    alarm_name = event['detail']['alarmName']\n    minKPU = int(os.environ['minKPU'])\n    maxKPU = int(os.environ['maxKPU'])\n    stop_scale = 0\n\n    # get details for the KDA app in question\n\n    appVersion = event[\"TaskResult\"][\"ApplicationDetail\"][\"ApplicationVersionId\"]\n    applicationStatus = event[\"TaskResult\"][\"ApplicationDetail\"][\"ApplicationStatus\"]\n    parallelism = event[\"TaskResult\"][\"ApplicationDetail\"][\"ApplicationConfigurationDescription\"][\n        \"FlinkApplicationConfigurationDescription\"][\"ParallelismConfigurationDescription\"][\"Parallelism\"]\n    actualCapacity = parallelism\n    if applicationStatus == \"UPDATING\":\n        scalingStatus = \"InProgress\"\n    elif applicationStatus == \"RUNNING\":\n        scalingStatus = \"Successful\"\n\n    if \"ScaleOut\" in alarm_name and alarm_status == 'ALARM' and applicationStatus == 'RUNNING':\n        if actualCapacity < maxKPU:\n            if scaleOperation == 'Multiple/Divide':\n                desiredCapacity = actualCapacity*scaleOutFactor\n            else:\n                desiredCapacity = actualCapacity+scaleOutFactor\n            if desiredCapacity <= maxKPU:\n                update_parallelism(context,desiredCapacity,resourceName,appVersion)\n            else:\n                print(\"Application will go over Max KPU\")\n                stop_scale = 1\n    elif \"ScaleIn\" in alarm_name and alarm_status == 'ALARM' and applicationStatus == 'RUNNING':\n        if actualCapacity > minKPU:\n            if scaleOperation == 'Multiple/Divide':\n                desiredCapacity = int(actualCapacity/scaleInFactor)\n            else:\n                desiredCapacity = actualCapacity-scaleInFactor\n            if desiredCapacity >= minKPU:\n                update_parallelism(context,desiredCapacity,resourceName,appVersion)\n            else:\n                print(\"Aplication will go below Min KPU\")\n                stop_scale = 1\n        else:\n            desiredCapacity = actualCapacity\n            print(\"Application is already below or equal to Min KPU\")\n            stop_scale = 1\n    else:\n        desiredCapacity = actualCapacity\n        print(\"Scaling still happening or not required\")\n        stop_scale = 0\n\n\n    return response_function(200, stop_scale)"
+    },
+    "Role": {
+     "Fn::GetAtt": [
+      "ScalingFunctionRoleD3892470",
+      "Arn"
+     ]
+    },
+    "Environment": {
+     "Variables": {
+      "flinkApplicationName": {
+       "Ref": "AmazonManagedFlinkApplicationName"
+      },
+      "scaleInFactor": {
+       "Ref": "ScaleInFactor"
+      },
+      "scaleOutFactor": {
+       "Ref": "ScaleOutFactor"
+      },
+      "scaleOperation": {
+       "Ref": "ScaleOperation"
+      },
+      "maxKPU": {
+       "Ref": "MaxKPU"
+      },
+      "minKPU": {
+       "Ref": "MinKPU"
+      }
+     }
+    },
+    "Handler": "index.handler",
+    "Runtime": "python3.9"
+   },
+   "DependsOn": [
+    "ScalingFunctionRoleD3892470"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "KdaAutoscalingStack/Scaling Function/Resource"
+   }
+  },
+  "StateMachineRoleB840431D": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "states.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "KdaAutoscalingStack/StateMachine/Role/Resource"
+   }
+  },
+  "StateMachineRoleDefaultPolicyDF1E6607": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "cloudwatch:*",
+        "cloudwatch:describeAlarms",
+        "kinesisanalytics:*",
+        "kinesisanalyticsv2:describeApplication"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ScalingFunctionD5B913F7",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ScalingFunctionD5B913F7",
+             "Arn"
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "StateMachineRoleDefaultPolicyDF1E6607",
+    "Roles": [
+     {
+      "Ref": "StateMachineRoleB840431D"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "KdaAutoscalingStack/StateMachine/Role/DefaultPolicy/Resource"
+   }
+  },
+  "StateMachine2E01A3A5": {
+   "Type": "AWS::StepFunctions::StateMachine",
+   "Properties": {
+    "RoleArn": {
+     "Fn::GetAtt": [
+      "StateMachineRoleB840431D",
+      "Arn"
+     ]
+    },
+    "DefinitionString": {
+     "Fn::Join": [
+      "",
+      [
+       "{\"StartAt\":\"Describe Application\",\"States\":{\"Describe Application\":{\"Next\":\"Invoke Lambda Function\",\"Type\":\"Task\",\"ResultPath\":\"$.TaskResult\",\"Resource\":\"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":states:::aws-sdk:kinesisanalyticsv2:describeApplication\",\"Parameters\":{\"ApplicationName\":\"",
+       {
+        "Ref": "AmazonManagedFlinkApplicationName"
+       },
+       "\"}},\"Still in alarm?\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.TaskResult.MetricAlarms[0].StateValue\",\"StringEquals\":\"ALARM\",\"Next\":\"Describe Application\"}],\"Default\":\"SuccessState\"},\"Describe Alarm after waiting\":{\"Next\":\"Still in alarm?\",\"Type\":\"Task\",\"ResultPath\":\"$.TaskResult\",\"Resource\":\"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":states:::aws-sdk:cloudwatch:describeAlarms\",\"Parameters\":{\"AlarmNames.$\":\"States.Array($.detail.alarmName)\",\"AlarmTypes\":[\"CompositeAlarm\",\"MetricAlarm\"]}},\"Cooling Period for Alarm\":{\"Type\":\"Wait\",\"Seconds\":",
+       {
+        "Ref": "ScalingGracingPeriod"
+       },
+       ",\"Next\":\"Describe Alarm after waiting\"},\"SuccessState\":{\"Type\":\"Pass\",\"End\":true},\"MinMax KPU Reached?\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.TaskResult.Payload.body\",\"NumericEquals\":1,\"Next\":\"SuccessState\"}],\"Default\":\"Wait 15 secs for update\"},\"Invoke Lambda Function\":{\"Next\":\"MinMax KPU Reached?\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.TaskResult\",\"Resource\":\"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
+       {
+        "Fn::GetAtt": [
+         "ScalingFunctionD5B913F7",
+         "Arn"
+        ]
+       },
+       "\",\"Payload.$\":\"$\"}},\"Wait 15 secs for update\":{\"Type\":\"Wait\",\"Seconds\":15,\"Next\":\"Describe Application after scaling\"},\"Still updating?\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.TaskResult.ApplicationDetail.ApplicationStatus\",\"StringEquals\":\"UPDATING\",\"Next\":\"Wait 15 secs for update\"}],\"Default\":\"Cooling Period for Alarm\"},\"Describe Application after scaling\":{\"Next\":\"Still updating?\",\"Type\":\"Task\",\"ResultPath\":\"$.TaskResult\",\"Resource\":\"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":states:::aws-sdk:kinesisanalyticsv2:describeApplication\",\"Parameters\":{\"ApplicationName\":\"",
+       {
+        "Ref": "AmazonManagedFlinkApplicationName"
+       },
+       "\"}}}}"
+      ]
+     ]
+    }
+   },
+   "DependsOn": [
+    "StateMachineRoleDefaultPolicyDF1E6607",
+    "StateMachineRoleB840431D"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "KdaAutoscalingStack/StateMachine/Resource"
+   }
+  },
+  "EventBridgeRoleCF15D7EA": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "events.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Description": "EventBridge Role",
+    "Policies": [
+     {
+      "PolicyDocument": {
+       "Statement": [
+        {
+         "Action": "states:*",
+         "Effect": "Allow",
+         "Resource": "*"
+        }
+       ],
+       "Version": "2012-10-17"
+      },
+      "PolicyName": "AccessStepFunctionsPolicy"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "KdaAutoscalingStack/EventBridge Role/Resource"
+   }
+  },
+  "EventBridgeRoleDefaultPolicyDD4EF110": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "states:StartExecution",
+       "Effect": "Allow",
+       "Resource": {
+        "Ref": "StateMachine2E01A3A5"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "EventBridgeRoleDefaultPolicyDD4EF110",
+    "Roles": [
+     {
+      "Ref": "EventBridgeRoleCF15D7EA"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "KdaAutoscalingStack/EventBridge Role/DefaultPolicy/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/11PTWvDMAz9Lb2rXpdTryUwGGwQ0sOORXVUosaxi+UkjOD/PtvNYOz0PvTkJ1fqWKnDDhfZ627YG76q9RxQD1DfbIMeRwrks6id7Tiws5DCl1UbN3ULBt2r9WTQjzlTSASayQZRazsZynbGCIxjstxmZWycYf1dmgqLYHC8dqjWt8nq0pVmvzyCBHrcNiWXgDKkkhqNOS1yJj+zJvgoL7zb2Q30byNle5czX8gBGhSB9NVAn6h7tuWsvzpGaEnc5PXz4o1HsK4jdZeXuTqoo3rd3YV57ycbeCTVPvEH1+/qK1gBAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "KdaAutoscalingStack/CDKMetadata/Default"
+   },
+   "Condition": "CDKMetadataAvailable"
+  }
+ }
+}
