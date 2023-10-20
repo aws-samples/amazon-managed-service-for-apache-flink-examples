@@ -21,26 +21,26 @@ Follow the instructions to deploy the autoscaling solution in your AWS Account
 4. Select `Upload a template file`
 5. Upload the template from this repository
 6. This deployment takes the following CFN Parameters 
-   1. Amazon Managed Service for Apache Flink AutoScaling Configuration:
+   1. **Amazon Managed Service for Apache Flink AutoScaling Configuration:**
       1. *Amazon Managed Service for Apache Flink Application Name*: The name of the Amazon Managed Apache Flink Application you would want to Auto Scale
       2. *Auto Scale Metric*: Available metrics to use for Autoscaling.
       3. *Maximum KPU*: Maximum number of KPUs you want the Managed Flink Application to Scale
       4. *Minimum KPU*: Minimum number of KPUs you want the Managed Flink Application to Scale
-   2. CloudWatch Alarm Configuration:
-      5. *Evaluation Period for Metric*: Period to be used in the evaluation for scaling in or out
-      6. *Number of Data points to Trigger Alarm*: Number of Data Points during Evaluation period Metric has to be over threshold for rule to be in Alarm State
-      7. *Grace Period for Alarm*: Time given to application after scaling to have alarms go to OK status
-   3. Scale In/Out Configuration:
-      8. *Scale Out/In Operation*: Scale Out/In Operation (Multiply/Divide or Add/Substract
+   2. [**CloudWatch Alarm Configuration:**](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html#alarm-evaluation)
+      5. *Evaluation Period for Metric*: Period to be used in minutes for the evaluation for scaling in or out (Example: 5)
+      6. *Number of Data points to Trigger Alarm*: Number of Data Points (60 seconds each data point) during Evaluation Period where Metric has to be over threshold for rule to be in Alarm State. (Example: 2 This would mean that alarm would trigger if during a 5 minute window, 2 data points are above threshold) 
+      7. *Grace Period for Alarm*: Time given in seconds to application after scaling to have alarms go to OK status (Example: 120)
+   3. **Scale In/Out Configuration:**
+      8. *Scale Out/In Operation*: Scale Out/In Operation (Multiply/Divide or Add/Substract)
       9. *Scale In Factor*: Factor by which you want to reduce the number of KPUs in your Flink Application
       10. *Threshold for Metric to Scale Down*: Choose the threshold for when the Scale In Rule should be in Alarm State
       11. *Scale Out Factor*: Factor by which you want to increase the number of KPUs in your Flink Application
       12. *Threshold for Metric to Scale Up*: Choose the threshold for when the Scale Out Rule should be in Alarm State
-   4. Kafka Configuration:
+   4. **Kafka Configuration:**
       13. *Amazon MSK Cluster Name*: If you choose topic metrics (MaxOffsetLag, SumOffsetLag or EstimatedMaxTimeLag) as metric to scale, you need to provide the name of the MSK Cluster for monitoring
       14. *Kafka Topic Name*: If you choose topic metrics (MaxOffsetLag, SumOffsetLag or EstimatedMaxTimeLag) as metric to scale, you need to provide the Kafka Topic for monitoring
       15. *Kafka Consumer Group*: If you choose topic metrics (MaxOffsetLag, SumOffsetLag or EstimatedMaxTimeLag) as metric to scale, you need to provide the Consumer Group name for monitoring
-   5. Kinesis Configuration
+   5. **Kinesis Configuration:**
       16. *Kinesis Data Streams Name*: If you choose MillisBehindLatest as metric to scale, you need to provide the Kinesis Data Stream Name for monitoring
 
 
