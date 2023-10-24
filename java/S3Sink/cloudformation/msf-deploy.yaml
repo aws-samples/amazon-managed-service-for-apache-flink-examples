@@ -9,14 +9,6 @@ Parameters:
     Type: String
   CodeKey:
     Type: String
-  SecurityGroup:
-    Type: AWS::EC2::SecurityGroup::Id
-  SubnetOne:
-    Type: AWS::EC2::Subnet::Id
-  SubnetTwo:
-    Type: AWS::EC2::Subnet::Id
-  SubnetThree:
-    Type: AWS::EC2::Subnet::Id
   Parallelism:
     Type: String
     Default: 1
@@ -45,13 +37,6 @@ Resources:
               BucketARN: !Ref CodeBucketArn
               FileKey: !Ref CodeKey
           CodeContentType: 'ZIPFILE'
-        VpcConfigurations:
-          - SecurityGroupIds:
-              - !Ref SecurityGroup
-            SubnetIds:
-              - !Ref SubnetOne
-              - !Ref SubnetTwo
-              - !Ref SubnetThree
         ApplicationSnapshotConfiguration:
           SnapshotsEnabled: false
         EnvironmentProperties:
