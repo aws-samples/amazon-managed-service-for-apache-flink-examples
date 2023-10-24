@@ -24,12 +24,8 @@ then
     exit 1
 fi
 
-## Region and Network configuration
+## Region configuration
 region=ap-south-1
-SecurityGroup=sg-28d5f054
-SubnetOne=subnet-08710af059f886114
-SubnetTwo=subnet-7d90f906
-SubnetThree=subnet-02e1e451e78007768
 
 ## Kinesis and S3 Sink configuration
 input_stream="stream-input"
@@ -47,10 +43,6 @@ aws cloudformation deploy --template-file ${template_file} \
      FlinkRuntimeEnvironment=FLINK-1_15 \
      CodeBucketArn="arn:aws:s3:::${bucket}" \
      CodeKey=flink/${jar_name} \
-     SecurityGroup=${SecurityGroup} \
-     SubnetOne=${SubnetOne} \
-     SubnetTwo=${SubnetTwo} \
-     SubnetThree=${SubnetThree} \
      Parallelism=${parallelism} \
      InputStreamRegion=${region} \
      InputStreamName=${input_stream} \

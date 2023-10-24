@@ -147,19 +147,14 @@ Steps to follow:
 ## Deploying using CloudFormation to Amazon Managed Service for Apache Flink
 ### Pre-requisite
 1. Kinesis stream and S3 bucket. 
-2. Create subnets and security groups for the Flink application. If you are using private subnets , ensure that VPC endpoint for Kinesis and S3 is created.
-3. AWS user credential using which you can create CloudFormation stack from console or CLI.
+2. AWS user credential using which you can create CloudFormation stack from console or CLI.
 
 ### Build and deployment
 1. The steps below create stack using `./cloudformation/msf-deploy.yaml`.
 2. The script `deploy.sh` creates the stack using AWS CLI. Ensure that AWS CLI is configured and your user has permissions to create CloudFormation stack.
 3. Alternatively you can deploy from console using `./cloudformation/msf-deploy.yaml` and pass required parameters.
-4. Edit `deploy.sh` to modify  "Region and Network configuration" . Modify following configurations -
+4. Edit `deploy.sh` to modify  "Region configuration" . Modify following configurations -
 * region= Deployment region
-* SecurityGroup= MSK Security Group.
-* SubnetOne= MSK Subnet one
-* SubnetTwo= MSK Subnet two
-* SubnetThree= MSK Subnet three
 
 5. Edit `deploy.sh` to modify "Kinesis and S3 Sink configuration". Modify following configurations -
 * input_stream= Input Kinesis stream name.
