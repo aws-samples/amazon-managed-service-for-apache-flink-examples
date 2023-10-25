@@ -1,9 +1,0 @@
-@namespace("com.amazonaws.services.msf.avro")
-protocol In {
-	record TemperatureSample {
-		int sensorId;
-		string room;
-		float temperature;
-		timestamp_ms sampleTime;
-	}
-}
