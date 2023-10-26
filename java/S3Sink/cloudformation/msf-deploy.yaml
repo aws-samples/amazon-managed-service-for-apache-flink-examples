@@ -133,29 +133,6 @@ Resources:
                   - logs:DescribeLogStreams
                   - logs:PutLogEvents
                 Resource:  "*"
-        - PolicyName: VPCReadOnlyPermissions
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - ec2:DescribeVpcs
-                  - ec2:DescribeSubnets
-                  - ec2:DescribeSecurityGroups
-                  - ec2:DescribeDhcpOptions
-                Resource: "*"
-        - PolicyName: ENIReadWritePermissions
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - ec2:CreateNetworkInterface
-                  - ec2:CreateNetworkInterfacePermission
-                  - ec2:DescribeNetworkInterfaces
-                  - ec2:DeleteNetworkInterface
-                Resource:
-                  - "*"
         - PolicyName: s3-code-access
           PolicyDocument:
             Version: 2012-10-17
