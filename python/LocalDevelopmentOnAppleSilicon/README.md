@@ -2,7 +2,7 @@
 
 ### Problem
 
-There are known issues with installing PyFlink dependencies on Mac using Apple Silicon chips (see [FLINK-26981](https://issues.apache.org/jira/browse/FLINK-26981)). These issues, resolved in Flink 1.16.x, make difficult to develop PyFlink 1.15.x applications on new Mac machines, using IDE like PyCharm or Visual Studio Code.
+There are known issues with installing PyFlink dependencies on Mac using Apple Silicon chips (see [FLINK-26981](https://issues.apache.org/jira/browse/FLINK-26981)). These issues, resolved in Flink 1.16.x, make it difficult to develop PyFlink 1.15.x applications on new Mac machines, using IDE like PyCharm or Visual Studio Code.
 
 ### Solution overview
 
