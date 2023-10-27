@@ -16,7 +16,7 @@ To learn how to package multiple dependencies in a PyFlink application to run on
 ### Developing PyFlink on Apple Silicon macOS
 
 PyFlink version 1.15 has [known issues](https://issues.apache.org/jira/browse/FLINK-25188) on macOS machines using Apple Silicon chips (e.g. M1) due to Python dependencies.
-You cannot directly install the `apache-pyflink==1.15.4` library on the machine, directly. This makes challenging developing PyFlink 1.15 applications on Apple Silicon.
+You cannot install the `apache-pyflink==1.15.4` library on the machine, directly. This make it difficult to develop PyFlink 1.15 applications on Apple Silicon.
 
 A workaround is running the Python interpreter in a Docker container built for Intel architecture, and running it in the M1 machine using the Rosetta emulation.
 
