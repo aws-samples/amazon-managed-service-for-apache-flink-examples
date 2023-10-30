@@ -61,7 +61,7 @@ public class StreamingJob {
      * @param streamRegion: Region where Kinesis Data Stream
      * @return FlinkKinesisConsumer
      */
-    private static  FlinkKinesisConsumer kinesisSource(
+    private static  FlinkKinesisConsumer<String> kinesisSource(
             String inputStream,
             String streamRegion) {
 
@@ -71,6 +71,8 @@ public class StreamingJob {
         Properties kinesisConsumerConfig = new Properties();
         kinesisConsumerConfig.put(AWSConfigConstants.AWS_REGION, streamRegion);
         kinesisConsumerConfig.put(ConsumerConfigConstants.STREAM_INITIAL_POSITION, "LATEST");
+
+        LOGGER.info("Kinesis configuration "+kinesisConsumerConfig);
 
         // If EFO consumer is needed, uncomment the following block.
         /*
@@ -109,6 +111,7 @@ public class StreamingJob {
 
         // Application configuration
         Properties applicationProperties = loadApplicationProperties(env).get(APPLICATION_CONFIG_GROUP);
+        LOGGER.info("Application configuration "+applicationProperties);
         String inputStream = Preconditions.checkNotNull(applicationProperties.getProperty("input.stream"), "Input Kinesis Stream not defined");
         String streamRegion = Preconditions.checkNotNull(applicationProperties.getProperty("stream.region"), "Region of Kinesis Streams not Defined");
         String s3SyncPatch = Preconditions.checkNotNull(applicationProperties.getProperty("s3.path"), "Path for S3 not defined");

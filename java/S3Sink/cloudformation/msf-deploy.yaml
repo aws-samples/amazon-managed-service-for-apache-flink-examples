@@ -1,0 +1,144 @@
+Description: Simple KDA Flink application
+Parameters:
+  ApplicationName:
+    Type: String
+  FlinkRuntimeEnvironment:
+    Type: String
+    Default: FLINK-1_15
+  CodeBucketArn:
+    Type: String
+  CodeKey:
+    Type: String
+  Parallelism:
+    Type: String
+    Default: 1
+  InputStreamRegion:
+    Type: String
+  InputStreamName:
+    Type: String
+  S3BucketName:
+    Type: String
+    Description: Name of bucket
+  S3Path:
+    Type: String
+    Description: path without leading and  trailing /. example test/out
+
+Resources:
+  FlinkApplication:
+    Type: AWS::KinesisAnalyticsV2::Application
+    Properties:
+      ApplicationName: !Ref ApplicationName
+      RuntimeEnvironment: !Ref FlinkRuntimeEnvironment
+      ServiceExecutionRole: !GetAtt FlinkApplicationServiceExecutionRole.Arn
+      ApplicationConfiguration:
+        ApplicationCodeConfiguration:
+          CodeContent:
+            S3ContentLocation:
+              BucketARN: !Ref CodeBucketArn
+              FileKey: !Ref CodeKey
+          CodeContentType: 'ZIPFILE'
+        ApplicationSnapshotConfiguration:
+          SnapshotsEnabled: false
+        EnvironmentProperties:
+          PropertyGroups:
+            - PropertyGroupId: FlinkApplicationProperties
+              PropertyMap:
+                input.stream: !Ref InputStreamName
+                stream.region: !Ref InputStreamRegion
+                s3.path: !Sub "s3://${S3BucketName}/${S3Path}/"
+        FlinkApplicationConfiguration:
+          MonitoringConfiguration:
+            ConfigurationType: CUSTOM
+            LogLevel: INFO
+            MetricsLevel: APPLICATION
+          ParallelismConfiguration:
+            ConfigurationType: CUSTOM
+            AutoScalingEnabled: true
+            Parallelism: !Ref Parallelism
+            ParallelismPerKPU: 1
+
+  FlinkApplicationLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 7
+      LogGroupName: !Sub "/aws/amazon-msf/${ApplicationName}"
+
+  FlinkApplicationLogStream:
+    Type: AWS::Logs::LogStream
+    Properties:
+      LogGroupName: !Ref FlinkApplicationLogGroup
+      LogStreamName: "amazon-msf-log-stream"
+
+  FlinkApplicationLoggingOption:
+    Type: AWS::KinesisAnalyticsV2::ApplicationCloudWatchLoggingOption
+    Properties:
+      ApplicationName:
+        Ref: FlinkApplication
+      CloudWatchLoggingOption:
+        LogStreamARN:
+          Fn::Join:
+            - ":"
+            - - arn:aws:logs
+              - Ref: AWS::Region
+              - Ref: AWS::AccountId
+              - log-group
+              - Ref: FlinkApplicationLogGroup
+              - log-stream
+              - amazon-msf-log-stream
+
+  KinesisIAMManagedPolicy:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      Description: Policy for Kinesis access
+      Path: /
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - kinesis:DescribeStream
+              - kinesis:GetShardIterator
+              - kinesis:GetRecords
+              - kinesis:ListShards
+            Resource: !Sub "arn:aws:kinesis:${InputStreamRegion}:${AWS::AccountId}:stream/${InputStreamName}"
+          - Effect: Allow
+            Action:
+              - s3:ListBucket
+            Resource: !Sub "arn:aws:s3:::${S3BucketName}"
+          - Effect: Allow
+            Action:
+              - s3:*Object
+            Resource: !Sub "arn:aws:s3:::${S3BucketName}/${S3Path}/*"
+  FlinkApplicationServiceExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: kinesisanalytics.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: /
+      ManagedPolicyArns:
+        - !Ref KinesisIAMManagedPolicy
+      Policies:
+        - PolicyName: ListCloudwatchLogGroups
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:DescribeLogGroups
+                  - logs:DescribeLogStreams
+                  - logs:PutLogEvents
+                Resource:  "*"
+        - PolicyName: s3-code-access
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource:
+                  - !Sub "${CodeBucketArn}/${CodeKey}"

@@ -1,25 +1,7 @@
+<?xml version="1.0"?>
 <configuration>
     <property>
-        <name>fs.s3.impl</name>
-        <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>
-    </property>
-
-    <!-- Comma separated list of local directories used to buffer
-         large results prior to transmitting them to S3. -->
-    <property>
-        <name>fs.s3a.buffer.dir</name>
-        <value>/tmp</value>
-    </property>
-
-    <!-- set your AWS ID using key defined in org.apache.hadoop.fs.s3a.Constants -->
-    <property>
-        <name>fs.s3a.access.key</name>
-        <value>ACCESSKEY</value>
-    </property>
-
-    <!-- set your AWS access key -->
-    <property>
-        <name>fs.s3a.secret.key</name>
-        <value>SECRETACCESSKEY</value>
+        <name>fs.s3a.aws.credentials.provider</name>
+        <value>com.amazonaws.auth.profile.ProfileCredentialsProvider</value>
     </property>
 </configuration>
