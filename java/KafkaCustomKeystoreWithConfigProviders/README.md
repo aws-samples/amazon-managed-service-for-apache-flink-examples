@@ -70,7 +70,7 @@ The application reads the runtime configuration from the Runtime Properties, whe
 or from command line parameters, when running locally.
 
 Runtime Properties are expected in the Group ID `FlinkApplicationProperties`.
-Command line parameters should be prepended by `--`.
+Command line parameters should be prepended by `--` and separated by space.
 
 They are all case-sensitive.
 
@@ -85,3 +85,10 @@ Configuration parameters:
 * `TruststoreS3Bucket` name of the S3 bucket containing the truststore
 * `TruststoreS3Path` path to the truststore object, omitting any trailing `/` 
 * `KeystorePassSecret` and `KeystorePassSecretField` SecretManager secret ID and key containing the password of the keystore
+
+## Running locally in IntelliJ
+
+To run the application in IntelliJ
+
+1. Edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*
+2. Pass all configuration parameters from the command line, prepending `--` to each parameter (e.g. `--MSKBootstrapServers localhost:9094 --KafkaSourceTopic source-topic ...`)
