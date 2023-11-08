@@ -64,6 +64,8 @@ Config provider will inherit any type of credentials of hosting application, OS 
 
 Access Policy/Role associated with the application that is running a config provider should have sufficient but least privileged permissions to access the services that are configured/referenced in the configuration. E.g., Supplying secrets through AWS Secrets Manager provider will need read permissions for the client to read that particular secret from AWS Secrets Manager service.
 
+Kafka ACLs should provide permissions to the topic, for the principal (the `Distinguished-Name`) of the client certificate in the keystore.
+
 ### Runtime configuration
 
 The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for Apache Flink,
@@ -80,9 +82,9 @@ Configuration parameters:
 * `KafkaSourceTopic` source topic (default: `source`)
 * `KafkaConsumerGroupId` consumer group id (default: `flink-app`)
 * `S3BucketRegion` region of the S3 bucket containing the keystore and truststore
-* `KeystoreS3Bucket` name of the S3 bucket containing the keystore
+* `KeystoreS3Bucket` name of the S3 bucket containing the keystore, omitting `s3://` prefix
 * `KeystoreS3Path` path to the keystore object, omitting any trailing `/` 
-* `TruststoreS3Bucket` name of the S3 bucket containing the truststore
+* `TruststoreS3Bucket` name of the S3 bucket containing the truststore, omitting `s3://` prefix
 * `TruststoreS3Path` path to the truststore object, omitting any trailing `/` 
 * `KeystorePassSecret` and `KeystorePassSecretField` SecretManager secret ID and key containing the password of the keystore
 

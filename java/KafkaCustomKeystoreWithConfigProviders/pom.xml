@@ -22,6 +22,7 @@
     </properties>
 
     <repositories>
+        <!-- Local repository containing the uber-jar of the configuration providers -->
         <repository>
             <id>local-repo</id>
             <name>localrepo</name>
@@ -30,7 +31,7 @@
     </repositories>
 
     <dependencies>
-        <!-- Local dependency containing the configuration providers -->
+        <!-- Local dependency (uber-jar, shaded) with the configuration providers and all transitive dependencies -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>msk-config-providers</artifactId>
