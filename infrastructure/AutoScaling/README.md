@@ -25,6 +25,7 @@ Follow the instructions to deploy the autoscaling solution in your AWS Account
    
       1. *Amazon Managed Service for Apache Flink Application Name*: The name of the Amazon Managed Apache Flink Application you would want to Auto Scale
       2. *Auto Scale Metric*: Available metrics to use for Autoscaling.
+      3. *Custom Metric Name*: If you choose custom metric to do scaling, please provide its name. Remember that it will only work if you add as dimension to the Metric group **kinesisAnalytics**
       3. *Maximum KPU*: Maximum number of KPUs you want the Managed Flink Application to Scale
       4. *Minimum KPU*: Minimum number of KPUs you want the Managed Flink Application to Scale
    2. [**CloudWatch Alarm Configuration:**](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html#alarm-evaluation)
