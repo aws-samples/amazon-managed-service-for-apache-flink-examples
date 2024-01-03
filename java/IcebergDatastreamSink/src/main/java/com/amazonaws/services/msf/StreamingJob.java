@@ -1,6 +1,7 @@
 package com.amazonaws.services.msf;
 
 import com.amazonaws.services.kinesisanalytics.runtime.KinesisAnalyticsRuntime;
+import org.apache.avro.Protocol;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
@@ -29,19 +30,20 @@ import org.apache.iceberg.flink.sink.FlinkSink;
 import org.apache.iceberg.flink.util.FlinkCompatibilityUtil;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 
 public class StreamingJob {
-    private static final String DEFAULT_SOURCE_STREAM = "kds-stream-name";
-    private static final String DEFAULT_AWS_REGION = "eu-west-1";
-    private static final String DEFAULT_ICEBERG_S3_BUCKET = "s3://<s3Bucket>/warehouse/iceberg";
-    private static final String DEFAULT_GLUE_DB = "iceberg";
+    private static final String DEFAULT_SOURCE_STREAM = "source-iceberg";
+    private static final String DEFAULT_AWS_REGION = "us-east-1";
+    private static final String DEFAULT_ICEBERG_S3_BUCKET = "s3-bucket";
+    private static final String DEFAULT_GLUE_DB = "default";
     private static final String DEFAULT_ICEBERG_TABLE_NAME = "trade_iceberg";
     private static final String DEFAULT_ICEBERG_SORT_ORDER_FIELD = "accountNr";
-    private static final String DEFAULT_ICEBERG_PARTITION_FIELDS = "symbol,accountNr";
-    private static final String DEFAULT_ICEBERG_OPERATION = "append";
-    private static final String DEFAULT_ICEBERG_UPSERT_FIELDS = "accountNr,symbol";
+    private static final String DEFAULT_ICEBERG_PARTITION_FIELDS = "symbol";
+    private static final String DEFAULT_ICEBERG_OPERATION = "upsert";
+    private static final String DEFAULT_ICEBERG_UPSERT_FIELDS = "symbol";
 
     /**
      * Get configuration properties from Amazon Managed Service for Apache Flink runtime properties
@@ -71,14 +73,6 @@ public class StreamingJob {
         Properties kinesisConsumerConfig = new Properties();
         kinesisConsumerConfig.put(AWSConfigConstants.AWS_REGION, applicationProperties.get("kinesis.region",DEFAULT_AWS_REGION));
         kinesisConsumerConfig.put(ConsumerConfigConstants.STREAM_INITIAL_POSITION, "LATEST");
-
-        // If EFO consumer is needed, uncomment the following block.
-        /*
-        kinesisConsumerConfig.put(ConsumerConfigConstants.RECORD_PUBLISHER_TYPE,
-                ConsumerConfigConstants.RecordPublisherType.EFO.name());
-        kinesisConsumerConfig.put(ConsumerConfigConstants.EFO_CONSUMER_NAME,"my-efo-consumer");
-         */
-
         return new FlinkKinesisConsumer<>(applicationProperties.get("kinesis.source",DEFAULT_SOURCE_STREAM), new SimpleStringSchema(), kinesisConsumerConfig);
     }
 
@@ -98,7 +92,7 @@ public class StreamingJob {
         //If table has been previously created, we do not do any operation or modification
         if (!catalog.tableExists(outputTable)) {
             Table icebergTable = catalog.createTable(outputTable, icebergSchema, partitionSpec);
-           // Modifying newly created iceberg table to have a sort field
+            // Modifying newly created iceberg table to have a sort field
             icebergTable.replaceSortOrder()
                     .asc(sortField,NullOrder.NULLS_LAST)
                     .commit();
@@ -147,7 +141,7 @@ public class StreamingJob {
         FlinkSink.Builder flinkSinkBuilder = FlinkSink.builderFor(dataStream,
                         AvroGenericRecordToRowDataMapper.forAvroSchema(avroSchema),
                         FlinkCompatibilityUtil.toTypeInfo(rowType))
-                    .tableLoader(tableLoader);
+                .tableLoader(tableLoader);
         // In Iceberg you can perform Appends, Upserts and Overwrites.
         String icebergOperation = applicationProperties.get("iceberg.operation",DEFAULT_ICEBERG_OPERATION);
         // Flink Sink Builder for Upsert Operation
@@ -173,7 +167,10 @@ public class StreamingJob {
 
     public static void main(String[] args) throws Exception {
         // Get Avro Schema from resources
-        Schema avroSchema = new Schema.Parser().parse(new File("./src/main/resources/trade.avsc"));
+        InputStream inputStream = StreamingJob.class.getClassLoader().getResourceAsStream("trade.avsc");
+        Schema avroSchema = new Schema.Parser().parse(inputStream);
+
+        //Schema avroSchema = new Schema.Parser().parse(new File("./src/main/resources/trade.avsc"));
         // Create Generic Record TypeInfo from schema.
         GenericRecordAvroTypeInfo avroTypeInfo = new GenericRecordAvroTypeInfo(avroSchema);
         // set up the streaming execution environment
@@ -187,11 +184,6 @@ public class StreamingJob {
             env.setParallelism(5);
         }
 
-        // Verify that Checkpoint is enabled
-        if (!env.getCheckpointConfig().isCheckpointingEnabled()) {
-            throw new Exception("In Flink Iceberg Jobs you need to enable Checkpointing for committing the data, if not data will accumulate and you will get OutOfMemoryError and no data sent to Iceberg Table");
-        }
-
         // Flink Kinesis Consumer
         FlinkKinesisConsumer<String> source = createKinesisSource(applicationProperties);
 
@@ -203,7 +195,7 @@ public class StreamingJob {
                 .returns(avroTypeInfo);
 
         // Flink Sink Builder
-        FlinkSink.Builder icebergSink = createIcebergSinkBuilder(applicationProperties,genericRecordDataStream,avroSchema);
+        FlinkSink.Builder icebergSink = createIcebergSinkBuilder(applicationProperties, genericRecordDataStream, avroSchema);
 
         // Sink to Iceberg Table
         icebergSink.append();
