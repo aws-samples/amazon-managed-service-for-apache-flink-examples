@@ -1,114 +1,114 @@
 {
  "Metadata": {
   "AWS::CloudFormation::Interface" : {
-  "ParameterGroups": [
-   {
-    "Label": {
-     "default": "Amazon Managed Flink AutoScaling"
+   "ParameterGroups": [
+    {
+     "Label": {
+      "default": "Amazon Managed Flink AutoScaling"
+     },
+     "Parameters": [
+      "AmazonManagedFlinkApplicationName",
+      "AutoScaleMetric",
+      "AutoScaleCustomMetric",
+      "MaxKPU",
+      "MinKPU"
+     ]
     },
-    "Parameters": [
-     "AmazonManagedFlinkApplicationName",
-     "AutoScaleMetric",
-     "AutoScaleCustomMetric",
-     "MaxKPU",
-     "MinKPU"
-    ]
-   },
-   {
-    "Label": {
-     "default": "CloudWatch Alarm Configuration"
+    {
+     "Label": {
+      "default": "CloudWatch Alarm Configuration"
+     },
+     "Parameters": [
+      "ScalingEvaluationperiod",
+      "DataPointstoTriggerAlarm",
+      "ScalingGracingPeriod"
+     ]
     },
-    "Parameters": [
-     "ScalingEvaluationperiod",
-     "DataPointstoTriggerAlarm",
-     "ScalingGracingPeriod"
-    ]
-   },
-   {
-    "Label": {
-     "default": "Scale In/Out Parameters"
+    {
+     "Label": {
+      "default": "Scale In/Out Parameters"
+     },
+     "Parameters": [
+      "ScaleOperation",
+      "ScaleInFactor",
+      "ScaleInThreshold",
+      "ScaleOutFactor",
+      "ScaleOutThreshold"
+     ]
     },
-    "Parameters": [
-     "ScaleOperation",
-     "ScaleInFactor",
-     "ScaleInThreshold",
-     "ScaleOutFactor",
-     "ScaleOutThreshold"
-    ]
-   },
-   {
-    "Label": {
-     "default": "Kafka Configuration (If you choose a Kafka Metric)"
+    {
+     "Label": {
+      "default": "Kafka Configuration (If you choose a Kafka Metric)"
+     },
+     "Parameters": [
+      "AmazonMSKClusterName",
+      "KafkaTopicName",
+      "KafkaConsumerGroupName"
+     ]
     },
-    "Parameters": [
-     "AmazonMSKClusterName",
-     "KafkaTopicName",
-     "KafkaConsumerGroupName"
-    ]
-   },
-   {
-    "Label": {
-     "default": "Kinesis Configuration (If you choose a Kinesis Metric)"
+    {
+     "Label": {
+      "default": "Kinesis Configuration (If you choose a Kinesis Metric)"
+     },
+     "Parameters": [
+      "KinesisDataStreamName"
+     ]
+    }
+   ],
+   "ParameterLabels": {
+    "AmazonManagedFlinkApplicationName": {
+     "default": "Amazon Managed Service for Apache Flink Application Name"
     },
-    "Parameters": [
-     "KinesisDataStreamName"
-    ]
+    "AutoScaleMetric": {
+     "default": "Auto Scale Metric"
+    },
+    "AutoScaleCustomMetric": {
+     "default": "Custom Metric Name"
+    },
+    "MaxKPU": {
+     "default": "Maximum KPU for Apache Flink Application"
+    },
+    "MinKPU": {
+     "default": "Minimum KPU for Apache Flink Application"
+    },
+    "ScalingEvaluationperiod": {
+     "default": "Evaluation Period for Metric"
+    },
+    "DataPointstoTriggerAlarm": {
+     "default": "Number of Data points to Trigger Alarm"
+    },
+    "ScalingGracingPeriod": {
+     "default": "Grace Period for Alarm"
+    },
+    "ScaleOperation": {
+     "default": "How to scale out/in the Apache Flink Application?"
+    },
+    "ScaleOutFactor": {
+     "default": "Scale Out Factor for Apache Flink Application"
+    },
+    "ScaleInFactor": {
+     "default": "Scale In Factor for Apache Flink Application"
+    },
+    "ScaleInThreshold": {
+     "default": "Treshold for Metric to Scale Down"
+    },
+    "ScaleOutThreshold": {
+     "default": "Treshold for Metric to Scale Up"
+    },
+    "AmazonMSKClusterName": {
+     "default": "Amazon MSK Cluster Name"
+    },
+    "KafkaTopicName": {
+     "default": "Kafka Topic Name"
+    },
+    "KafkaConsumerGroupName": {
+     "default": "Kafka Consumer Group"
+    },
+    "KinesisDataStreamName": {
+     "default": "Kinesis Data Streams Name"
+    }
    }
-  ],
-  "ParameterLabels": {
-   "AmazonManagedFlinkApplicationName": {
-    "default": "Amazon Managed Service for Apache Flink Application Name"
-   },
-   "AutoScaleMetric": {
-    "default": "Auto Scale Metric"
-   },
-   "AutoScaleCustomMetric": {
-    "default": "Custom Metric Name"
-   },
-   "MaxKPU": {
-    "default": "Maximum KPU for Apache Flink Application"
-   },
-   "MinKPU": {
-    "default": "Minimum KPU for Apache Flink Application"
-   },
-   "ScalingEvaluationperiod": {
-    "default": "Evaluation Period for Metric"
-   },
-   "DataPointstoTriggerAlarm": {
-    "default": "Number of Data points to Trigger Alarm"
-   },
-   "ScalingGracingPeriod": {
-    "default": "Grace Period for Alarm"
-   },
-   "ScaleOperation": {
-    "default": "How to scale out/in the Apache Flink Application?"
-   },
-   "ScaleOutFactor": {
-    "default": "Scale Out Factor for Apache Flink Application"
-   },
-   "ScaleInFactor": {
-    "default": "Scale In Factor for Apache Flink Application"
-   },
-   "ScaleInThreshold": {
-    "default": "Treshold for Metric to Scale Down"
-   },
-   "ScaleOutThreshold": {
-    "default": "Treshold for Metric to Scale Up"
-   },
-   "AmazonMSKClusterName": {
-    "default": "Amazon MSK Cluster Name"
-   },
-   "KafkaTopicName": {
-    "default": "Kafka Topic Name"
-   },
-   "KafkaConsumerGroupName": {
-    "default": "Kafka Consumer Group"
-   },
-   "KinesisDataStreamName": {
-    "default": "Kinesis Data Streams Name"
-   }
-  }
- }},
+  }},
  "Parameters": {
   "AmazonManagedFlinkApplicationName": {
    "Type": "String",
