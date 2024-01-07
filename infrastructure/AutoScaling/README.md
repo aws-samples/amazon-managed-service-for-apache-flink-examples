@@ -32,6 +32,7 @@ Follow the instructions to deploy the autoscaling solution in your AWS Account
 
       5. *Evaluation Period for Metric*: Period to be used in minutes for the evaluation for scaling in or out (Example: 5)
       6. *Number of Data points to Trigger Alarm*: Number of Data Points (60 seconds each data point) during Evaluation Period where Metric has to be over threshold for rule to be in Alarm State. (Example: 2 This would mean that alarm would trigger if during a 5 minute window, 2 data points are above threshold)
+      7. Waiting time for Application to finish updating (Seconds)
       7. *Grace Period for Alarm*: Time given in seconds to application after scaling to have alarms go to OK status (Example: 120)
    3. **Scale In/Out Configuration:**
 
