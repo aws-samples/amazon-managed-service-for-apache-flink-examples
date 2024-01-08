@@ -19,8 +19,11 @@
       "default": "CloudWatch Alarm Configuration"
      },
      "Parameters": [
+      "Statistic",
+      "Period",
       "ScalingEvaluationperiod",
       "DataPointstoTriggerAlarm",
+      "UpdateApplicationWaitingTime",
       "ScalingGracingPeriod"
      ]
     },
@@ -71,11 +74,20 @@
     "MinKPU": {
      "default": "Minimum KPU for Apache Flink Application"
     },
+    "Statistic": {
+     "default": "Statistic to use for the Metric"
+    },
+    "Period": {
+     "default": "Length of time for each data point of Metric"
+    },
     "ScalingEvaluationperiod": {
      "default": "Evaluation Period for Metric"
     },
     "DataPointstoTriggerAlarm": {
      "default": "Number of Data points to Trigger Alarm"
+    },
+    "UpdateApplicationWaitingTime": {
+     "default": "Waiting Time for Updating Application"
     },
     "ScalingGracingPeriod": {
      "default": "Grace Period for Alarm"
@@ -108,7 +120,8 @@
      "default": "Kinesis Data Streams Name"
     }
    }
-  }},
+  }
+ },
  "Parameters": {
   "AmazonManagedFlinkApplicationName": {
    "Type": "String",
@@ -122,6 +135,8 @@
     "containerMemoryUtilization",
     "containerCPUUtilization",
     "busyTimeMsPerSecond",
+    "backPressuredTimeMsPerSecond",
+    "lastCheckpointDuration",
     "millisBehindLatest",
     "MaxOffsetLag",
     "SumOffsetLag",
@@ -143,6 +158,33 @@
    "Type": "Number",
    "Default": "1",
    "Description": "Minimum number of KPUs you want the Managed Flink Application to Scale"
+  },
+  "Period": {
+   "Type": "Number",
+   "Default": 60,
+   "AllowedValues": [
+    "1",
+    "5",
+    "10",
+    "30",
+    "60",
+    "120",
+    "180",
+    "240",
+    "300"
+   ],
+   "Description": "Choose the length of time to create each individual data point for an alarm (Seconds)"
+  },
+  "Statistic": {
+   "Type": "String",
+   "Default": "Average",
+   "AllowedValues": [
+    "Average",
+    "Minimum",
+    "Maximum",
+    "Sum"
+   ],
+   "Description": "Choose your metric statistic"
   },
   "KinesisDataStreamName": {
    "Type": "String",
@@ -184,6 +226,11 @@
    "Type": "Number",
    "Default": 200,
    "Description": "Time given to application after scaling to have alarms go to OK status"
+  },
+  "UpdateApplicationWaitingTime": {
+   "Type": "Number",
+   "Default": 15,
+   "Description": "Time given to application to finish updating after scaling"
   },
   "ScaleInFactor": {
    "Type": "Number",
@@ -245,6 +292,22 @@
        "Ref": "AutoScaleMetric"
       },
       "busyTimeMsPerSecond"
+     ]
+    },
+    {
+     "Fn::Equals": [
+      {
+       "Ref": "AutoScaleMetric"
+      },
+      "backPressuredTimeMsPerSecond"
+     ]
+    },
+    {
+     "Fn::Equals": [
+      {
+       "Ref": "AutoScaleMetric"
+      },
+      "lastCheckpointDuration"
      ]
     }
    ]
@@ -512,8 +575,12 @@
      "Ref": "AutoScaleCustomMetric"
     },
     "Namespace": "AWS/KinesisAnalytics",
-    "Period": 60,
-    "Statistic": "Average",
+    "Period": {
+     "Ref": "Period"
+    },
+    "Statistic":  {
+     "Ref": "Statistic"
+    },
     "Threshold": {
      "Ref": "ScaleOutThreshold"
     }
@@ -556,8 +623,12 @@
      "Ref": "AutoScaleCustomMetric"
     },
     "Namespace": "AWS/KinesisAnalytics",
-    "Period": 60,
-    "Statistic": "Average",
+    "Period":  {
+     "Ref": "Period"
+    },
+    "Statistic":{
+     "Ref": "Statistic"
+    },
     "Threshold": {
      "Ref": "ScaleInThreshold"
     }
@@ -600,8 +671,12 @@
      "Ref": "AutoScaleMetric"
     },
     "Namespace": "AWS/Kinesis",
-    "Period": 60,
-    "Statistic": "Sum",
+    "Period":  {
+     "Ref": "Period"
+    },
+    "Statistic": {
+     "Ref": "Statistic"
+    },
     "Threshold": {
      "Ref": "ScaleOutThreshold"
     }
@@ -644,8 +719,12 @@
      "Ref": "AutoScaleMetric"
     },
     "Namespace": "AWS/Kinesis",
-    "Period": 60,
-    "Statistic": "Sum",
+    "Period":  {
+     "Ref": "Period"
+    },
+    "Statistic": {
+     "Ref": "Statistic"
+    },
     "Threshold": {
      "Ref": "ScaleInThreshold"
     }
@@ -700,8 +779,12 @@
      "Ref": "AutoScaleMetric"
     },
     "Namespace": "AWS/Kafka",
-    "Period": 60,
-    "Statistic": "Average",
+    "Period":  {
+     "Ref": "Period"
+    },
+    "Statistic": {
+     "Ref": "Statistic"
+    },
     "Threshold": {
      "Ref": "ScaleOutThreshold"
     }
@@ -744,8 +827,12 @@
      "Ref": "AutoScaleMetric"
     },
     "Namespace": "AWS/KinesisAnalytics",
-    "Period": 60,
-    "Statistic": "Average",
+    "Period":  {
+     "Ref": "Period"
+    },
+    "Statistic": {
+     "Ref": "Statistic"
+    },
     "Threshold": {
      "Ref": "ScaleOutThreshold"
     }
@@ -788,8 +875,12 @@
      "Ref": "AutoScaleMetric"
     },
     "Namespace": "AWS/KinesisAnalytics",
-    "Period": 60,
-    "Statistic": "Average",
+    "Period":  {
+     "Ref": "Period"
+    },
+    "Statistic": {
+     "Ref": "Statistic"
+    },
     "Threshold": {
      "Ref": "ScaleOutThreshold"
     }
@@ -844,8 +935,12 @@
      "Ref": "AutoScaleMetric"
     },
     "Namespace": "AWS/Kafka",
-    "Period": 60,
-    "Statistic": "Average",
+    "Period":  {
+     "Ref": "Period"
+    },
+    "Statistic": {
+     "Ref": "Statistic"
+    },
     "Threshold": {
      "Ref": "ScaleInThreshold"
     }
@@ -888,8 +983,12 @@
      "Ref": "AutoScaleMetric"
     },
     "Namespace": "AWS/KinesisAnalytics",
-    "Period": 60,
-    "Statistic": "Average",
+    "Period":  {
+     "Ref": "Period"
+    },
+    "Statistic": {
+     "Ref": "Statistic"
+    },
     "Threshold": {
      "Ref": "ScaleInThreshold"
     }
@@ -932,8 +1031,12 @@
      "Ref": "AutoScaleMetric"
     },
     "Namespace": "AWS/KinesisAnalytics",
-    "Period": 60,
-    "Statistic": "Average",
+    "Period":  {
+     "Ref": "Period"
+    },
+    "Statistic": {
+     "Ref": "Statistic"
+    },
     "Threshold": {
      "Ref": "ScaleInThreshold"
     }
@@ -1284,9 +1387,28 @@
       "PolicyDocument": {
        "Statement": [
         {
-         "Action": "logs:*",
+         "Action": [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+         ],
          "Effect": "Allow",
-         "Resource": "*"
+         "Resource": {
+          "Fn::Join": [
+           "",
+           [
+            "arn:aws:logs:",
+            {
+             "Ref": "AWS::Region"
+            },
+            ":",
+            {
+             "Ref": "AWS::AccountId"
+            },
+            ":log-group:/aws/lambda/*"
+           ]
+          ]
+         }
         }
        ],
        "Version": "2012-10-17"
@@ -1297,9 +1419,30 @@
       "PolicyDocument": {
        "Statement": [
         {
-         "Action": "kinesisanalytics:*",
+         "Action": [
+          "kinesisAnalytics:UpdateApplication",
+          "kinesisanalytics:DescribeApplication"
+         ],
          "Effect": "Allow",
-         "Resource": "*"
+         "Resource": {
+          "Fn::Join": [
+           "",
+           [
+            "arn:aws:kinesisanalytics:",
+            {
+             "Ref": "AWS::Region"
+            },
+            ":",
+            {
+             "Ref": "AWS::AccountId"
+            },
+            ":application/",
+            {
+             "Ref": "AmazonManagedFlinkApplicationName"
+            }
+           ]
+          ]
+         }
         }
        ],
        "Version": "2012-10-17"
@@ -1383,13 +1526,49 @@
      "Statement": [
       {
        "Action": [
-        "cloudwatch:*",
-        "cloudwatch:describeAlarms",
-        "kinesisanalytics:*",
-        "kinesisanalyticsv2:describeApplication"
+        "kinesisanalytics:describeApplication",
+        "kinesisanalytics:describeApplication"
        ],
        "Effect": "Allow",
-       "Resource": "*"
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          "arn:aws:kinesisanalytics:",
+          {
+           "Ref": "AWS::Region"
+          },
+          ":",
+          {
+           "Ref": "AWS::AccountId"
+          },
+          ":application/",
+          {
+           "Ref": "AmazonManagedFlinkApplicationName"
+          }
+         ]
+        ]
+       }
+      },
+      {
+       "Action": "cloudwatch:DescribeAlarms",
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          "arn:aws:cloudwatch:",
+          {
+           "Ref": "AWS::Region"
+          },
+          ":",
+          {
+           "Ref": "AWS::AccountId"
+          },
+          ":alarm:*"
+         ]
+        ]
+       }
       },
       {
        "Action": "lambda:InvokeFunction",
@@ -1460,7 +1639,7 @@
        {
         "Ref": "ScalingGracingPeriod"
        },
-       ",\"Next\":\"Describe Alarm after waiting\"},\"SuccessState\":{\"Type\":\"Pass\",\"End\":true},\"MinMax KPU Reached?\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.TaskResult.Payload.body\",\"NumericEquals\":1,\"Next\":\"SuccessState\"}],\"Default\":\"Wait 15 secs for update\"},\"Invoke Lambda Function\":{\"Next\":\"MinMax KPU Reached?\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.TaskResult\",\"Resource\":\"arn:",
+       ",\"Next\":\"Describe Alarm after waiting\"},\"SuccessState\":{\"Type\":\"Pass\",\"End\":true},\"MinMax KPU Reached?\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.TaskResult.Payload.body\",\"NumericEquals\":1,\"Next\":\"SuccessState\"}],\"Default\":\"Waiting for application to finish updating\"},\"Invoke Lambda Function\":{\"Next\":\"MinMax KPU Reached?\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.TaskResult\",\"Resource\":\"arn:",
        {
         "Ref": "AWS::Partition"
        },
@@ -1471,7 +1650,11 @@
          "Arn"
         ]
        },
-       "\",\"Payload.$\":\"$\"}},\"Wait 15 secs for update\":{\"Type\":\"Wait\",\"Seconds\":15,\"Next\":\"Describe Application after scaling\"},\"Still updating?\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.TaskResult.ApplicationDetail.ApplicationStatus\",\"StringEquals\":\"UPDATING\",\"Next\":\"Wait 15 secs for update\"}],\"Default\":\"Cooling Period for Alarm\"},\"Describe Application after scaling\":{\"Next\":\"Still updating?\",\"Type\":\"Task\",\"ResultPath\":\"$.TaskResult\",\"Resource\":\"arn:",
+       "\",\"Payload.$\":\"$\"}},\"Waiting for application to finish updating\":{\"Type\":\"Wait\",\"Seconds\":",
+       {
+        "Ref": "UpdateApplicationWaitingTime"
+       },
+       ",\"Next\":\"Describe Application after scaling\"},\"Still updating?\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.TaskResult.ApplicationDetail.ApplicationStatus\",\"StringEquals\":\"UPDATING\",\"Next\":\"Waiting for application to finish updating\"}],\"Default\":\"Cooling Period for Alarm\"},\"Describe Application after scaling\":{\"Next\":\"Still updating?\",\"Type\":\"Task\",\"ResultPath\":\"$.TaskResult\",\"Resource\":\"arn:",
        {
         "Ref": "AWS::Partition"
        },
@@ -1515,9 +1698,11 @@
       "PolicyDocument": {
        "Statement": [
         {
-         "Action": "states:*",
+         "Action": "states:StartExecution",
          "Effect": "Allow",
-         "Resource": "*"
+         "Resource": {
+          "Ref": "StateMachine2E01A3A5"
+         }
         }
        ],
        "Version": "2012-10-17"
