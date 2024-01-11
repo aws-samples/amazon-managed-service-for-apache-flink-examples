@@ -30,6 +30,13 @@
     </repositories>
 
     <dependencies>
+        <!-- Local dependency containing the configuration providers -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>msk-config-providers</artifactId>
+            <version>0.0.1-SNAPSHOT-uber</version>
+        </dependency>
+
         <!-- Flink Core dependencies -->
         <dependency>
             <groupId>org.apache.flink</groupId>

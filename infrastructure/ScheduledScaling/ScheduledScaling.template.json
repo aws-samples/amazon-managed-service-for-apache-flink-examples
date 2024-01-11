@@ -48,7 +48,16 @@
           "kinesisanalytics:UpdateApplication"
          ],
          "Effect": "Allow",
-         "Resource": "*"
+         "Resource": {
+          "Fn::Sub": [
+           "arn:aws:kinesisanalytics:${AWS::Region}:${AWS::AccountId}:application/${MsfAppName}",
+           {
+            "MsfAppName": {
+             "Ref": "msfAppName"
+            }
+           }
+          ]
+         }
         }
        ],
        "Version": "2012-10-17"
@@ -59,13 +68,29 @@
       "PolicyDocument": {
        "Statement": [
         {
+         "Effect": "Allow",
+         "Action": "logs:CreateLogGroup",
+         "Resource": {
+          "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+         }
+        },
+        {
          "Action": [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
           "logs:PutLogEvents"
          ],
          "Effect": "Allow",
-         "Resource": "*"
+         "Resource": {
+          "Fn::Sub": [
+           "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${LogGroupName}*",
+           {
+            "LogGroupName": {
+             "Fn::Join": [":", ["", "/aws/lambda/*"]]
+            }
+           }
+          ]
+         }
         }
        ],
        "Version": "2012-10-17"
@@ -239,202 +264,7 @@
    },
    "Metadata": {
     "aws:cdk:path": "ScheduledScalingCdkStack/CDKMetadata/Default"
-   },
-   "Condition": "CDKMetadataAvailable"
-  }
- },
- "Conditions": {
-  "CDKMetadataAvailable": {
-   "Fn::Or": [
-    {
-     "Fn::Or": [
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "af-south-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "ap-east-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "ap-northeast-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "ap-northeast-2"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "ap-south-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "ap-southeast-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "ap-southeast-2"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "ca-central-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "cn-north-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "cn-northwest-1"
-       ]
-      }
-     ]
-    },
-    {
-     "Fn::Or": [
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "eu-central-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "eu-north-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "eu-south-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "eu-west-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "eu-west-2"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "eu-west-3"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "me-south-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "sa-east-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "us-east-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "us-east-2"
-       ]
-      }
-     ]
-    },
-    {
-     "Fn::Or": [
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "us-west-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "us-west-2"
-       ]
-      }
-     ]
-    }
-   ]
+   }
   }
  }
-}
+ }

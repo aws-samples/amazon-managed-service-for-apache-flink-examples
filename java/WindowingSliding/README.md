@@ -104,8 +104,8 @@ To run this example locally -
 * Flink application with application name defined by application_name in deploy.sh.
 * CloudWatch log group with name - /aws/amazon-msf/${application_name}
 * CloudWatch log stream under the log group created above by name amazon-msf-log-stream.
-* IAM execution role for Flink application. The role permission on MSK cluster.
-* IAM managed policy.
+* IAM execution role for Flink application. 
+* IAM managed policy for permission.
 
 
 ## Data generator - Kinesis
