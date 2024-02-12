@@ -1,0 +1,43 @@
+# Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# software and associated documentation files (the "Software"), to deal in the Software
+# without restriction, including without limitation the rights to use, copy, modify,
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Cloudformation Stack template to create the Cloudwatch dashboard for the Managed Service for Apache Flink Application"
+Parameters:
+  ApplicationName:
+    Description: "The Managed Service for Apache Flink application to monitor the cloudwatch metrics in dashboard"
+    Type: "String"
+  MSFRegion:
+    Description: "The region where the Managed Service for Apache Flink application is created"
+    Type: "String"
+  KinesisStreamName:
+    Description: "The Kinesis stream name which is configured as input in Managed Service for Apache Flink application"
+    Type: "String"
+    Default: "Optional"
+  DashboardName:
+    Description: "The CloudWatch dashboard name to create"
+    Type: "String"
+Resources:
+  CloudwatchDashboard:
+    Type: "AWS::CloudWatch::Dashboard"
+    Properties:
+      DashboardName: !Ref DashboardName
+      DashboardBody:
+        !Sub '{"variables":[{"type":"property","property":"Application","inputType":"input","id":"Application","label":"Flink Application Name","visible":true},{"type":"property","property":"Id","inputType":"input","id":"Id","label":"Kinesis Stream Name","visible":true}],"widgets":[{"height":6,"width":6,"y":1,"x":0,"type":"metric","properties":{"metrics":[["AWS/KinesisAnalytics","fullRestarts","Application","${ApplicationName}",{"region":"${MSFRegion}","yAxis":"left","color":"#d62728"}],[".","uptime",".",".",{"region":"${MSFRegion}","yAxis":"right","color":"#2ca02c"}]],"view":"timeSeries","stacked":false,"region":"${MSFRegion}","period":60,"stat":"Maximum","title":"Full Restarts and Uptime of Application","yAxis":{"left":{"showUnits":false,"label":"Count"},"right":{"label":"Milliseconds","showUnits":false}},"liveData":false,"legend":{"position":"bottom"}}},{"height":1,"width":6,"y":0,"x":0,"type":"text","properties":{"markdown":"# Job Availability","background":"solid"}},{"height":1,"width":18,"y":0,"x":6,"type":"text","properties":{"markdown":"# Job Performance","background":"solid"}},{"height":6,"width":6,"y":1,"x":6,"type":"metric","properties":{"metrics":[["AWS/KinesisAnalytics","containerCPUUtilization","Application","${ApplicationName}",{"region":"${MSFRegion}","color":"#98df8a"}],[".","containerMemoryUtilization",".",".",{"region":"${MSFRegion}","yAxis":"left","color":"#1f77b4"}]],"view":"timeSeries","stacked":false,"region":"${MSFRegion}","period":60,"stat":"Average","title":"CPU and Memory (Container)","yAxis":{"left":{"showUnits":false,"label":"%"},"right":{"label":"%","showUnits":false}},"liveData":false,"legend":{"position":"bottom"},"annotations":{"horizontal":[{"label":"Threshold","value":80,"fill":"above"}]}}},{"height":6,"width":6,"y":1,"x":12,"type":"metric","properties":{"metrics":[["AWS/KinesisAnalytics","backPressuredTimeMsPerSecond","Application","${ApplicationName}",{"region":"${MSFRegion}","color":"#9467bd"}],[".","busyTimeMsPerSecond",".",".",{"region":"${MSFRegion}","yAxis":"right","color":"#d62728"}]],"view":"timeSeries","stacked":false,"region":"${MSFRegion}","period":60,"stat":"Average","title":"Backpressure and Busy Time","yAxis":{"left":{"showUnits":false,"label":"Milliseconds"},"right":{"label":"Milliseconds","showUnits":false}},"liveData":false,"legend":{"position":"bottom"}}},{"height":6,"width":6,"y":1,"x":18,"type":"metric","properties":{"metrics":[["AWS/KinesisAnalytics","lastCheckpointDuration","Application","${ApplicationName}",{"region":"${MSFRegion}","label":"lastCheckpointDuration","color":"#2ca02c"}],[".","lastCheckpointSize",".",".",{"yAxis":"right","region":"${MSFRegion}","color":"#1f77b4"}]],"view":"timeSeries","stacked":false,"region":"${MSFRegion}","period":60,"stat":"Maximum","title":"Last Checkpoint Duration","yAxis":{"left":{"showUnits":false,"label":"Milliseconds"},"right":{"label":"Bytes","showUnits":false}},"liveData":false,"legend":{"position":"bottom"}}},{"height":1,"width":12,"y":7,"x":0,"type":"text","properties":{"markdown":"# Job Progress","background":"solid"}},{"height":8,"width":6,"y":8,"x":6,"type":"metric","properties":{"metrics":[["AWS/KinesisAnalytics","currentInputWatermark","Application","${ApplicationName}",{"region":"${MSFRegion}"}],[".","currentOutputWatermark",".",".",{"region":"${MSFRegion}","yAxis":"right"}]],"view":"timeSeries","stacked":false,"region":"${MSFRegion}","period":60,"stat":"Maximum","title":"Watermarks (Event Time only)","yAxis":{"left":{"showUnits":false,"label":"Milliseconds"},"right":{"label":"Milliseconds","showUnits":false}},"liveData":false,"legend":{"position":"bottom"}}},{"height":8,"width":6,"y":8,"x":0,"type":"metric","properties":{"metrics":[["AWS/KinesisAnalytics","records_lag_max","Application","${ApplicationName}",{"region":"${MSFRegion}"}],[".","millisBehindLatest","Id","${KinesisStreamName}","Application","${ApplicationName}","Flow","Input",{"region":"${MSFRegion}","yAxis":"right"}]],"view":"timeSeries","stacked":false,"region":"${MSFRegion}","period":60,"stat":"Maximum","title":"Record Lag (Kinesis or Kafka)","yAxis":{"left":{"showUnits":false,"label":"Milliseconds"},"right":{"label":"Milliseconds","showUnits":false}},"liveData":false,"legend":{"position":"bottom"}}},{"height":3,"width":12,"y":7,"x":12,"type":"text","properties":{"markdown":"# numRecordsIn / Out\nPlease Note: You must enable task level metrics for these metrics to appear properly. \nSources and Sinks may share the same names between Kinesis and Kafka, so feel free to modify this dashboard based on your application specifics.","background":"solid"}},{"height":6,"width":12,"y":10,"x":12,"type":"metric","properties":{"metrics":[[{"expression":"m1 / 4","label":"kafka numRecordsIn (Calculated)","id":"kafka_in","region":"${MSFRegion}"}],[{"expression":"m2 / 4","label":"kafka numRecordsOut (Calculated)","id":"kakfa_out","yAxis":"right","region":"${MSFRegion}"}],[{"expression":"m4 / 4","label":"kinesis numRecordsOut (Calculated)","id":"kinesis_out","yAxis":"right"}],[{"expression":"m3 / 4","label":"kinesis numRecordsIn (Calculated)","id":"kinesis_in"}],["AWS/KinesisAnalytics","numRecordsOut","Task","Source:_Kafka_source","Application","${ApplicationName}",{"id":"m1","visible":false,"region":"${MSFRegion}"}],[".","numRecordsIn",".","Sink:_Writer",".",".",{"id":"m2","visible":false,"region":"${MSFRegion}"}],[".","numRecordsOut",".","Source:_Kinesis_Source",".","${ApplicationName}",{"id":"m3","visible":false}],[".","numRecordsIn",".","Sink:_Writer",".",".",{"id":"m4","visible":false}]],"view":"timeSeries","stacked":false,"region":"${MSFRegion}","stat":"Sum","period":60,"title":"Records In & Out"}}]}'
+Outputs:
+  CloudwatchDashboard:
+    Description: "Dashboard created to monitor the Managed Service for Apache Flink Application"
+    Value: !Sub |
+      https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home#dashboards:name=${DashboardName}
