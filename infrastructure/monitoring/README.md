@@ -3,6 +3,7 @@
 
 This repository contains a CloudFormation template that you can customize to deploy a sample metrics dashboard for your [Managed Service for Apache Flink](https://docs.aws.amazon.com/kinesisanalytics/latest/java/what-is.html) application.
 
+
 Here's a screenshot of the dashboard:
 
 ![Dashboard screenshot](img/dashboard.png)
@@ -13,6 +14,9 @@ Before you deploy the template, please make sure that you enter appropriate valu
 - MSFRegion: The region where the Managed Service for Apache Flink app is deployed
 - KinesisStreamName (optional): The Kinesis stream name which is configured as input in Kinesis Analytics application (assuming you're reading from a Kinesis stream)
 - DashboardName: The name you'd like to assign to the newly created CloudWatch Dashboard
+
+#### It should be noted that this dashboard supports both Apache Kafka and Amazon Kinesis Data Streams as sources, so long as the application has a single source.
+
 
 ## Security
 
