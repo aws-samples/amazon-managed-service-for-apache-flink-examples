@@ -68,7 +68,7 @@ public class BasicStreamingJob {
         return KinesisStreamsSink.<String>builder()
                 .setKinesisClientProperties(outputProperties)
                 .setSerializationSchema(new SimpleStringSchema())
-                .setStreamName(outputProperties.getProperty("OutputStreamName", "ExampleOutputStream"))
+                .setStreamName(applicationProperties.get("OutputStreamName", "ExampleOutputStream"))
                 .setPartitionKeyGenerator(element -> String.valueOf(element.hashCode()))
                 .build();
     }
