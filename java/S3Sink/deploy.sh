@@ -40,7 +40,7 @@ aws cloudformation deploy --template-file ${template_file} \
      --region ${region} \
      --stack-name ${application_name}  \
      --parameter-overrides ApplicationName=${application_name} \
-     FlinkRuntimeEnvironment=FLINK-1_15 \
+     FlinkRuntimeEnvironment=FLINK-1_18 \
      CodeBucketArn="arn:aws:s3:::${bucket}" \
      CodeKey=flink/${jar_name} \
      Parallelism=${parallelism} \
