@@ -1,9 +1,8 @@
 # Flink Kinesis Firehose Sink example
 
-* Flink version: 1.15
+* Flink version: 1.18
 * Flink API: DataStream API
 * Language: Java (11)
-
 
 This example demonstrate how to use [Flink Kinesis Firehose Sink Connector](https://nightlies.apache.org/flink/flink-docs-master/docs/connectors/datastream/firehose/).
 
