@@ -2,8 +2,8 @@
   {
           "PropertyGroupId": "kinesis.analytics.flink.run.options",
           "PropertyMap": {
-            "python": "tumbling-windows.py",
-            "jarfile": "lib/flink-sql-connector-kinesis-4.2.0-1.18.jar"
+            "python": "TumblingWindows/tumbling-windows.py",
+            "jarfile": "TumblingWindows/lib/flink-sql-connector-kinesis-4.2.0-1.18.jar"
           }
         },
         {
