@@ -16,6 +16,7 @@ This module:
 
 from pyflink.table import EnvironmentSettings, TableEnvironment, DataTypes
 from pyflink.table.window import Slide
+from pyflink.table.expressions import col, lit
 from pyflink.table.udf import udf
 import os
 import json
@@ -37,7 +38,7 @@ if is_local:
     CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
     table_env.get_config().get_configuration().set_string(
         "pipeline.jars",
-        "file:///" + CURRENT_DIR + "/lib/flink-sql-connector-kinesis-1.15.2.jar",
+        "file:///" + CURRENT_DIR + "/lib/flink-sql-connector-kinesis-4.2.0-1.18.jar",
     )
 
 
@@ -74,6 +75,7 @@ def create_input_table(table_name, stream_name, region, stream_initpos):
                 'json.timestamp-format.standard' = 'ISO-8601'
               ) """.format(table_name, stream_name, region, stream_initpos)
 
+
 def create_output_table(table_name, stream_name, region):
     return """ CREATE TABLE {0} (
                 ticker VARCHAR(6),
@@ -96,14 +98,15 @@ def perform_sliding_window_aggregation(input_table_name):
 
     sliding_window_table = (
         input_table
-            .window(
-                Slide.over("10.seconds")
-                .every("5.seconds")
-                .on("event_time")
-                .alias("ten_second_window")
-            )
-            .group_by("ticker, ten_second_window")
-            .select("ticker, price.min as price, to_string(ten_second_window.end) as event_time")
+        .window(
+            Slide.over(lit(10).seconds)
+            .every(lit(5).seconds)
+            .on(col("event_time"))
+            .alias("ten_second_window")
+        )
+        .group_by(col("ticker"), col("ten_second_window"))
+        .select(col("ticker"), col("price").min.alias("price"),
+                to_string(col("ten_second_window").end).alias("event_time"))
     )
 
     return sliding_window_table
@@ -115,6 +118,7 @@ def to_string(i):
 
 
 table_env.create_temporary_system_function("to_string", to_string)
+
 
 def main():
     # Application Property Keys
@@ -159,13 +163,6 @@ def main():
     # 5. These sliding windows are inserted into the sink table
     table_result1 = table_env.execute_sql("INSERT INTO {0} SELECT * FROM {1}"
                                           .format(output_table_name, "sliding_window_table"))
-
-
-    if is_local:
-        table_result1.wait()
-    else:
-        # get job status through TableResult
-        print(table_result1.get_job_client().get_job_status())
 
 
 if __name__ == "__main__":
