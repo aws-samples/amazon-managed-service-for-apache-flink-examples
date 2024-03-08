@@ -10,3 +10,4 @@
 .venv
 env/
 venv/
+.java-version
