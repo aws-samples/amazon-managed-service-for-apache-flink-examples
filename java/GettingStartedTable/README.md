@@ -2,7 +2,7 @@
 
 Example of project for a basic Flink Java application using the Table API & SQL in combination with the DataStream API.
 
-* Flink version: 1.15
+* Flink version: 1.18
 * Flink API: Table API & SQL, and DataStream API
 * Language: Java (11)
 
