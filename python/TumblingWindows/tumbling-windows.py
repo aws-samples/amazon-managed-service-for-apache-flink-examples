@@ -157,6 +157,8 @@ def main():
     table_result = table_env.execute_sql("INSERT INTO {0} SELECT * FROM {1}"
                                          .format(output_table_name, "tumbling_window_table"))
 
+    if is_local:
+        table_result.wait()
 
 if __name__ == "__main__":
     main()

@@ -161,9 +161,11 @@ def main():
     table_env.create_temporary_view("sliding_window_table", sliding_window_table)
 
     # 5. These sliding windows are inserted into the sink table
-    table_result1 = table_env.execute_sql("INSERT INTO {0} SELECT * FROM {1}"
+    table_result = table_env.execute_sql("INSERT INTO {0} SELECT * FROM {1}"
                                           .format(output_table_name, "sliding_window_table"))
 
+    if is_local:
+        table_result.wait()
 
 if __name__ == "__main__":
     main()

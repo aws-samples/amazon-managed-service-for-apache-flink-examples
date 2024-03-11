@@ -169,9 +169,6 @@ def main():
 
     if is_local:
         table_result.wait()
-    else:
-        # get job status through TableResult
-        print(table_result.get_job_client().get_job_status())
 
 
 if __name__ == "__main__":
