@@ -14,11 +14,25 @@
         <target.java.version>11</target.java.version>
         <maven.compiler.source>${target.java.version}</maven.compiler.source>
         <maven.compiler.target>${target.java.version}</maven.compiler.target>
-        <flink.version>1.15.4</flink.version>
+        <flink.version>1.18.1</flink.version>
+        <aws.connector.version>4.2.0-1.18</aws.connector.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
         <log4j.version>2.17.2</log4j.version>
         <slf4j.version>1.7.32</slf4j.version>
     </properties>
+
+        <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-bom</artifactId>
+                <!-- Get the latest SDK version from https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
+                <version>1.12.514</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- Flink Core dependencies -->
@@ -45,13 +59,14 @@
         <!-- Flink Kinesis connector -->
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-kinesis</artifactId>
+            <artifactId>flink-connector-base</artifactId>
             <version>${flink.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-aws-kinesis-streams</artifactId>
-            <version>${flink.version}</version>
+            <artifactId>flink-connector-kinesis</artifactId>
+            <version>${aws.connector.version}</version>
         </dependency>
 
         <!-- Logging framework, to produce console output when running in the IDE. -->

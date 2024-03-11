@@ -4,7 +4,7 @@ Parameters:
     Type: String
   FlinkRuntimeEnvironment:
     Type: String
-    Default: FLINK-1_15
+    Default: FLINK-1_18
   CodeBucketArn:
     Type: String
   CodeKey:

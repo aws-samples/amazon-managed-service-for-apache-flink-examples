@@ -1,15 +1,15 @@
 # Flink Kinesis Source & Sink examples (standard and EFO)
 
-* Flink version: 1.15
+* Flink version: 1.18
 * Flink API: DataStream API
 * Language: Java (11)
 
 
-This example demonstrate how to use [Flink Kinesis Connector](https://nightlies.apache.org/flink/flink-docs-release-1.15/docs/connectors/datastream/kinesis/), source and sink.
+This example demonstrate how to use Flink Kinesis Connector source and sink.
 
 It also shows how to set up an **Enhanced Fan-Out (EFO)** source.
 
-This example uses [`FlinkKinesisConsumer` and `KinesisStreamsSink` connectors](https://nightlies.apache.org/flink/flink-docs-release-1.15/docs/connectors/datastream/kinesis/).
+This example uses `FlinkKinesisConsumer` and `KinesisStreamsSink` connectors.
 
 ![Flink Example](images/flink-kinesis-example.png)
 ### Runtime configuration
