@@ -1,12 +1,12 @@
 # Flink Kafka Source & Sink Examples
 
-* Flink version: 1.15
+* Flink version: 1.18
 * Flink API: DataStream API
 * Language: Java (11)
 
 
 This example demonstrate how to use
-[Flink Kafka Connector](https://nightlies.apache.org/flink/flink-docs-release-1.15/docs/connectors/datastream/kafka/),
+[Flink Kafka Connector](https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/connectors/datastream/kafka/),
 source and sink.
 
 This example uses on `KafkaSource` and `KafkaSink`.
