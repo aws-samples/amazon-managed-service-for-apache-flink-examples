@@ -4,7 +4,7 @@ Example of project for a basic Flink Java application using Tumbling and Sliding
 
 * Flink version: 1.18
 * Flink API: DataStream API
-* Flink Connectors: Kafka Connector, Kinesis Connector
+* Flink Connectors: Kinesis Connector
 * Language: Java (11)
 
 The project can run both on Amazon Managed Service for Apache Flink, and locally for development.
