@@ -18,7 +18,6 @@
         <kafka.connector.version>3.1.0-1.18</kafka.connector.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
         <log4j.version>2.17.2</log4j.version>
-        <slf4j.version>1.7.32</slf4j.version>
     </properties>
 
     <dependencies>
@@ -32,6 +31,12 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-clients</artifactId>
+            <version>${flink.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-runtime-web</artifactId>
             <version>${flink.version}</version>
             <scope>provided</scope>
         </dependency>
