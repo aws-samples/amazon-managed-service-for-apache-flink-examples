@@ -18,7 +18,7 @@
         <aws.connector.version>4.2.0-1.18</aws.connector.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
         <scala.binary.version>2.12</scala.binary.version>
-        <log4j.version>2.17.1</log4j.version>
+        <log4j.version>2.23.1</log4j.version>
     </properties>
 
     <dependencyManagement>
@@ -27,7 +27,7 @@
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-bom</artifactId>
                 <!-- Get the latest SDK version from https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
-                <version>1.12.514</version>
+                <version>1.12.677</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -55,12 +55,6 @@
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-kinesisanalytics-runtime</artifactId>
             <version>${kda.runtime.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-s3-fs-hadoop</artifactId>
-            <version>${flink.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <!-- Connectors -->
