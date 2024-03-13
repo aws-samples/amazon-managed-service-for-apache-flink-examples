@@ -12,8 +12,8 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -24,7 +24,7 @@ import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.dateFormat;
 
 public class BasicTableJob {
-    private static final Logger LOG = LoggerFactory.getLogger(BasicTableJob.class);
+    private static final Logger LOG = LogManager.getLogger(BasicTableJob.class);
 
 
 
