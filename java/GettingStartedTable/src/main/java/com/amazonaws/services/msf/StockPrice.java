@@ -1,7 +1,6 @@
 package com.amazonaws.services.msf;
 
 import java.sql.Timestamp;
-import java.time.Instant;
 
 public class StockPrice {
     private Timestamp eventTime;
