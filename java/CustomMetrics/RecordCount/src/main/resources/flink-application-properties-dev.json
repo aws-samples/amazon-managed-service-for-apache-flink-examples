@@ -2,8 +2,8 @@
   {
     "PropertyGroupId": "FlinkApplicationProperties",
     "PropertyMap": {
-      "input.stream.name": "record-count-source",
-      "output.stream.name": "record-count-sink",
+      "input.stream.name": "ExampleInputStream",
+      "output.stream.name": "ExampleOutputStream",
       "aws.region": "us-east-1",
       "flink.stream.initpos": "LATEST"
     }
