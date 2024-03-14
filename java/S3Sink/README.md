@@ -76,18 +76,6 @@ the classpath'.
 * Following is the screenshot of run configuration
 ![Run Configuration](images/runConfiguration.png)
 
-##### Running via Maven command line
-Execute following command from the project home directory -
-
-```
- mvn clean compile exec:java  -Dexec.classpathScope="compile" \
- -Dexec.mainClass="com.amazonaws.services.msf.StreamingJob" 
-```
-
-### Deploying to Amazon Managed Service for Apache Flink
-
-Follow instructions found in [cloudformation](cloudformation) directory to deploy and run the application using AWS Managed Service for Apache Flink.
-
 ## Sample data generation
 To generate test data you can use [Kinesis Data Generator](https://github.com/awslabs/amazon-kinesis-data-generator),
 also available in a [hosted version](https://awslabs.github.io/amazon-kinesis-data-generator/web/producer.html),
