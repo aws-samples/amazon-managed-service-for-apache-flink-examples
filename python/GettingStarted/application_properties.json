@@ -9,7 +9,7 @@
   {
     "PropertyGroupId": "consumer.config.0",
     "PropertyMap": {
-      "input.stream.name": "input-stream",
+      "input.stream.name": "ExampleInputStream",
       "flink.stream.initpos": "LATEST",
       "aws.region": "us-east-1"
     }
@@ -17,7 +17,7 @@
   {
     "PropertyGroupId": "producer.config.0",
     "PropertyMap": {
-      "output.stream.name": "output-stream",
+      "output.stream.name": "ExampleOutputStream",
       "shard.count": "1",
       "aws.region": "us-east-1"
     }
