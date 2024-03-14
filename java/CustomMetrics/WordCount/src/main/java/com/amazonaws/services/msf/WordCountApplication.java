@@ -16,10 +16,9 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kinesis.FlinkKinesisConsumer;
-import org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants;
 import org.apache.flink.util.Collector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import static org.apache.flink.kinesis.shaded.org.apache.flink.connector.aws.config.AWSConfigConstants.AWS_REGION;
 
@@ -29,7 +28,7 @@ import static org.apache.flink.kinesis.shaded.org.apache.flink.connector.aws.con
  */
 public class WordCountApplication {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(WordCountApplication.class);
+    private static final Logger LOGGER = LogManager.getLogger(WordCountApplication.class);
 
     private static final String APPLICATION_CONFIG_GROUP = "FlinkApplicationProperties";
     private static final String LOCAL_APPLICATION_PROPERTIES_RESOURCE = "flink-application-properties-dev.json";
