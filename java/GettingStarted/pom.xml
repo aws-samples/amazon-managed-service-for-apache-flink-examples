@@ -17,7 +17,6 @@
         <flink.version>1.18.1</flink.version>
         <aws.connector.version>4.2.0-1.18</aws.connector.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
-        <scala.binary.version>2.12</scala.binary.version>
         <log4j.version>2.23.1</log4j.version>
     </properties>
 
