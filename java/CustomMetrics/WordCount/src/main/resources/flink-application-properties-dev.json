@@ -2,8 +2,8 @@
   {
     "PropertyGroupId": "FlinkApplicationProperties",
     "PropertyMap": {
-      "input.stream.name": "word-count-source",
-      "output.stream.name": "word-count-sink",
+      "input.stream.name": "ExampleInputStream",
+      "output.stream.name": "ExampleOutputStream",
       "aws.region": "us-east-1",
       "flink.stream.initpos": "LATEST"
     }
