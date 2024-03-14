@@ -20,11 +20,11 @@ import static org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfi
 
 public class FirehoseStreamingJob {
 
-    private static final String DEFAULT_SOURCE_STREAM = "source";
+    private static final String DEFAULT_SOURCE_STREAM = "ExampleInputStream";
 
-    private static final String DEFAULT_SINK_FIREHOSE_STREAM = "delivery";
+    private static final String DEFAULT_SINK_FIREHOSE_STREAM = "ExampleOutputStream";
 
-    private static final String DEFAULT_AWS_REGION = "eu-west-1";
+    private static final String DEFAULT_AWS_REGION = "us-east-1";
 
     /**
      * Get configuration properties from Amazon Managed Service for Apache Flink runtime properties
