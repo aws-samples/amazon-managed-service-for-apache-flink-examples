@@ -11,8 +11,8 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kinesis.FlinkKinesisConsumer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.Map;
@@ -26,7 +26,7 @@ import static org.apache.flink.kinesis.shaded.org.apache.flink.connector.aws.con
  */
 public class RecordCountApplication {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RecordCountApplication.class);
+    private static final Logger LOGGER = LogManager.getLogger(RecordCountApplication.class);
 
     private static final String APPLICATION_CONFIG_GROUP = "FlinkApplicationProperties";
 

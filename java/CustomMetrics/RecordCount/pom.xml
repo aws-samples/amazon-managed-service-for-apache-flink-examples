@@ -10,13 +10,15 @@
     <packaging>jar</packaging>
 
     <properties>
-        <java.version>1.11</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <target.java.version>11</target.java.version>
+        <maven.compiler.source>${target.java.version}</maven.compiler.source>
+        <maven.compiler.target>${target.java.version}</maven.compiler.target>
         <flink.version>1.18.1</flink.version>
         <flink.connector.version>4.2.0-1.18</flink.connector.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
-        <jackson.version>2.16.2</jackson.version>
         <log4j.version>2.23.1</log4j.version>
-        <main.class>com.amazonaws.services.msf.RecordCountApplication</main.class>
+        <jackson.version>2.16.2</jackson.version>
     </properties>
 
     <dependencyManagement>
@@ -33,6 +35,7 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- Amazon Managed Service for Apache Flink (formerly Amazon Kinesis Data Analytics) runtime-->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-kinesisanalytics-runtime</artifactId>
@@ -43,13 +46,13 @@
         <!-- These dependencies are provided, because they should not be packaged into the JAR file. -->
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-clients</artifactId>
+            <artifactId>flink-streaming-java</artifactId>
             <version>${flink.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-streaming-java</artifactId>
+            <artifactId>flink-clients</artifactId>
             <version>${flink.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -60,12 +63,11 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Connectors -->
+        <!-- Flink Kinesis connector -->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-base</artifactId>
             <version>${flink.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
@@ -84,23 +86,22 @@
         <!-- These dependencies are excluded from the application JAR by default. -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>${log4j.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
             <version>${log4j.version}</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
             <version>${log4j.version}</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j.version}</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -111,12 +112,12 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <release>11</release>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <source>${target.java.version}</source>
+                    <target>${target.java.version}</target>
                 </configuration>
             </plugin>
-            <!-- We use the maven-shade plugin to create a fat jar that contains all necessary dependencies. -->
+
+            <!-- Shade plugin to build the fat-jar including all required dependencies -->
             <!-- Change the value of <mainClass>...</mainClass> if your program entry point changes. -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -155,7 +156,7 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>${main.class}</mainClass>
+                                    <mainClass>com.amazonaws.services.msf.RecordCountApplication</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
