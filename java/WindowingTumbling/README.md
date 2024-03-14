@@ -1,6 +1,6 @@
 # Getting Started Flink Java project - Tumbling Window
 
-Example of project for a basic Flink Java application using Tumbling and Sliding windows.
+Example of project for a basic Flink Java application using a tumbling window.
 
 * Flink version: 1.18
 * Flink API: DataStream API
