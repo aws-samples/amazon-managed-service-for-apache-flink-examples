@@ -10,7 +10,8 @@ Example of project for a basic Flink Java application using a tumbling window.
 The project can run both on Amazon Managed Service for Apache Flink, and locally for development.
 There is one sample application which shows tumbling windowing example. 
 
-### Kinesis - Tumbling window*
+### Kinesis - Tumbling window
+
 `com.amazonaws.services.msf.windowing.kinesis.TumblingWindowStreamingJob`
 
 ![Flink Example](images/flink-kinesis-example.png)
