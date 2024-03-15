@@ -9,14 +9,14 @@ This example demonstrate how to use
 [Flink Kafka Connector](https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/connectors/datastream/kafka/),
 source and sink.
 
-This example uses on `KafkaSource` and `KafkaSink`.
+This example uses `KafkaSource` and `KafkaSink`.
 
 ![Flink Example](images/flink-example.png),
 
 Note that the old 
-[`FlinkKafkaConsumer`](https://nightlies.apache.org/flink/flink-docs-release-1.13/docs/connectors/datastream/kafka/#kafka-sourcefunction) 
-and [`FlinkKafkaProducers`](https://nightlies.apache.org/flink/flink-docs-release-1.13/docs/connectors/datastream/kafka/#kafka-producer)
-are deprecated since Flink 1.15
+[`FlinkKafkaConsumer`](https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/connectors/datastream/kafka/#kafka-sourcefunction)
+and [`FlinkKafkaProducer`](https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/connectors/datastream/kafka/#kafka-producer)
+were removed in Flink 1.17 and 1.15, respectively.
 
 ## Runtime configuration
 
