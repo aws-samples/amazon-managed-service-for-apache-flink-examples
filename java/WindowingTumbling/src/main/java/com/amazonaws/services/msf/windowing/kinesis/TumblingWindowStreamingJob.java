@@ -28,8 +28,8 @@ public class TumblingWindowStreamingJob
 {
     private static final String APPLICATION_CONFIG_GROUP = "FlinkApplicationProperties";
     private static final String DEFAULT_REGION = "us-east-1";
-    private static final String DEFAULT_INPUT_STREAM = "input-stream";
-    private static final String DEFAULT_OUTPUT_STREAM = "output-stream";
+    private static final String DEFAULT_INPUT_STREAM = "ExampleInputStream";
+    private static final String DEFAULT_OUTPUT_STREAM = "ExampleOutputStream";
 
     private static final Logger LOG = LoggerFactory.getLogger(TumblingWindowStreamingJob.class);
 
