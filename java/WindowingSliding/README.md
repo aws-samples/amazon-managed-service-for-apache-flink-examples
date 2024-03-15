@@ -45,7 +45,7 @@ Configuration parameters:
 * `OutputStreamName` name of the input Kinesis Data Stream (default: `ExampleOutputStream`)
 
 ## Running in IntelliJ
-To run this example locally -
+To run this example locally:
 * Create source and sink Kinesis streams.
 * Ensure that use profile is configured and user has required permission to read/write from Kinesis streams. 
 * To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to
