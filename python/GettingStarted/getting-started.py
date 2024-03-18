@@ -48,7 +48,7 @@ if is_local:
     CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
     table_env.get_config().get_configuration().set_string(
         "pipeline.jars",
-        "file:///" + CURRENT_DIR + "/lib/flink-sql-connector-kinesis-1.15.2.jar",
+        "file:///" + CURRENT_DIR + "/lib/flink-sql-connector-kinesis-4.2.0-1.18.jar",
     )
 
 
@@ -169,9 +169,6 @@ def main():
 
     if is_local:
         table_result.wait()
-    else:
-        # get job status through TableResult
-        print(table_result.get_job_client().get_job_status())
 
 
 if __name__ == "__main__":

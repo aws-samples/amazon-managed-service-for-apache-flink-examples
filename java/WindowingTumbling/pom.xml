@@ -14,12 +14,11 @@
         <target.java.version>11</target.java.version>
         <maven.compiler.source>${target.java.version}</maven.compiler.source>
         <maven.compiler.target>${target.java.version}</maven.compiler.target>
-        <flink.version>1.15.4</flink.version>
-        <flink.kds.connector.version>1.15.4</flink.kds.connector.version>
-        <scala.binary.version>2.12</scala.binary.version>
+        <flink.version>1.18.1</flink.version>
+        <aws.connector.version>4.2.0-1.18</aws.connector.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
-        <log4j.version>2.17.2</log4j.version>
-        <slf4j.version>1.7.32</slf4j.version>
+        <log4j.version>2.23.1</log4j.version>
+        <jackson.version>2.17.0</jackson.version>
     </properties>
 
     <dependencyManagement>
@@ -28,7 +27,7 @@
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-bom</artifactId>
                 <!-- Get the latest SDK version from https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
-                <version>1.12.514</version>
+                <version>1.12.677</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -50,7 +49,14 @@
             <version>${flink.version}</version>
             <scope>provided</scope>
         </dependency>
-        <!-- Amazon Managed Service for Apache Flink (formerly Amazon Kinesis Data Analytics) runtime-->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-runtime-web</artifactId>
+            <version>${flink.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Amazon Managed Service for Apache Flink (formerly Amazon Kinesis Data Analytics) runtime -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-kinesisanalytics-runtime</artifactId>
@@ -60,31 +66,14 @@
         <!-- Connectors and Formats -->
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-kafka</artifactId>
+            <artifactId>flink-connector-base</artifactId>
             <version>${flink.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-kinesis</artifactId>
-            <version>${flink.kds.connector.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-json</artifactId>
-            <version>${flink.version}</version>
-        </dependency>
-
-        <!-- Other dependencies -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-            <version>1.18.28</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.10.1</version>
+            <version>${aws.connector.version}</version>
         </dependency>
 
         <!-- Add logging framework, to produce console output when running in the IDE. -->
@@ -103,6 +92,12 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>${log4j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
     </dependencies>
 

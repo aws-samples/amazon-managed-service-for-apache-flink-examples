@@ -17,6 +17,7 @@ This module:
 from pyflink.table import EnvironmentSettings, TableEnvironment, DataTypes
 from pyflink.table.window import Tumble
 from pyflink.table.udf import udf
+from pyflink.table.expressions import col, lit
 import os
 import json
 
@@ -39,7 +40,7 @@ if is_local:
         "pipeline.jars",
         "file:///"
         + CURRENT_DIR
-        + "/lib/flink-sql-connector-kinesis-1.15.2.jar"
+        + "/lib/flink-sql-connector-kinesis-4.2.0-1.18.jar"
     )
 
     table_env.get_config().get_configuration().set_string(
@@ -94,7 +95,7 @@ def create_sink_table(table_name, bucket_name):
               WITH (
                   'connector'='filesystem',
                   'path'='s3a://{1}/',
-                  'format'='csv',
+                  'format'='json',
                   'sink.partition-commit.policy.kind'='success-file',
                   'sink.partition-commit.delay' = '1 min'
               ) """.format(table_name, bucket_name)
@@ -106,10 +107,10 @@ def perform_tumbling_window_aggregation(input_table_name):
 
     tumbling_window_table = (
         input_table.window(
-            Tumble.over("1.minute").on("event_time").alias("one_minute_window")
+            Tumble.over(lit(1).minutes).on(col("event_time")).alias("one_minute_window")
         )
-        .group_by("ticker, one_minute_window")
-        .select("ticker, price.avg as price, to_string(one_minute_window.end) as event_time")
+        .group_by(col("ticker"), col("one_minute_window"))
+        .select(col("ticker"), col('price').avg.alias('price'), (to_string(col('one_minute_window').end)).alias('event_time'))
     )
 
     return tumbling_window_table
@@ -169,10 +170,6 @@ def main():
 
     if is_local:
         table_result.wait()
-    else:
-        # get job status through TableResult
-        print(table_result.get_job_client().get_job_status())
-
 
 if __name__ == "__main__":
     main()

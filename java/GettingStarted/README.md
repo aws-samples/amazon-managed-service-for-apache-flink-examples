@@ -2,7 +2,7 @@
 
 Skeleton project for a basic Flink Java application to run on Amazon Managed Service for Apache Flink.
 
-* Flink version: 1.15
+* Flink version: 1.18
 * Flink API: DataStream API
 * Language: Java (11)
 

@@ -6,8 +6,8 @@ import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.kinesis.sink.KinesisStreamsSink;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -28,8 +28,8 @@ public class TumblingWindowStreamingJob
 {
     private static final String APPLICATION_CONFIG_GROUP = "FlinkApplicationProperties";
     private static final String DEFAULT_REGION = "us-east-1";
-    private static final String DEFAULT_INPUT_STREAM = "input-stream";
-    private static final String DEFAULT_OUTPUT_STREAM = "output-stream";
+    private static final String DEFAULT_INPUT_STREAM = "ExampleInputStream";
+    private static final String DEFAULT_OUTPUT_STREAM = "ExampleOutputStream";
 
     private static final Logger LOG = LoggerFactory.getLogger(TumblingWindowStreamingJob.class);
 

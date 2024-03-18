@@ -12,17 +12,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <target.java.version>11</target.java.version>
         <maven.compiler.source>${target.java.version}</maven.compiler.source>
-        <main.class>com.amazonaws.services.msf.StreamingJob</main.class>
-
-        <scala.binary.version>2.12</scala.binary.version>
-        <avro.version>1.10.2</avro.version>
-
-        <flink.version>1.15.4</flink.version>
-        <kda.connectors.version>2.1.0</kda.connectors.version>
+        <maven.compiler.target>${target.java.version}</maven.compiler.target>
+        <flink.version>1.18.1</flink.version>
+        <flink.connector.version>4.2.0-1.18</flink.connector.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
-        <slf4j.version>1.7.32</slf4j.version>
-        <log4j.version>2.17.2</log4j.version>
-        <junit.version>5.9.1</junit.version>
+        <log4j.version>2.23.1</log4j.version>
     </properties>
 
     <dependencyManagement>
@@ -31,7 +25,7 @@
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-bom</artifactId>
                 <!-- Get the latest SDK version from https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
-                <version>1.12.281</version>
+                <version>1.12.677</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -41,12 +35,6 @@
     <dependencies>
         <!-- Apache Flink dependencies -->
         <!-- These dependencies are provided, because they should not be packaged into the JAR file. -->
-    <dependency>
-        <groupId>org.apache.flink</groupId>
-        <artifactId>flink-java</artifactId>
-        <version>${flink.version}</version>
-        <scope>provided</scope>
-    </dependency>
     <dependency>
         <groupId>org.apache.flink</groupId>
         <artifactId>flink-streaming-java</artifactId>
@@ -59,18 +47,18 @@
         <version>${flink.version}</version>
         <scope>provided</scope>
     </dependency>
+    <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-runtime-web</artifactId>
+        <version>${flink.version}</version>
+        <scope>provided</scope>
+    </dependency>
 
-    <!-- Kinesis Data Analytics -->
+    <!-- Amazon Managed Service for Apache Flink (formerly Amazon Kinesis Data Analytics) runtime-->
     <dependency>
         <groupId>com.amazonaws</groupId>
         <artifactId>aws-kinesisanalytics-runtime</artifactId>
         <version>${kda.runtime.version}</version>
-        <scope>provided</scope>
-    </dependency>
-    <dependency>
-        <groupId>com.amazonaws</groupId>
-        <artifactId>aws-kinesisanalytics-flink</artifactId>
-        <version>${kda.connectors.version}</version>
     </dependency>
 
     <!-- Flink connectors -->
@@ -79,7 +67,6 @@
         <artifactId>flink-connector-files</artifactId>
         <version>${flink.version}</version>
     </dependency>
-
     <dependency>
         <groupId>org.apache.flink</groupId>
         <artifactId>flink-s3-fs-hadoop</artifactId>
@@ -93,43 +80,28 @@
     <dependency>
         <groupId>org.apache.flink</groupId>
         <artifactId>flink-connector-kinesis</artifactId>
-        <version>${flink.version}</version>
+        <version>${flink.connector.version}</version>
     </dependency>
-    <dependency>
-        <groupId>org.apache.flink</groupId>
-        <artifactId>flink-connector-aws-kinesis-streams</artifactId>
-        <version>${flink.version}</version>
-    </dependency>
+
         <!-- Add logging framework, to produce console output when running in the IDE. -->
         <!-- These dependencies are excluded from the application JAR by default. -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
             <version>${log4j.version}</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
             <version>${log4j.version}</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>${log4j.version}</version>
-        </dependency>
-
-        <!-- Test -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
@@ -152,7 +124,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>3.2.1</version>
                 <executions>
                     <!-- Run shade goal on package phase -->
                     <execution>
@@ -186,7 +158,7 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>${main.class}</mainClass>
+                                    <mainClass>com.amazonaws.services.msf.StreamingJob</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

@@ -5,7 +5,6 @@ import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.aws.config.AWSConfigConstants;
 import org.apache.flink.connector.firehose.sink.KinesisFirehoseSink;
-import org.apache.flink.connector.kinesis.sink.KinesisStreamsSink;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -16,16 +15,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import static org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants.*;
+import static org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants.STREAM_INITIAL_POSITION;
 
 
-public class StreamingJob {
+public class FirehoseStreamingJob {
 
-    private static final String DEFAULT_SOURCE_STREAM = "source";
+    private static final String DEFAULT_SOURCE_STREAM = "ExampleInputStream";
 
-    private static final String DEFAULT_SINK_FIREHOSE_STREAM = "delivery";
+    private static final String DEFAULT_SINK_FIREHOSE_STREAM = "ExampleOutputStream";
 
-    private static final String DEFAULT_AWS_REGION = "eu-west-1";
+    private static final String DEFAULT_AWS_REGION = "us-east-1";
 
     /**
      * Get configuration properties from Amazon Managed Service for Apache Flink runtime properties
