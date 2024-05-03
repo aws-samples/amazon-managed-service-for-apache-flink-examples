@@ -11,6 +11,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <buildDirectory>${project.basedir}/target</buildDirectory>
+        <jar.finalName>${project.name}-${project.version}</jar.finalName>
         <target.java.version>11</target.java.version>
         <maven.compiler.source>${target.java.version}</maven.compiler.source>
         <maven.compiler.target>${target.java.version}</maven.compiler.target>
@@ -101,6 +103,9 @@
     </dependencies>
 
     <build>
+        <directory>${buildDirectory}</directory>
+        <finalName>${jar.finalName}</finalName>
+
         <plugins>
             <!-- Java Compiler -->
             <plugin>

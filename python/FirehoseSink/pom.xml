@@ -5,6 +5,8 @@
     <version>1</version>
 
     <properties>
+        <buildDirectory>${project.basedir}/target</buildDirectory>
+        <jar.finalName>${project.name}-${project.version}</jar.finalName>
         <flink.version>1.15.2</flink.version>
     </properties>
 
@@ -25,6 +27,8 @@
     </dependencies>
 
     <build>
+        <directory>${buildDirectory}</directory>
+        <finalName>${jar.finalName}</finalName>
 
         <plugins>
 
