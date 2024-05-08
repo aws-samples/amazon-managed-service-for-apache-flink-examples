@@ -35,6 +35,7 @@ table_env = TableEnvironment.create(env_settings)
 
 statement_set = table_env.create_statement_set()
 
+AT_TIMESTAMP = "AT_TIMESTAMP"
 APPLICATION_PROPERTIES_FILE_PATH = "/etc/flink/application_properties.json"  # on kda
 
 is_local = (
@@ -48,7 +49,7 @@ if is_local:
     CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
     table_env.get_config().get_configuration().set_string(
         "pipeline.jars",
-        "file:///" + CURRENT_DIR + "/lib/flink-sql-connector-kinesis-4.2.0-1.18.jar",
+        "file:///" + CURRENT_DIR + "/lib/pyflink-dependencies.jar",
     )
 
 
@@ -67,7 +68,13 @@ def property_map(props, property_group_id):
         if prop["PropertyGroupId"] == property_group_id:
             return prop["PropertyMap"]
 
-def create_source_table(table_name, stream_name, region, stream_initpos):
+def create_source_table(table_name, stream_name, region, stream_initpos, stream_initpos_timestamp):
+    if stream_initpos == AT_TIMESTAMP and stream_initpos_timestamp == None:
+            raise ValueError(f"A timestamp must be supplied for stream_initpos {AT_TIMESTAMP}")
+
+    init_pos = "\n'scan.stream.initpos' = '{0}',".format(stream_initpos) if stream_initpos is not None else ''
+    init_pos_timestamp = "\n'scan.stream.initpos-timestamp' = '{0}',".format(stream_initpos_timestamp) if stream_initpos_timestamp is not None else ''
+
     return """ CREATE TABLE {0} (
                 ticker VARCHAR(6),
                 price DOUBLE,
@@ -79,22 +86,20 @@ def create_source_table(table_name, stream_name, region, stream_initpos):
               WITH (
                 'connector' = 'kinesis',
                 'stream' = '{1}',
-                'aws.region' = '{2}',
-                'scan.stream.initpos' = '{3}',
+                'aws.region' = '{2}',{3}{4}
                 'format' = 'json',
                 'json.timestamp-format.standard' = 'ISO-8601'
               ) """.format(
-        table_name, stream_name, region, stream_initpos
+        table_name, stream_name, region, init_pos, init_pos_timestamp
     )
 
 
-def create_sink_table(table_name, stream_name, region, stream_initpos):
+def create_sink_table(table_name, stream_name, region):
     return """ CREATE TABLE {0} (
                 ticker VARCHAR(6),
                 price DOUBLE,
                 event_time TIMESTAMP(3),
                 WATERMARK FOR event_time AS event_time - INTERVAL '5' SECOND
-
               )
               PARTITIONED BY (ticker)
               WITH (
@@ -126,14 +131,16 @@ def create_print_table(table_name, stream_name, region, stream_initpos):
 
 def main():
     # Application Property Keys
-    input_property_group_key = "consumer.config.0"
-    producer_property_group_key = "producer.config.0"
+    input_property_group_key = "InputStream0"
+    producer_property_group_key = "OutputStream0"
 
-    input_stream_key = "input.stream.name"
+    input_stream_key = "stream.name"
     input_region_key = "aws.region"
-    input_starting_position_key = "flink.stream.initpos"
 
-    output_stream_key = "output.stream.name"
+    input_starting_position_key = "flink.stream.initpos"
+    input_starting_position_timestamp = "flink.stream.initpos.timestamp"
+
+    output_stream_key = "stream.name"
     output_region_key = "aws.region"
 
     # tables
@@ -148,19 +155,21 @@ def main():
 
     input_stream = input_property_map[input_stream_key]
     input_region = input_property_map[input_region_key]
-    stream_initpos = input_property_map[input_starting_position_key]
+
+    stream_initpos = input_property_map[input_starting_position_key] if input_starting_position_key in input_property_map else None
+    stream_initpos_timestamp = input_property_map[input_starting_position_timestamp] if input_starting_position_timestamp in input_property_map else None
 
     output_stream = output_property_map[output_stream_key]
     output_region = output_property_map[output_region_key]
 
     # 2. Creates a source table from a Kinesis Data Stream
     table_env.execute_sql(
-        create_source_table(input_table_name, input_stream, input_region, stream_initpos)
+        create_source_table(input_table_name, input_stream, input_region, stream_initpos, stream_initpos_timestamp)
     )
 
     # 3. Creates a sink table writing to a Kinesis Data Stream
     table_env.execute_sql(
-        create_sink_table(output_table_name, output_stream, output_region, stream_initpos)
+        create_sink_table(output_table_name, output_stream, output_region)
     )
 
     # 4. Inserts the source table data into the sink table
