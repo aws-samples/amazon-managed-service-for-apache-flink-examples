@@ -4,7 +4,6 @@ import com.amazonaws.services.kinesisanalytics.runtime.KinesisAnalyticsRuntime;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;
-import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.datagen.source.DataGeneratorSource;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
@@ -16,7 +15,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -24,26 +22,24 @@ import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.dateFormat;
 
 public class BasicTableJob {
-    private static final Logger LOG = LogManager.getLogger(BasicTableJob.class);
 
+    private static final Logger LOGGER = LogManager.getLogger(BasicTableJob.class);
 
+    // Name of the local JSON resource with the application properties in the same format as they are received from the Amazon Managed Service for Apache Flink runtime
+    private static final String LOCAL_APPLICATION_PROPERTIES_RESOURCE = "flink-application-properties-dev.json";
 
     /**
-     * Get configuration properties from Amazon Managed Service for Apache Flink runtime properties
-     * GroupID "FlinkApplicationProperties", or from command line parameters when running locally
+     * Load application properties from Amazon Managed Service for Apache Flink runtime or from a local resource, when the environment is local
      */
-    private static ParameterTool loadApplicationParameters(String[] args, StreamExecutionEnvironment env) throws IOException {
+    private static Map<String, Properties> loadApplicationProperties(StreamExecutionEnvironment env) throws IOException {
         if (env instanceof LocalStreamEnvironment) {
-            return ParameterTool.fromArgs(args);
+            LOGGER.info("Loading application properties from '{}'", LOCAL_APPLICATION_PROPERTIES_RESOURCE);
+            return KinesisAnalyticsRuntime.getApplicationProperties(
+                    BasicTableJob.class.getClassLoader()
+                            .getResource(LOCAL_APPLICATION_PROPERTIES_RESOURCE).getPath());
         } else {
-            Map<String, Properties> applicationProperties = KinesisAnalyticsRuntime.getApplicationProperties();
-            Properties flinkProperties = applicationProperties.get("FlinkApplicationProperties");
-            if (flinkProperties == null) {
-                throw new RuntimeException("Unable to load FlinkApplicationProperties properties from the Kinesis Analytics Runtime.");
-            }
-            Map<String, String> map = new HashMap<>(flinkProperties.size());
-            flinkProperties.forEach((k, v) -> map.put((String) k, (String) v));
-            return ParameterTool.fromMap(map);
+            LOGGER.info("Loading application properties from Amazon Managed Service for Apache Flink");
+            return KinesisAnalyticsRuntime.getApplicationProperties();
         }
     }
 
@@ -51,9 +47,12 @@ public class BasicTableJob {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, EnvironmentSettings.newInstance().build());
 
-        ParameterTool applicationParameters = loadApplicationParameters(args, env);
-        String s3Path = applicationParameters.get("s3Path", "");
-        LOG.info("s3Path is {}", s3Path);
+        Map<String, Properties> applicationParameters = loadApplicationProperties(env);
+
+        Properties s3Properties = applicationParameters.get("bucket");
+        String s3Path = s3Properties.getProperty("name") + '/' + s3Properties.getProperty("path", "output");
+
+        LOGGER.info("s3Path is {}", s3Path);
 
         // When running locally, enable checkpointing, as filesystem sink rolls files on checkpointing
         // When running on Managed Flink checkpointing is controlled by the application configuration
@@ -94,7 +93,7 @@ public class BasicTableJob {
         // Create the sink to S3 table
         tableEnv.createTemporaryView("filtered_stock_prices", filteredStockPricesTable);
         tableEnv.executeSql("CREATE TABLE s3_sink (" +
-                 "eventTime TIMESTAMP," +
+                 "eventTime TIMESTAMP(3)," +
                  "ticker STRING," +
                  "price DOUBLE," +
                  "dt STRING," +
