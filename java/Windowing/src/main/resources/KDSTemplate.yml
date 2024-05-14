@@ -1,0 +1,39 @@
+---
+Parameters:
+  WithConsumer:
+    Type: String
+    AllowedValues: [ true, false ]
+  StreamName:
+    Type: String
+    AllowedPattern : "^[a-zA-Z0-9]*$"
+Conditions:
+  ShouldCreateConsumer:
+    !Equals [ true, !Ref WithConsumer ]
+Resources:
+  KDS:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      ShardCount: 1
+      Name: !Join
+        - "-"
+        - - !Ref StreamName
+          - !Select
+            - 0
+            - !Split
+              - "-"
+              - !Select
+                - 2
+                - !Split
+                  - "/"
+                  - !Ref "AWS::StackId"
+  KDSStreamConsumer:
+    Condition: ShouldCreateConsumer
+    Type: AWS::Kinesis::StreamConsumer
+    Properties:
+      ConsumerName: "stream-consumer"
+      StreamARN:
+        Fn::GetAtt: [ KDS, Arn ]
+Outputs:
+  StreamARN:
+    Value:
+      Fn::GetAtt: [ KDS, Arn ]

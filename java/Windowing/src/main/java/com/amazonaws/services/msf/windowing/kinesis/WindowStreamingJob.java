@@ -35,12 +35,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.Properties;
 
-public class SlidingWindowStreamingJobWithParallelism {
+public class WindowStreamingJob {
 
     // Name of the local JSON resource with the application properties in the same format as they are received from the Amazon Managed Service for Apache Flink runtime
     private static final String LOCAL_APPLICATION_PROPERTIES_RESOURCE = "flink-application-properties-dev.json";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SlidingWindowStreamingJobWithParallelism.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WindowStreamingJob.class);
     public static final Time WINDOW_LENGTH = Time.seconds(30);
     public static final Time STEP_LENGTH = Time.seconds(5);
     public static final Time JITTER_LENGTH = Time.seconds(5);
@@ -53,7 +53,7 @@ public class SlidingWindowStreamingJobWithParallelism {
         if (env instanceof LocalStreamEnvironment) {
             LOGGER.info("Loading application properties from '{}'", LOCAL_APPLICATION_PROPERTIES_RESOURCE);
             return KinesisAnalyticsRuntime.getApplicationProperties(
-                    SlidingWindowStreamingJobWithParallelism.class.getClassLoader()
+                    WindowStreamingJob.class.getClassLoader()
                             .getResource(LOCAL_APPLICATION_PROPERTIES_RESOURCE).getPath());
         } else {
             LOGGER.info("Loading application properties from Amazon Managed Service for Apache Flink");
@@ -77,7 +77,7 @@ public class SlidingWindowStreamingJobWithParallelism {
                 .<StockPrice>forBoundedOutOfOrderness(Duration.of(10, ChronoUnit.SECONDS))
                 .withTimestampAssigner((event, timestamp) -> event.getEventTime().getTime()));
 
-        // Use tick symbol before applying window
+        // Key processing by tick symbol before applying windowing logic
         KeyedStream<Tuple2<String, Double>, String> keyedStream = watermarkedStream.map(value -> { // Parse the JSON
                     return new Tuple2<>(value.getTicker(), value.getPrice());
                 }).returns(Types.TUPLE(Types.STRING, Types.DOUBLE))
@@ -119,30 +119,38 @@ public class SlidingWindowStreamingJobWithParallelism {
 
     private static SingleOutputStreamOperator<String> avgPriceWindow(KeyedStream<Tuple2<String, Double>, String> keyedStream, WindowAssigner<Object, TimeWindow> windowAssigner) {
         return keyedStream.window(windowAssigner)
-                .aggregate(new AverageAggregate(), new WindowContextEmittingFunction())
+                .aggregate(new MinAggregate(), new WindowContextEmittingFunction())
                 .map(value -> value.f0 + String.format(",%.2f,%s", value.f1, value.f2) + "\n");
     }
 
-    private static class AverageAggregate
-            implements AggregateFunction<Tuple2<String, Double>, Tuple2<Double, Long>, Double> {
+    /**
+     * Implementation of min aggregate for demonstration purposes. This specific outcome could be achieved more
+     * simply by relying on pre-defined aggregators.
+     */
+    private static class MinAggregate implements AggregateFunction<Tuple2<String, Double>, Double, Double> {
+
         @Override
-        public Tuple2<Double, Long> createAccumulator() {
-            return new Tuple2<>(0d, 0L);
+        public Double createAccumulator() {
+            return Double.NaN;
         }
 
         @Override
-        public Tuple2<Double, Long> add(Tuple2<String, Double> value, Tuple2<Double, Long> accumulator) {
-            return new Tuple2<>(accumulator.f0 + value.f1, accumulator.f1 + 1L);
+        public Double add(Tuple2<String, Double> value, Double accumulator) {
+            return accumulator.isNaN() || accumulator > value.f1
+                    ? value.f1
+                    : accumulator;
         }
 
         @Override
-        public Double getResult(Tuple2<Double, Long> accumulator) {
-            return ((double) accumulator.f0) / accumulator.f1;
+        public Double getResult(Double accumulator) {
+            return accumulator;
         }
 
         @Override
-        public Tuple2<Double, Long> merge(Tuple2<Double, Long> a, Tuple2<Double, Long> b) {
-            return new Tuple2<>(a.f0 + b.f0, a.f1 + b.f1);
+        public Double merge(Double a, Double b) {
+            return a.isNaN() || a > b
+                    ? b
+                    : a;
         }
 
     }
