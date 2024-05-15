@@ -82,29 +82,33 @@ public class KafkaStreamingJob {
                 .build();
     }
 
+    private static Properties mergeProperties(Properties properties, Properties authProperties) {
+        properties.putAll(authProperties);
+        return properties;
+    }
+
 
     public static void main(String[] args) throws Exception {
-        // set up the streaming execution environment
+        // Set up the streaming execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+
+        // Load the application properties
         final Map<String, Properties> applicationProperties = loadApplicationProperties(env);
 
         LOG.info("Application properties: {}", applicationProperties);
 
-        Properties inputProperties = applicationProperties.get("Input0");
-        Properties outputProperties = applicationProperties.get("Output0");
-
+        // Get the AuthProperties if present (only relevant when using IAM Auth)
         Properties authProperties = applicationProperties.getOrDefault("AuthProperties", new Properties());
 
-        inputProperties.putAll(authProperties);
-        outputProperties.putAll(authProperties);
+        // Prepare the Source and Sink properties
+        Properties inputProperties = mergeProperties(applicationProperties.get("Input0"), authProperties);
+        Properties outputProperties = mergeProperties(applicationProperties.get("Output0"), authProperties);
 
-        if (!outputProperties.containsKey("transaction.timeout.ms")) {
-            outputProperties.setProperty("transaction.timeout.ms", "1000");
-        }
-
+        // Create and add the Source
         KafkaSource<String> source = createKafkaSource(inputProperties);
         DataStream<String> input = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka source");
 
+        // Create and add the Sink
         KafkaSink<String> sink = createKafkaSink(outputProperties);
         input.sinkTo(sink);
 
