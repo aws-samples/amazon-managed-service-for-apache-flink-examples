@@ -120,7 +120,7 @@ public class WindowStreamingJob {
     private static SingleOutputStreamOperator<String> avgPriceWindow(KeyedStream<Tuple2<String, Double>, String> keyedStream, WindowAssigner<Object, TimeWindow> windowAssigner) {
         return keyedStream.window(windowAssigner)
                 .aggregate(new MinAggregate(), new WindowContextEmittingFunction())
-                .map(value -> value.f0 + String.format(",%.2f,%s", value.f1, value.f2) + "\n");
+                .map(value -> value.f0 + String.format(",%.2f,%s", value.f1, value.f2));
     }
 
     /**
