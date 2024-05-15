@@ -23,35 +23,33 @@ were removed in Flink 1.17 and 1.15, respectively.
 The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for Apache Flink,
 or from command line parameters, when running locally.
 
-Runtime Properties are expected in the Group ID `FlinkApplicationProperties`.
-Command line parameters should be prepended by `--`.
+Runtime Properties are expected in the Group IDs `Input0` and `Output0` (see [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json)).
 
-They are all case-sensitive.
+All properties are case-sensitive.
 
 Configuration parameters:
 
-* `source.bootstrap.servers` source cluster boostrap servers
-* `source.topic` source topic (default: `source`)
-* `sink.bootstrap.servers` sink cluster bootstrap servers
-* `sink.topic` sink topic (default: `destination`)
-* `sink.transaction.timeout.ms` Sink transaction timeout 
+For the source (i.e. Group ID `Input0`):
+* `bootstrap.servers` source cluster boostrap servers
+* `topic` source topic (default: `source`)
+* `group.id` source group id (default: `my-group`)
+
+For the sink (i.e. Group ID `Output0`):
+* `bootstrap.servers` sink cluster bootstrap servers
+* `topic` sink topic (default: `destination`)
+* `transaction.timeout.ms` sink transaction timeout (default: `1000`)
 
 If you are connecting with no-auth and no SSL, above will work. Else you need additional configuration for both source and sink.
+
 ### For IAM Auth
 
-
-* `source.sasl.mechanism` AWS_MSK_IAM
-* `source.sasl.client.callback.handler.class` software.amazon.msk.auth.iam.IAMClientCallbackHandler
-* `source.sasl.jaas.config` "software.amazon.msk.auth.iam.IAMLoginModule required;"
-* `source.security.protocol` SASL_SSL
-* `source.ssl.truststore.location` /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts
-* `source.ssl.truststore.password` changeit
-* `sink.sasl.mechanism` AWS_MSK_IAM
-* `sink.sasl.client.callback.handler.class` software.amazon.msk.auth.iam.IAMClientCallbackHandler
-* `sink.sasl.jaas.config` "software.amazon.msk.auth.iam.IAMLoginModule required;"
-* `sink.security.protocol` SASL_SSL
-* `sink.ssl.truststore.location` /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts
-* `sink.ssl.truststore.password` changeit
+When using IAM Auth, the following Runtime Properties are expected at the Group ID `AuthProperties`:
+* `sasl.mechanism` AWS_MSK_IAM
+* `sasl.client.callback.handler.class` software.amazon.msk.auth.iam.IAMClientCallbackHandler
+* `sasl.jaas.config` "software.amazon.msk.auth.iam.IAMLoginModule required;"
+* `security.protocol` SASL_SSL
+* `ssl.truststore.location` /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts
+* `ssl.truststore.password` changeit
 
 
 ## Running locally in IntelliJ
@@ -60,11 +58,5 @@ To run this example locally -
 * Run a Kafka cluster locally. You can refer https://kafka.apache.org/quickstart to download and start Kafka locally.
 * Create `source` and `sink` topics. 
 * To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*.
-
-Provide arguments like following -
-```
---source.bootstrap.servers localhost:9092 --source.topic source --sink.bootstrap.servers localhost:9092 --sink.topic sink --sink.transaction.timeout.ms 1000
-```
-
-Following is the screenshot of run configuration
-![Run Configuration](images/runConfiguration.png)
+* Update [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json)
+* Execute using credentials with permissions to consume data from a Kinesis Data Stream and write data into Amazon S3.
