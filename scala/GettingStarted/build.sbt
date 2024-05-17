@@ -9,7 +9,7 @@ lazy val root = (project in file(".")).
     javacOptions ++= Seq("-source", "11", "-target", "11")
   )
 
-val jarName = "getting-started-scala-1.0.jar"
+val jarName = "ScalaGettingStarted-flink_1.18.jar"
 val flinkVersion = "1.18.1"
 val msfRuntimeVersion = "1.2.0"
 val connectorVersion = "4.2.0-1.18"

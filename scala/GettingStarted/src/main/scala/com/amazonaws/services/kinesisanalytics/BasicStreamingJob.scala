@@ -15,7 +15,7 @@ private val defaultOutputStreamName = "ExampleOutputStream"
 
 private def createSource: FlinkKinesisConsumer[String] = {
   val applicationProperties = KinesisAnalyticsRuntime.getApplicationProperties
-  val inputProperties = applicationProperties.get("ConsumerConfigProperties")
+  val inputProperties = applicationProperties.get("InputStream0")
 
   new FlinkKinesisConsumer[String](inputProperties.getProperty(streamNameKey, defaultInputStreamName),
     new SimpleStringSchema, inputProperties)
@@ -23,7 +23,7 @@ private def createSource: FlinkKinesisConsumer[String] = {
 
 private def createSink: KinesisStreamsSink[String] = {
   val applicationProperties = KinesisAnalyticsRuntime.getApplicationProperties
-  val outputProperties = applicationProperties.get("ProducerConfigProperties")
+  val outputProperties = applicationProperties.get("OutputStream0")
 
   KinesisStreamsSink.builder[String]
     .setKinesisClientProperties(outputProperties)
