@@ -5,8 +5,8 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.metrics.Counter;
 
 /**
- * NoOp mapper function which acts as a pass through for the records. It would also publish the custom metric for
- * the number of received records.
+ * NoOp mapper function which acts as a pass through for the records. It demonstrates
+ * reporting of custom metrics that get published to Cloud Watch by Managed Service for Apache Flink.
  */
 class MetricEmittingMapperFunction extends RichMapFunction<SpeedRecord, SpeedRecord> {
     private static final double averageDecay = 0.1;
@@ -21,6 +21,10 @@ class MetricEmittingMapperFunction extends RichMapFunction<SpeedRecord, SpeedRec
 
     @Override
     public void open(Configuration config) {
+        //  Managed Service for Apache Flink publishes only metrics associated with "kinesisanalytics" metric group.
+        //  Amazon Managed Service for Apache Flink was formerly known as Kinesis Data Analytics.
+        //
+        //  Additional metric groups may be included and will get published into Cloud Watch as dimensions.
         this.counter = getRuntimeContext().getMetricGroup()
                 .addGroup("kinesisanalytics")
                 .counter(customMetricName + "Total");

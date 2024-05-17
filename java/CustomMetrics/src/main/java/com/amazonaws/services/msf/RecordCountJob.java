@@ -22,9 +22,9 @@ import java.util.Properties;
  * A sample Managed Service For Apache Flink application with Kinesis data streams as source and sink with simple filter
  * function.
  */
-public class RecordCountApplication {
+public class RecordCountJob {
 
-    private static final Logger LOGGER = LogManager.getLogger(RecordCountApplication.class);
+    private static final Logger LOGGER = LogManager.getLogger(RecordCountJob.class);
     private static final String LOCAL_APPLICATION_PROPERTIES_RESOURCE = "flink-application-properties-dev.json";
 
     /**
@@ -34,7 +34,7 @@ public class RecordCountApplication {
         if (env instanceof LocalStreamEnvironment) {
             LOGGER.info("Loading application properties from '{}'", LOCAL_APPLICATION_PROPERTIES_RESOURCE);
             return KinesisAnalyticsRuntime.getApplicationProperties(
-                    RecordCountApplication.class.getClassLoader()
+                    RecordCountJob.class.getClassLoader()
                             .getResource(LOCAL_APPLICATION_PROPERTIES_RESOURCE).getPath());
         } else {
             LOGGER.info("Loading application properties from Amazon Managed Service for Apache Flink");
@@ -49,27 +49,27 @@ public class RecordCountApplication {
         // Load application parameters
         final Map<String, Properties> applicationParameters = loadApplicationProperties(env);
 
-        DataStreamSource<SpeedRecord> kinesisInput = env.fromSource(
+        DataStreamSource<SpeedRecord> input = env.fromSource(
                 getSpeedDataGeneratorSource(), WatermarkStrategy.noWatermarks(), "data-generator").setParallelism(1);
 
-        // Add the NoOpMapperFunction to publish custom 'ReceivedRecords' metric before filtering
-        DataStream<SpeedRecord> noopMapperFunctionBeforeFilter = kinesisInput.map(new MetricEmittingMapperFunction("ReceivedRecords"));
+        // Add the NoOpMapperFunction to publish custom metrics before filtering
+        DataStream<SpeedRecord> noopMapperFunctionBeforeFilter = input
+                .map(new MetricEmittingMapperFunction("ReceivedRecords"));
 
         // Add the FilterFunction to filter the records based on MinSpeed (i.e. 106)
         DataStream<SpeedRecord> kinesisProcessed = noopMapperFunctionBeforeFilter.filter(SpeedLimitFilter::isAboveSpeedLimit);
 
-        // Add the NoOpMapperFunction to publish custom 'FilteredRecords' metric after filtering
+        // Add the NoOpMapperFunction to publish custom metrics after filtering
         DataStream<SpeedRecord> noopMapperFunctionAfterFilter =
                 kinesisProcessed.map(new MetricEmittingMapperFunction("FilteredRecords"));
 
-        KinesisStreamsSink<String> kinesisSink = createSink(applicationParameters.get("OutputStream0"));
         noopMapperFunctionAfterFilter
                 .map(value -> String.format("%s,%.2f", value.id, value.speed))
-                .sinkTo(kinesisSink);
+                .sinkTo(createSink(applicationParameters.get("OutputStream0")));
 
-        LOGGER.info("Starting flink job: {}", "RecordCountApplication");
+        LOGGER.info("Starting flink job: {}", "RecordCountJob");
 
-        env.execute("RecordCountApplication Job");
+        env.execute("RecordCount Job");
     }
 
     private static DataGeneratorSource<SpeedRecord> getSpeedDataGeneratorSource() {

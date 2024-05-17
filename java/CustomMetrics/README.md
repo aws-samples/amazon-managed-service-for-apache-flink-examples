@@ -13,7 +13,6 @@ The application reads the runtime configuration from the Runtime Properties, whe
 Runtime Properties are expected in the Group ID `OutputStream0`. They are all case-sensitive:
 * `stream.name` - Kinesis Data Stream to be used for sink.
 * `aws.region` - AWS Region containing test resources.
-* `flink.stream.initpos` - Kinesis Data Streams starting position. Provide `LATEST` to start from the latest record of the stream.
 
 ### Running locally in IntelliJ
 Update `PropertyMap` in [configuration file](src/main/resources/flink-application-properties-dev.json).
