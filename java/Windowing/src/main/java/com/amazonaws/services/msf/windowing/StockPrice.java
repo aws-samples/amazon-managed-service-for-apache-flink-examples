@@ -1,4 +1,4 @@
-package com.amazonaws.services.msf.windowing.kinesis;
+package com.amazonaws.services.msf.windowing;
 
 import java.sql.Timestamp;
 

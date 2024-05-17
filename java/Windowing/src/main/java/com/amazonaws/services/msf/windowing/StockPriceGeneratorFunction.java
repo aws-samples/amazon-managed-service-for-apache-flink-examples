@@ -1,4 +1,4 @@
-package com.amazonaws.services.msf.windowing.kinesis;
+package com.amazonaws.services.msf.windowing;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.flink.connector.datagen.source.GeneratorFunction;

@@ -3,28 +3,28 @@
     "PropertyGroupId": "OutputStream0",
     "PropertyMap": {
       "aws.region": "us-east-1",
-      "stream.name": "SlidingWindowProcessingTime"
+      "stream.name": "SlidingWindowProcessingTimeOutput"
     }
   },
   {
     "PropertyGroupId": "OutputStream1",
     "PropertyMap": {
       "aws.region": "us-east-1",
-      "stream.name": "SlidingWindowEventTime"
+      "stream.name": "SlidingWindowEventTimeOutput"
     }
   },
   {
     "PropertyGroupId": "OutputStream2",
     "PropertyMap": {
       "aws.region": "us-east-1",
-      "stream.name": "TumblingWindowProcessingTime"
+      "stream.name": "TumblingWindowProcessingTimeOutput"
     }
   },
   {
     "PropertyGroupId": "OutputStream3",
     "PropertyMap": {
       "aws.region": "us-east-1",
-      "stream.name": "TumblingWindowEventTime"
+      "stream.name": "TumblingWindowEventTimeOutput"
     }
   }
 ]

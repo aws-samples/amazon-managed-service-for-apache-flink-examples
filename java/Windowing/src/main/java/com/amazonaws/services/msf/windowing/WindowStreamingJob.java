@@ -1,19 +1,15 @@
-package com.amazonaws.services.msf.windowing.kinesis;
+package com.amazonaws.services.msf.windowing;
 
 import com.amazonaws.services.kinesisanalytics.runtime.KinesisAnalyticsRuntime;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.AggregateFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;
-import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.connector.datagen.source.DataGeneratorSource;
 import org.apache.flink.connector.kinesis.sink.KinesisStreamsSink;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
@@ -21,10 +17,8 @@ import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindow
 import org.apache.flink.streaming.api.windowing.assigners.SlidingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
-import org.apache.flink.streaming.api.windowing.assigners.WindowAssigner;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
-import org.apache.flink.streaming.api.windowing.windows.Window;
 import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,8 +37,6 @@ public class WindowStreamingJob {
     private static final Logger LOGGER = LoggerFactory.getLogger(WindowStreamingJob.class);
     public static final Time WINDOW_LENGTH = Time.seconds(30);
     public static final Time STEP_LENGTH = Time.seconds(5);
-    public static final Time JITTER_LENGTH = Time.seconds(5);
-
 
     /**
      * Load application properties from Amazon Managed Service for Apache Flink runtime or from a local resource, when the environment is local
@@ -69,33 +61,40 @@ public class WindowStreamingJob {
         LOGGER.info("Application properties: {}", applicationParameters);
 
         // Set up the data generator as a dummy source
-        DataStream<StockPrice> input = env.fromSource(
-                getStockPriceDataGeneratorSource(), WatermarkStrategy.noWatermarks(), "data-generator").setParallelism(1);
-
-        // Assign eventTime watermarks to allow event time processing
-        SingleOutputStreamOperator<StockPrice> watermarkedStream = input.assignTimestampsAndWatermarks(WatermarkStrategy
+        WatermarkStrategy<StockPrice> watermarkStrategy = WatermarkStrategy
                 .<StockPrice>forBoundedOutOfOrderness(Duration.of(10, ChronoUnit.SECONDS))
-                .withTimestampAssigner((event, timestamp) -> event.getEventTime().getTime()));
+                .withTimestampAssigner((event, timestamp) -> event.getEventTime().getTime());
+        DataStream<StockPrice> input = env.fromSource(
+                getStockPriceDataGeneratorSource(), watermarkStrategy, "data-generator").setParallelism(1);
 
         // Key processing by tick symbol before applying windowing logic
-        KeyedStream<Tuple2<String, Double>, String> keyedStream = watermarkedStream.map(value -> { // Parse the JSON
-                    return new Tuple2<>(value.getTicker(), value.getPrice());
-                }).returns(Types.TUPLE(Types.STRING, Types.DOUBLE))
-                .keyBy(v -> v.f0);
+        KeyedStream<StockPrice, String> keyedStream = input.keyBy(StockPrice::getTicker);
 
-        SingleOutputStreamOperator<String> slidingWindowProcessingTime = avgPriceWindow(keyedStream, SlidingProcessingTimeWindows.of(WINDOW_LENGTH, STEP_LENGTH));
+        DataStream<String> slidingWindowProcessingTime = keyedStream
+                .window(SlidingProcessingTimeWindows.of(WINDOW_LENGTH, STEP_LENGTH))
+                .aggregate(new MinAggregate(), new WindowContextEmittingFunction())
+                .map(value -> value.getTicker() + String.format(",%.2f,%s", value.getMinPrice(), value.getTimeWindow()));
         slidingWindowProcessingTime.sinkTo(createSink(applicationParameters.get("OutputStream0")));
 
-        SingleOutputStreamOperator<String> slidingWindowEventTime = avgPriceWindow(keyedStream, SlidingEventTimeWindows.of(WINDOW_LENGTH, STEP_LENGTH));
+        DataStream<String> slidingWindowEventTime = keyedStream
+                .window(SlidingEventTimeWindows.of(WINDOW_LENGTH, STEP_LENGTH))
+                .aggregate(new MinAggregate(), new WindowContextEmittingFunction())
+                .map(value -> value.getTicker() + String.format(",%.2f,%s", value.getMinPrice(), value.getTimeWindow()));
         slidingWindowEventTime.sinkTo(createSink(applicationParameters.get("OutputStream1")));
 
-        SingleOutputStreamOperator<String> tumblingWindowProcessingTime = avgPriceWindow(keyedStream, TumblingProcessingTimeWindows.of(WINDOW_LENGTH, JITTER_LENGTH));
+        DataStream<String> tumblingWindowProcessingTime = keyedStream
+                .window(TumblingProcessingTimeWindows.of(WINDOW_LENGTH))
+                .aggregate(new MinAggregate(), new WindowContextEmittingFunction())
+                .map(value -> value.getTicker() + String.format(",%.2f,%s", value.getMinPrice(), value.getTimeWindow()));
         tumblingWindowProcessingTime.sinkTo(createSink(applicationParameters.get("OutputStream2")));
 
-        SingleOutputStreamOperator<String> tumblingWindowEventTime = avgPriceWindow(keyedStream, TumblingEventTimeWindows.of(WINDOW_LENGTH, JITTER_LENGTH));
+        DataStream<String> tumblingWindowEventTime = keyedStream
+                .window(TumblingEventTimeWindows.of(WINDOW_LENGTH))
+                .aggregate(new MinAggregate(), new WindowContextEmittingFunction())
+                .map(value -> value.getTicker() + String.format(",%.2f,%s", value.getMinPrice(), value.getTimeWindow()));
         tumblingWindowEventTime.sinkTo(createSink(applicationParameters.get("OutputStream3")));
 
-        env.execute("Avg Stock Price");
+        env.execute("Min Stock Price");
     }
 
     private static DataGeneratorSource<StockPrice> getStockPriceDataGeneratorSource() {
@@ -117,17 +116,11 @@ public class WindowStreamingJob {
                 .build();
     }
 
-    private static SingleOutputStreamOperator<String> avgPriceWindow(KeyedStream<Tuple2<String, Double>, String> keyedStream, WindowAssigner<Object, TimeWindow> windowAssigner) {
-        return keyedStream.window(windowAssigner)
-                .aggregate(new MinAggregate(), new WindowContextEmittingFunction())
-                .map(value -> value.f0 + String.format(",%.2f,%s", value.f1, value.f2));
-    }
-
     /**
      * Implementation of min aggregate for demonstration purposes. This specific outcome could be achieved more
      * simply by relying on pre-defined aggregators.
      */
-    private static class MinAggregate implements AggregateFunction<Tuple2<String, Double>, Double, Double> {
+    private static class MinAggregate implements AggregateFunction<StockPrice, Double, Double> {
 
         @Override
         public Double createAccumulator() {
@@ -135,9 +128,9 @@ public class WindowStreamingJob {
         }
 
         @Override
-        public Double add(Tuple2<String, Double> value, Double accumulator) {
-            return accumulator.isNaN() || accumulator > value.f1
-                    ? value.f1
+        public Double add(StockPrice value, Double accumulator) {
+            return accumulator.isNaN() || accumulator > value.getPrice()
+                    ? value.getPrice()
                     : accumulator;
         }
 
@@ -148,22 +141,24 @@ public class WindowStreamingJob {
 
         @Override
         public Double merge(Double a, Double b) {
-            return a.isNaN() || a > b
+            return a.isNaN()
                     ? b
-                    : a;
+                    : b.isNaN() || b > a
+                        ? a
+                        : b;
         }
 
     }
 
     private static class WindowContextEmittingFunction
-            extends ProcessWindowFunction<Double, Tuple3<String, Double, Window>, String, TimeWindow> {
+            extends ProcessWindowFunction<Double, AggregatedStockPrice, String, TimeWindow> {
 
         public void process(String key,
                             Context context,
                             Iterable<Double> averages,
-                            Collector<Tuple3<String, Double, Window>> out) {
-            Double average = averages.iterator().next();
-            out.collect(new Tuple3<>(key, average, context.window()));
+                            Collector<AggregatedStockPrice> out) {
+            Double minPrice = averages.iterator().next();
+            out.collect(new AggregatedStockPrice(context.window(), key, minPrice));
         }
     }
 
