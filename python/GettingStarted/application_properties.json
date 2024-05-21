@@ -9,7 +9,7 @@
   {
     "PropertyGroupId": "InputStream0",
     "PropertyMap": {
-      "input.stream.name": "ExampleInputStream",
+      "stream.name": "ExampleInputStream",
       "flink.stream.initpos": "LATEST",
       "aws.region": "us-east-1"
     }
@@ -17,7 +17,7 @@
   {
     "PropertyGroupId": "OutputStream0",
     "PropertyMap": {
-      "output.stream.name": "ExampleOutputStream",
+      "stream.name": "ExampleOutputStream",
       "aws.region": "us-east-1"
     }
   }

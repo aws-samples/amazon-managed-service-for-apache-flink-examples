@@ -15,35 +15,33 @@ This example uses `FlinkKinesisConsumer` and `KinesisStreamsSink` connectors.
 ### Runtime configuration
 
 The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for Apache Flink,
-or from command line parameters, when running locally.
+or from a local file, when running locally.
 
-Runtime Properties are expected in the Group ID `FlinkApplicationProperties`.
-Command line parameters should be prepended by `--`.
-
-They are all case-sensitive.
+All properties are case-sensitive.
 
 Configuration parameters:
 
-* `kinesis.source.stream` Kinesis Data Stream to be used for source (default: `source`)
-* `kinesis.sink.stream` Kinesis Data Stream to be used for sink (default: `destination`)
-* `kinesis.region` AWS Region where Kinesis Data Streams are (default `eu-west-1`)
+Configuration PropertyGroupId: `InputStream0`
+
+* `stream.name` Kinesis Data Stream to be used for source
+* `flink.stream.initpos` Kinesis Data Stream consumer initial position
+* `flink.stream.initpos.timestamp` Kinesis Data Stream consumer initial position timestamp (only applicable if `flink.stream.initpos` is `AT_TIMESTAMP`)
+* `aws.region` AWS Region where the Kinesis Data Stream is
+
+Configuration PropertyGroupId: `InputStream0`
+
+* `stream.name` Kinesis Data Stream to be used for sink
+* `aws.region` AWS Region where the Kinesis Data Stream is
 
 #### Enhanced Fan-Out (EFO) source
 
-To use EFO for the Kinesis Data Stream source, set up two additional configuration parameters:
+To use EFO for the Kinesis Data Stream source, set up two additional configuration parameters in the PropertyGroupId `InputStream0` :
 
-* `kinesis.source.type` Kinesis Data Stream publisher type, either `POLLING` or `EFO` (default: `POLLING`)
-* `kinesis.source.efoConsumer` Kinesis Data Stream EFO Consumer name; only used if `kinesis.source.type=EFO` (default: `sample-efo-flink-consumer`)
+* `flink.stream.recordpublisher` Kinesis Data Stream publisher type, either `POLLING` or `EFO` (default: `POLLING`)
+* `flink.stream.efo.consumername` Kinesis Data Stream EFO Consumer name; only used if `flink.stream.recordpublisher=EFO` (default: `sample-efo-flink-consumer`)
 
 ### Running locally in IntelliJ
 To run this example locally -
 * Create source and sink Kinesis streams. 
 * Ensure that use profile is configured and user has required permission to read/write from Kinesis streams. 
 * To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*.
-
-```
---kinesis.source.stream stream-input --kinesis.sink.stream stream-output --kinesis.region ap-south-1 --kinesis.source.type POLLING
-```
-
-Following is the screenshot of run configuration
-![Run Configuration](images/runConfiguration.png)
