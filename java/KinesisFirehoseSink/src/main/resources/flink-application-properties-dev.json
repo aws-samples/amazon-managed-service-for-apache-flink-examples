@@ -1,0 +1,9 @@
+[
+  {
+    "PropertyGroupId": "OutputStream0",
+    "PropertyMap": {
+      "stream.name": "<StreamName>",
+      "aws.region": "<AWSRegion>"
+    }
+  }
+]

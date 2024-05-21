@@ -6,24 +6,19 @@
 
 This example demonstrate how to use [Flink Kinesis Firehose Sink Connector](https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/connectors/datastream/firehose/).
 
-This example uses [`FlinkKinesisConsumer`](https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/connectors/datastream/kinesis/#kinesis-consumer)
-and [`KinesisFirehoseSink`](https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/connectors/datastream/firehose/) connectors.
+This example uses the [`KinesisFirehoseSink`](https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/connectors/datastream/firehose/) connector.
 
 ### Runtime configuration
 
 The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for Apache Flink,
-or from command line parameters, when running locally.
+or from a local file, when running locally.
 
-Runtime Properties are expected in the Group ID `FlinkApplicationProperties`.
-Command line parameters should be prepended by `--`.
-
-They are all case-sensitive.
+All runtime properties are case-sensitive.
 
 Configuration parameters:
 
-* `kinesis.source.stream` Kinesis Data Stream to be used for source (default: `ExampleInputStream`)
-* `kinesis.firehose.sink.stream` Kinesis Data Firehose to be used for sink (default: `ExampleOutputStream`)
-* `kinesis.region` AWS Region where Kinesis Data Streams are (default `us-east-1`)
+* `stream.name` Amazon Data Firehose to be used for sink
+* `aws.region` AWS Region where Amazon Data Firehose Stream is (e.g. "us-east-1")
 
 ### Running locally in IntelliJ
 
