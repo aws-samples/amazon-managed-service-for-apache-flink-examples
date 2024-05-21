@@ -2,23 +2,14 @@
   {
     "PropertyGroupId": "kinesis.analytics.flink.run.options",
     "PropertyMap": {
-      "python": "TumblingWindows/tumbling-windows.py",
-      "jarfile": "TumblingWindows/lib/flink-sql-connector-kinesis-4.2.0-1.18.jar"
+      "python": "main.py",
+      "jarfile": "lib/pyflink-dependencies.jar"
     }
   },
   {
-    "PropertyGroupId": "consumer.config.0",
+    "PropertyGroupId": "OutputStream0",
     "PropertyMap": {
-      "input.stream.name": "ExampleInputStream",
-      "scan.stream.initpos": "LATEST",
-      "aws.region": "us-east-1"
-    }
-  },
-  {
-    "PropertyGroupId": "producer.config.0",
-    "PropertyMap": {
-      "output.stream.name": "ExampleOutputStream",
-      "shard.count": "1",
+      "stream.name": "ExampleOutputStream",
       "aws.region": "us-east-1"
     }
   }
