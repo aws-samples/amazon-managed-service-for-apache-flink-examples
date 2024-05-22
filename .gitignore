@@ -11,3 +11,4 @@
 env/
 venv/
 .java-version
+/pyflink/
