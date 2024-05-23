@@ -28,6 +28,8 @@
     <build>
         <directory>${buildDirectory}</directory>
         <plugins>
+
+            <!-- Build shaded fat-jar including all dependencies -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -75,7 +77,7 @@
                 </executions>
             </plugin>
 
-            <!-- Maven Assembly Plugin to create the zip -->
+            <!-- Generates the ZIP file with Python + fat-jar -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.3.0</version>

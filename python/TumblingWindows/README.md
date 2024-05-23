@@ -11,6 +11,8 @@ Sample PyFlink application reading from and writing to Kinesis Data Stream, appl
 * Local development: reads [application_properties.json](./application_properties.json)
 * Deployed on Amazon Managed Service for Apache Fink: set up Runtime Properties, using Groupd ID and property names based on the content of [application_properties.json](./application_properties.json)
 
-### Local execution
 
-TBD
+
+TODO explain how dependencies are packaged
+TODO explain local development
+TODO explain required IAM permissions to write to KDS destination 
