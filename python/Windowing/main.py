@@ -109,9 +109,20 @@ def main():
               ) """)
 
     # 5. Define sink tables and window aggregation queries, one per window type
-    # Note that this code is for demonstration purposes only, to compare different types of windows.
-    # In a real application you will probably not repeat multiple times practically identical code
 
+    # To showcase different types of windowing, we are defining 4 different sink tables to Kinesis
+    # Data Stream, and 4 queries, one per windowing type, that INSERT INTO the sink tables.
+    # We are deliberately repeating similar code multiple times, to show the small differences.
+
+    # Only a single INSERT statement can be executed with execute_sql(), because the first
+    # execute_sql("INSERT INTO...) would trigger job execution, ignoring all following statements.
+    # To define multiple INSERT statements you create a StatementSet, add each INSERT statement, and finally execute
+    # the set.
+    # Note that this only applies to INSERT statements. You can add as many CREATE TABLE as needed using execute_sql().
+    # Only INSERT causes the job execution to be triggered.
+    # See: https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/dev/table/sql/insert/#insert-statement
+
+    stmt_set = table_env.create_statement_set()
 
     ##########################################
     # 5.1 Tumbling windows in processing time
@@ -134,7 +145,7 @@ def main():
               ) """.format(tumbling_windows_proc_time_output_stream_name, tumbling_windows_proc_time_output_stream_region))
 
     # Processing-time tumbling window aggregation
-    table_result0 = table_env.execute_sql("""
+    stmt_set.add_insert_sql("""
             INSERT INTO tumbling_proc_time_out
             SELECT 
                 sensor_id, 
@@ -165,8 +176,9 @@ def main():
                 'json.timestamp-format.standard' = 'ISO-8601'
               ) """.format(tumbling_windows_event_time_output_stream_name, tumbling_windows_event_time_output_stream_region))
 
+
     # Event-time tumbling window aggregation
-    table_result1 = table_env.execute_sql("""
+    stmt_set.add_insert_sql("""
             INSERT INTO tumbling_event_time_out
             SELECT 
                 sensor_id, 
@@ -196,9 +208,10 @@ def main():
                 'json.timestamp-format.standard' = 'ISO-8601'
               ) """.format(sliding_windows_proc_time_output_stream_name, sliding_windows_proc_time_output_stream_region))
 
+
     # Processing-time sliding (or "hopping") window aggregation
     # Windows have fixed durations of 10 seconds, and slide (or "hop") of 2 seconds
-    table_result2 = table_env.execute_sql("""
+    stmt_set.add_insert_sql("""
             INSERT INTO sliding_proc_time_out
             SELECT 
                 sensor_id, 
@@ -229,9 +242,10 @@ def main():
                 'json.timestamp-format.standard' = 'ISO-8601'
               ) """.format(sliding_windows_event_time_output_stream_name, sliding_windows_event_time_output_stream_region))
 
+
     # Event-time sliding (or "hopping") window aggregation
     # Windows have fixed durations of 10 seconds, and slide (or "hop") of 2 seconds
-    table_result3 = table_env.execute_sql("""
+    stmt_set.add_insert_sql("""
             INSERT INTO sliding_event_time_out
             SELECT 
                 sensor_id, 
@@ -241,12 +255,15 @@ def main():
             GROUP BY HOP(measurement_time, INTERVAL '2' SECONDS, INTERVAL '10' SECONDS), sensor_id
     """)
 
+    # Executing the StatementSet will trigger job execution
+    table_result = stmt_set.execute()
+
     # When running locally, as a standalone Python application, you must instruct Python not to exit at the end of the
     # main() method, otherwise the job will stop immediately.
     # When running the job deployed in a Flink cluster or in Amazon Managed Service for Apache Flink, the main() method
     # must end once the flow has been defined and handed over to the Flink framework to run.
     if is_local:
-        table_result1.wait()
+        table_result.wait()
 
 if __name__ == "__main__":
     main()
