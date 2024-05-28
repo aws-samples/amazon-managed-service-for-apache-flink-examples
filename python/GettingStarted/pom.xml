@@ -17,21 +17,19 @@
         <kda.runtime.version>1.2.0</kda.runtime.version>
     </properties>
 
+    <!-- Specify any jar dependencies (e.g. connectors) required -->
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-kinesis</artifactId>
+            <version>${aws.connector.version}</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <directory>${buildDirectory}</directory>
         <plugins>
-            <!-- Java Compiler -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <source>${target.java.version}</source>
-                    <target>${target.java.version}</target>
-                </configuration>
-            </plugin>
-            <!-- We use the maven-shade plugin to create a fat jar that contains all necessary dependencies. -->
-            <!-- Change the value of <mainClass>...</mainClass> if your program entry point changes. -->
+            <!-- Maven Shade Plugin to create the "fat-jar" with all required dependencies -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -44,6 +42,9 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <!-- This configuration prevents the plugin from generating the "original" jar file -->
+                            <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+
                             <artifactSet>
                                 <excludes>
                                     <exclude>org.apache.flink:force-shading</exclude>
@@ -75,7 +76,8 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Maven Assembly Plugin to create the zip -->
+
+            <!-- Maven Assembly Plugin to create the zip file containing the Python code and the fat-jar -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.3.0</version>
@@ -97,6 +99,8 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Maven jar plugin controls the  name of the generated jar -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -107,23 +111,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <dependencies>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-kinesisanalytics-runtime</artifactId>
-            <version>${kda.runtime.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-base</artifactId>
-            <version>${flink.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-kinesis</artifactId>
-            <version>${aws.connector.version}</version>
-        </dependency>
-    </dependencies>
 </project>
