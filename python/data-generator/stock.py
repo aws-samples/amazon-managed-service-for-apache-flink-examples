@@ -2,9 +2,9 @@ import datetime
 import json
 import random
 import boto3
+import sys
 
-STREAM_NAME = "input-stream"
-
+DEFAULT_STREAM_NAME = "ExampleInputStream"
 
 def get_data():
     return {
@@ -24,4 +24,9 @@ def generate(stream_name, kinesis_client):
 
 
 if __name__ == '__main__':
-    generate(STREAM_NAME, boto3.client('kinesis'))
+    stream_name = DEFAULT_STREAM_NAME
+    if len(sys.argv) == 2:
+        stream_name = sys.argv[1]
+
+    print(f"Sending data to '{stream_name}'")
+    generate(stream_name, boto3.client('kinesis'))

@@ -7,7 +7,7 @@ Example showing a basic PyFlink job doing data aggregation over time windows.
 * Flink Connectors: Kinesis Connector
 * Language: Python (3.10)
 
-The application demonstrate the behaviour some of the most used combinations of windowing: 
+The application demonstrate the behavior some of the most used combinations of windowing: 
 sliding and tumbling windows, in processing and event time.
 
 The application is written in Python, but operators are defined using SQL.
@@ -38,7 +38,7 @@ The stream names defined in the configuration (see below) are:
 * `TumblingWindowProcessingTimeOutput`
 * `TumblingWindowEventTimeOutput`
 
-All Streams are in `us-east-1`.
+By default, all Streams are in `us-east-1`.
 
 Single-shard Streams in Provisioned mode will be sufficient for the emitted throughput.
 

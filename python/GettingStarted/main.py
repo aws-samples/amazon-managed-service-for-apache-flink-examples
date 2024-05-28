@@ -88,53 +88,6 @@ def property_map(props, property_group_id):
 
 AT_TIMESTAMP = "AT_TIMESTAMP"
 
-# def create_source_table(table_name, stream_name, region, stream_initpos, stream_initpos_timestamp):
-#     if stream_initpos == AT_TIMESTAMP and stream_initpos_timestamp == None:
-#             raise ValueError(f"A timestamp must be supplied for stream_initpos {AT_TIMESTAMP}")
-#
-#     init_pos = "\n'scan.stream.initpos' = '{0}',".format(stream_initpos) if stream_initpos is not None else ''
-#     init_pos_timestamp = "\n'scan.stream.initpos-timestamp' = '{0}',".format(stream_initpos_timestamp) if stream_initpos_timestamp is not None else ''
-#
-#     return """ CREATE TABLE {0} (
-#                 ticker VARCHAR(6),
-#                 price DOUBLE,
-#                 event_time TIMESTAMP(3),
-#                 WATERMARK FOR event_time AS event_time - INTERVAL '5' SECOND
-#
-#               )
-#               PARTITIONED BY (ticker)
-#               WITH (
-#                 'connector' = 'kinesis',
-#                 'stream' = '{1}',
-#                 'aws.region' = '{2}',{3}{4}
-#                 'format' = 'json',
-#                 'json.timestamp-format.standard' = 'ISO-8601'
-#               ) """.format(
-#         table_name, stream_name, region, init_pos, init_pos_timestamp
-#     )
-
-
-# def create_sink_table(table_name, stream_name, region):
-#     return """ CREATE TABLE {0} (
-#                 ticker VARCHAR(6),
-#                 price DOUBLE,
-#                 event_time TIMESTAMP(3),
-#                 WATERMARK FOR event_time AS event_time - INTERVAL '5' SECOND
-#               )
-#               PARTITIONED BY (ticker)
-#               WITH (
-#                 'connector' = 'kinesis',
-#                 'stream' = '{1}',
-#                 'aws.region' = '{2}',
-#                 'sink.partitioner-field-delimiter' = ';',
-#                 'sink.batch.max-size' = '100',
-#                 'format' = 'json',
-#                 'json.timestamp-format.standard' = 'ISO-8601'
-#               ) """.format(
-#         table_name, stream_name, region
-#     )
-
-
 def create_print_table(table_name, stream_name, region, stream_initpos):
     return """ CREATE TABLE {0} (
                 ticker VARCHAR(6),
@@ -247,7 +200,6 @@ def main():
         INSERT INTO output 
         SELECT ticker, price, event_time 
         FROM prices""")
-
 
     # When running locally, as a standalone Python application, you must instruct Python not to exit at the end of the
     # main() method, otherwise the job will stop immediately.
