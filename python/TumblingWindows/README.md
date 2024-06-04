@@ -1,6 +1,6 @@
 ## Example of Tumbling Windows in PyFlink/SQL
 
-* Flink version: 1.18.1
+* Flink version: 1.19.0
 * Flink API: SQL/Table API
 * Language: Python
 

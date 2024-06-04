@@ -1,6 +1,6 @@
 # Custom Metrics
 
-* Flink version: 1.18.1
+* Flink version: 1.19.0
 * Flink API: DataStream API
 * Language: Java (11)
 

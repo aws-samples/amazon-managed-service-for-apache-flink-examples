@@ -1,6 +1,6 @@
 ## Getting Started Flink Python project
 
-* Flink version: 1.18
+* Flink version: 1.19
 * Flink API: SQL/Table API
 * Language: Python
 
