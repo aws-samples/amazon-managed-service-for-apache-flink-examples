@@ -88,7 +88,7 @@ To run locally, PyFlink requires you to download the S3 File System Hadoop plugi
    ```
    $ python -c "import pyflink;import os;print(os.path.dirname(os.path.abspath(pyflink.__file__)))"
    ```
-2. Download  `flink-s3-fs-hadoop-1.18.1.jar` from [this link](https://mvnrepository.com/artifact/org.apache.flink/flink-s3-fs-hadoop/1.18.1#:~:text=(13%20KB)-,jar%20(29.8%20MB),-View%20All)
+2. Download  `flink-s3-fs-hadoop-1.18.1.jar` from [this link](https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/1.18.1/flink-s3-fs-hadoop-1.18.1.jar)
 3. Copy it into the `<flink-home>/lib/` directory
 
 > Note: [Flink documentation](https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/deployment/filesystems/plugins/#file-systems) 
