@@ -15,6 +15,8 @@ using Table API ar DataStream API, in Python.
 
 The job can run both on Amazon Managed Service for Apache Flink, and locally for development.
 
+---
+
 ### Requirements
 
 #### Development and build environment requirements
@@ -26,11 +28,11 @@ The job can run both on Amazon Managed Service for Apache Flink, and locally for
 > JDK and Maven are required to download and package any required Flink dependencies, e.g. connectors, and
   to package the application as `.zip` file, for deployment to Amazon Managed Service for Apache Flink.
 
-#### Runtime dependencies
+#### External dependencies
 
 The application expects 2 Kinesis Data Streams.
 
-The stream names are defined in the configuration (see below), are by default:
+The stream names are defined in the configuration (see [below](#runtime-configuration)), are by default:
 
 * `ExampleInputStream`
 * `ExampleOutputStream`
@@ -61,10 +63,10 @@ For this application, the configuration properties to specify are:
 | `OutputStream0` | `aws.region`  | `us-east-1`                          | Region for the output stream. |
 
 
-
 In addition to these configuration properties, when running a PyFlink application in Managed Flink you need to set two
 [Additional configuring for PyFink application on Managed Flink](#additional-configuring-for-pyfink-application-on-managed-flink).
 
+---
 
 ### How to run and build the application
 
@@ -130,13 +132,19 @@ Follow this process to make changes to the Python code
 > console or using the [*UpdateApplication*](https://docs.aws.amazon.com/managed-flink/latest/apiv2/API_UpdateApplication.html)
 > API.
 
+---
+
 ### Generating sample data
 
 Use the [Python script](../data-generator/) provided, to generate sample stock data to Kinesis Data Stream.
 
+---
+
 ### Application structure
 
 The application consumes data from a Kinesis source and publishes without any modification to a Kinesis sink.
+
+---
 
 ### Application packaging and dependencies
 

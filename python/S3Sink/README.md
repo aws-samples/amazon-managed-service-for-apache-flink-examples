@@ -26,11 +26,11 @@ The job can run both on Amazon Managed Service for Apache Flink, and locally for
 > JDK and Maven are required to download and package any required Flink dependencies, e.g. connectors, and
   to package the application as `.zip` file, for deployment to Amazon Managed Service for Apache Flink.
 
-#### Runtime dependencies
+#### External dependencies
 
 The application requires an S3 bucket to write data to.
 
-The name of the output bucket must be specified in the application configuration (see below).
+The name of the output bucket must be specified in the application configuration (see [below](#runtime-configuration)).
 
 #### IAM permissions
 
@@ -153,6 +153,8 @@ programmatically by the application every minute. When deployed on Amazon Manage
 configuration is configured as part of the Managed Flink application configuration. By default, it's every minute.
 
 If you disable checkpoints (or forget to set it up when running locally) the application runs but never writes any file to S3.
+
+---
 
 ### Application packaging and dependencies
 

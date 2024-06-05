@@ -16,6 +16,8 @@ using Table API ar DataStream API, in Python.
 
 The job can run both on Amazon Managed Service for Apache Flink, and locally for development.
 
+---
+
 ### Requirements
 
 #### Development and build environment requirements
@@ -27,11 +29,11 @@ The job can run both on Amazon Managed Service for Apache Flink, and locally for
 > JDK and Maven are required to download and package any required Flink dependencies, e.g. connectors, and
   to package the application as `.zip` file, for deployment to Amazon Managed Service for Apache Flink.
 
-#### Runtime dependencies
+#### External dependencies
 
 The application expects 4 Kinesis Data Streams.
 
-The stream names defined in the configuration (see below) are:
+The stream names defined in the configuration (see [below](#runtime-configuration)), and by default are:
 
 * `SlidingWindowProcessingTimeOutput`
 * `SlidingWindowEventTimeOutput`
@@ -47,6 +49,8 @@ Single-shard Streams in Provisioned mode will be sufficient for the emitted thro
 The application must have sufficient permissions to publish data to the Kinesis Data Streams.
 
 When running locally, you need active valid AWS credentials that allow publishing data to the Streams.
+
+---
 
 ### Runtime configuration
 
@@ -68,6 +72,8 @@ For this application, the configuration properties to specify :
 
 In addition to these configuration properties, when running a PyFlink application in Managed Flink you need to set two
 [Additional configuring for PyFink application on Managed Flink](#additional-configuring-for-pyfink-application-on-managed-flink).
+
+---
 
 ### How to run and build the application
 
@@ -118,7 +124,7 @@ Follow this process to make changes to the Python code
 > console or using the [*UpdateApplication*](https://docs.aws.amazon.com/managed-flink/latest/apiv2/API_UpdateApplication.html)
 > API.
 
-
+---
 
 ### Application structure
 
@@ -134,6 +140,8 @@ It demonstrates 4 types of windowing aggregations:
 
 The result of each aggregation is sent to a different Kinesis Data Streams. 
 You can inspect the results consuming the Streams or using the Data Viewer from the AWS Console.
+
+---
 
 ### Application packaging and dependencies
 
