@@ -7,7 +7,7 @@ Example showing a basic PyFlink job doing data aggregation over time windows.
 * Flink Connectors: Kinesis Connector
 * Language: Python (3.10)
 
-The application demonstrate the behavior some of the most used combinations of windowing: 
+The application demonstrates the behavior some of the most used combinations of windowing: 
 sliding and tumbling windows, in processing and event time.
 
 The application is written in Python, but operators are defined using SQL.
@@ -53,7 +53,7 @@ When running locally, you need active valid AWS credentials that allow publishin
 * **Local development**: uses the local file [application_properties.json](./application_properties.json)
 * **On Amazon Managed Service for Apache Fink**: define Runtime Properties, using Group ID and property names based on the content of [application_properties.json](./application_properties.json)
 
-For this application, the configuration properties to specify are
+For this application, the configuration properties to specify :
 
 | Group ID        | Key           | Value                                | Notes                                                             |
 |-----------------|---------------|--------------------------------------|-------------------------------------------------------------------|
@@ -77,6 +77,10 @@ In addition to these configuration properties, when running a PyFlink applicatio
 2. Run `mvn package` once, from this directory. This step is required to download the jar dependencies - the Kinesis connector in this case
 3. Set the environment variable `IS_LOCAL=true`. You can do from the prompt or in the run profile of the IDE
 4. Run `main.py`
+
+You can also run the python script directly from the command line, like `python main.py`. This still require running `mvn package` before.
+
+If you are using Virtual Environments, make sure the to select the venv as a runtime in your IDE.
 
 If you forget the set the environment variable `IS_LOCAL=true` or forget to run `mvn package` the application fails on start.
 

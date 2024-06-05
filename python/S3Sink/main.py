@@ -31,6 +31,7 @@ from pyflink.table import EnvironmentSettings, TableEnvironment
 import pyflink
 import os
 import json
+import logging
 
 #######################################
 # 1. Creates the execution environment
@@ -85,12 +86,6 @@ if is_local:
         "execution.checkpointing.interval", "1 min"
     )
 
-    # FIXME delete me
-    table_env.get_config().get_configuration().set_string(
-        "fs.allowed-fallback-filesystems", "s3"
-    )
-    print("fs.allowed-fallback-filesystems: " + table_env.get_config().get_configuration().get_string("fs.allowed-fallback-filesystems", "UNDEFINED"))
-
 
 # Utility method, extracting properties from the runtime configuration file
 def get_application_properties():
@@ -118,6 +113,7 @@ def main():
 
     props = get_application_properties()
     s3_bucket_name = property_map(props, "bucket")["name"]
+    logging.info("Output bucket: {}".format(s3_bucket_name))
 
     #################################################
     # 4. Define input table using datagen connector
@@ -159,6 +155,7 @@ def main():
                   'sink.partition-commit.delay' = '1 min'
             ) """.format(s3_bucket_name))
 
+    #
     # table_env.execute_sql("""
     #         CREATE TABLE sensors_out (
     #             sensor_id INT NOT NULL,

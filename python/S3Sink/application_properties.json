@@ -9,7 +9,7 @@
   {
     "PropertyGroupId": "bucket",
     "PropertyMap": {
-      "name": "msf-examples-output"
+      "name": "<output-bucket>"
     }
   }
 ]

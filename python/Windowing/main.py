@@ -20,10 +20,10 @@ main.py
 ~~~~~~~~~~~~~~~~~~~
 This module:
     1. Creates the execution environment
-    2. Set any special configuration for local mode (e.g. when running in the IDE)
-    3. Retrieve the runtime configuration
-    4. Create a source table to generate data using DataGen connector
-    5. Create 4x sink table and windowing aggregation queries, one per window type: tumbling or sliding windows,
+    2. Sets any special configuration for local mode (e.g. when running in the IDE)
+    3. Retrieves the runtime configuration
+    4. Creates a source table to generate data using DataGen connector
+    5. Creates 4x sink table and windowing aggregation queries, one per window type: tumbling or sliding windows,
         processing-time or event-time.
 """
 

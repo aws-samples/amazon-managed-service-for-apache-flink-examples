@@ -30,7 +30,7 @@ The job can run both on Amazon Managed Service for Apache Flink, and locally for
 
 The application expects 2 Kinesis Data Streams.
 
-The stream names defined in the configuration (see below) are:
+The stream names are defined in the configuration (see below), are by default:
 
 * `ExampleInputStream`
 * `ExampleOutputStream`
@@ -50,7 +50,7 @@ When running locally, you need active valid AWS credentials that allow publishin
 * **Local development**: uses the local file [application_properties.json](./application_properties.json)
 * **On Amazon Managed Service for Apache Fink**: define Runtime Properties, using Group ID and property names based on the content of [application_properties.json](./application_properties.json)
 
-For this application, the configuration properties to specify are
+For this application, the configuration properties to specify are:
 
 
 | Group ID        | Key           | Value                                | Notes                         |
@@ -74,6 +74,10 @@ In addition to these configuration properties, when running a PyFlink applicatio
 2. Run `mvn package` once, from this directory. This step is required to download the jar dependencies - the Kinesis connector in this case
 3. Set the environment variable `IS_LOCAL=true`. You can do from the prompt or in the run profile of the IDE
 4. Run `main.py`
+
+You can also run the python script directly from the command line, like `python main.py`. This still require running `mvn package` before.
+
+If you are using Virtual Environments, make sure the to select the venv as a runtime in your IDE.
 
 If you forget the set the environment variable `IS_LOCAL=true` or forget to run `mvn package` the application fails on start.
 
@@ -118,7 +122,7 @@ Follow this process to make changes to the Python code
 2. Re-run `mvn package` - **if you skip this step, the zipfile is not updated**, and contains the old Python script.
 3. Upload the new zip file to the same location on S3 (overwriting the previous zip file)
 4. In the Managed Flink application console, enter *Configure*, scroll down and press *Save Changes*
-   * If you application was running when you published the change, Managed Flink stops the application and restarts it with the new code
+   * If your application was running when you published the change, Managed Flink stops the application and restarts it with the new code
    * If the application was not running (in Ready state) you need to click *Run* to restart it with the new code
 
 > **Important**: by design, Managed Flink does not detect the new zip file automatically.
