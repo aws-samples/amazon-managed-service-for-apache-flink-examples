@@ -78,6 +78,7 @@ In addition to these configuration properties, when running a PyFlink applicatio
 3. Set the environment variable `IS_LOCAL=true`. You can do from the prompt or in the run profile of the IDE
 4. Run `main.py`
 
+If you forget the set the environment variable `IS_LOCAL=true` or forget to run `mvn package` the application fails on start.
 
 > **Attention**: The application does not log or print anything. 
 > If you do not see any output in the console, it does not mean the application is not running.
@@ -105,7 +106,7 @@ Follow this process to make changes to the Python code
 2. Re-run `mvn package` - **if you skip this step, the zipfile is not updated**, and contains the old Python script.
 3. Upload the new zip file to the same location on S3 (overwriting the previous zip file)
 4. In the Managed Flink application console, enter *Configure*, scroll down and press *Save Changes*
-   * If you application was running when you published the change, Managed Flink stops the application and restarts it with the new code
+   * If your application was running when you published the change, Managed Flink stops the application and restarts it with the new code
    * If the application was not running (in Ready state) you need to click *Run* to restart it with the new code
 
 > **Important**: by design, Managed Flink does not detect the new zip file automatically.

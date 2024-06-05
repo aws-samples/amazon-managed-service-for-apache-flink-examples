@@ -30,6 +30,7 @@ This module:
 from pyflink.table import EnvironmentSettings, TableEnvironment
 import os
 import json
+import pyflink
 
 #######################################
 # 1. Creates the execution environment
@@ -67,6 +68,9 @@ if is_local:
         "file:///" + CURRENT_DIR + "/target/pyflink-dependencies.jar",
     )
 
+    # Show the PyFlink home directory and the directory where logs will be written, when running locally
+    print("PyFlink home: " + os.path.dirname(os.path.abspath(pyflink.__file__)))
+    print("Logging directory: " + os.path.dirname(os.path.abspath(pyflink.__file__)) + '/log')
 
 # Utility method, extracting properties from the runtime configuration file
 def get_application_properties():
@@ -123,7 +127,9 @@ def main():
                 'fields.temperature.max' = '100'
               ) """)
 
+    ############################################################################
     # 5. Define sink tables and window aggregation queries, one per window type
+    ############################################################################
 
     # To showcase different types of windowing, we are defining 4 different sink tables to Kinesis
     # Data Stream, and 4 queries, one per windowing type, that INSERT INTO the sink tables.

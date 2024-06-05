@@ -75,12 +75,28 @@ In addition to these configuration properties, when running a PyFlink applicatio
 3. Set the environment variable `IS_LOCAL=true`. You can do from the prompt or in the run profile of the IDE
 4. Run `main.py`
 
+If you forget the set the environment variable `IS_LOCAL=true` or forget to run `mvn package` the application fails on start.
 
 > **Attention**: The application does not log or print anything. 
 > If you do not see any output in the console, it does not mean the application is not running.
 > The output is sent to the Kinesis streams. You can inspect the content of the streams using the Data Viewer in the Kinesis console
 
 Note: if you modify the Python code, you do not need to re-run `mvn package` before running the application locally.
+
+##### Troubleshooting when running the application locally
+
+By default, the PyFlink application running locally does not send logs to the console. 
+Any exception thrown by the Flink runtime (i.e. not due to Python error) will not appear in the console. 
+The application may appear to be running, but actually continuously failing and restarting.
+
+To see any error messages, you need to inspect the Flink logs.
+By default, PyFlink will send logs to the directory where the PyFlink module is installed (Flink home).
+Use this command to find the directory:
+
+```
+$ python -c "import pyflink;import os;print(os.path.dirname(os.path.abspath(pyflink.__file__))+'/log')"
+```
+
 
 #### Deploy and run on Amazon Managed Service for Apache Flink
 
