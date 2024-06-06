@@ -73,22 +73,27 @@ If you are using Virtual Environments, make sure the to select the venv as a run
 
 If you forget the set the environment variable `IS_LOCAL=true` or forget to run `mvn package` the application fails on start.
 
-> **Attention**: The application does not log or print anything. 
+> 🚨 The application does not log or print anything. 
 > If you do not see any output in the console, it does not mean the application is not running.
 > The output is sent to the Kinesis streams. You can inspect the content of the streams using the Data Viewer in the Kinesis console
 
 Note: if you modify the Python code, you do not need to re-run `mvn package` before running the application locally.
 
 
-##### IMPORTANT: Install local Flink dependency
+##### 🚨 Install local Flink dependencies
 
-To run locally, PyFlink requires you to download the S3 File System Hadoop plugin and copy it in the directory where PyFlink is installed.
+To run locally, PyFlink requires you to download the 
+[S3 File System Hadoop plugin](https://nightlies.apache.org/flink/flink-docs-master/docs/deployment/filesystems/s3/) 
+and copy it in the directory where PyFlink is installed.
 
 1. To find the PyFlink home directory run the following command (if you are using Virtual Environments, make sure the environment is activated before running this command):
    ```
    $ python -c "import pyflink;import os;print(os.path.dirname(os.path.abspath(pyflink.__file__)))"
    ```
-2. Download  `flink-s3-fs-hadoop-1.18.1.jar` from [this link](https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/1.18.1/flink-s3-fs-hadoop-1.18.1.jar)
+2. For Flink 1.18, download  `flink-s3-fs-hadoop-1.18.1.jar`
+   from [this link](https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/1.18.1/flink-s3-fs-hadoop-1.18.1.jar).
+   If you are using e different Flink version, download the plugin for the correct version 
+   (see [available plugin versions](https://mvnrepository.com/artifact/org.apache.flink/flink-s3-fs-hadoop)).
 3. Copy it into the `<flink-home>/lib/` directory
 
 > Note: [Flink documentation](https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/deployment/filesystems/plugins/#file-systems) 
@@ -132,7 +137,7 @@ Follow this process to make changes to the Python code
    * If your application was running when you published the change, Managed Flink stops the application and restarts it with the new code
    * If the application was not running (in Ready state) you need to click *Run* to restart it with the new code
 
-> **Important**: by design, Managed Flink does not detect the new zip file automatically.
+> 🚨 by design, Managed Flink does not detect the new zip file automatically.
 > You control when you want to restart the application with the code changes. This is done saving a new configuration from the 
 > console or using the [*UpdateApplication*](https://docs.aws.amazon.com/managed-flink/latest/apiv2/API_UpdateApplication.html)
 > API.

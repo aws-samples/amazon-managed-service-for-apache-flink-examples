@@ -16,9 +16,9 @@ Maven is used to "merge" multiple jar dependencies and to build the `.zip` file 
  
 ### Developing PyFlink 1.15 on Apple Silicon macOS
 
-> This limitation only applies to Flink 1.15. 
-> If you are using Flink 1.18 and later you can develop PyFlink on your machine, installing PyFlink library directly as
-> you are normally doing with other Python libraries.
+> 🚨 This limitation only applies to Flink 1.15, and only for local development. 
+> With Flink 1.18 or later you can install PyFlink libraries on your macOS machine as any other Python library. 
+> See the [Getting Started](./GettingStarted) for more details.
 
 PyFlink version 1.15 has [known issues](https://issues.apache.org/jira/browse/FLINK-25188) on macOS machines using Apple Silicon chips (e.g. M1) due to Python dependencies.
 You cannot install the `apache-pyflink==1.15.4` library on the machine, directly. This make it difficult to develop PyFlink 1.15 applications on Apple Silicon.
