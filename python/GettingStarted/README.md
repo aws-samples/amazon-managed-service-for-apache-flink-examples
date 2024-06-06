@@ -89,7 +89,7 @@ If you forget the set the environment variable `IS_LOCAL=true` or forget to run 
 
 Note: if you modify the Python code, you do not need to re-run `mvn package` before running the application locally.
 
-##### Troubleshooting when running the application locally
+##### Troubleshooting the application when running locally
 
 By default, the PyFlink application running locally does not send logs to the console. 
 Any exception thrown by the Flink runtime (i.e. not due to Python error) will not appear in the console. 
@@ -115,6 +115,35 @@ $ python -c "import pyflink;import os;print(os.path.dirname(os.path.abspath(pyfl
 7. Configure the Runtime Properties of the application, creating the Group ID, Keys and Values as defined in the [application_properties.json](./application_properties.json)
 8. Start the application
 9. When the application transitions to "Ready" you can open the Flink Dashboard to verify the job is running, and you can inspect the data published to the Kinesis Streams, using the Data Viewer in the Kinesis console.
+
+##### Troubleshooting Python errors when the application runs on Amazon Managed Service for Apache Flink
+
+Amazon Managed Service for Apache Flink sends all logs to CloudWatch Logs.
+You can find the name of the Log Group and Log Stream in the configuration of the application, in the console.
+
+Errors caused by the Flink engine are usually logged as `ERROR` and easy to find. However, errors reported by the Python 
+runtime are **not** logged as `ERROR`.
+
+Apache Flink logs any entry reported by the Python runtime using a logger named `org.apache.flink.client.python.PythonDriver`.
+
+The easiest way to find errors reported by Python is using CloudWatch Insight, and run the following query:]
+
+```
+fields @timestamp, message
+| sort @timestamp asc
+| filter logger like /PythonDriver/
+| limit 1000
+```
+
+> 🚨 If the Flink jobs fails to start due to an error reported by Python, for example a missing expected configuration 
+> parameters, the Amazon Managed Service for Apache Flink may report as *Running* but the job fails to start.
+> You can check whether the job is actually running using the Apache Flink Dashboard. If the job is not listed in the 
+> Running Job List, it means it probably failed to start due to an error.
+> 
+> In CloudWatch Logs you may find an `ERROR` entry with not very explanatory message "Run python process failed". 
+> To find the actual cause of the problem, run the CloudWatch Insight above, to see the actual error reported by 
+> the Python runtime.
+
 
 #### Publishing code changes to Amazon Managed Service for Apache Flink
 

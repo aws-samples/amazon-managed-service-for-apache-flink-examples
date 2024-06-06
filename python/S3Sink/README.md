@@ -124,7 +124,7 @@ $ python -c "import pyflink;import os;print(os.path.dirname(os.path.abspath(pyfl
 6. Configure the Managed Flink application: set Application Code Location to the bucket and zip file you just uploaded
 7. Configure the Runtime Properties of the application, creating the Group ID, Keys and Values as defined in the [application_properties.json](./application_properties.json)
 8. Start the application
-9. When the application transitions to "Ready" you can open the Flink Dashboard to verify the job is running, and you can inspect the data published to the Kinesis Streams, using the Data Viewer in the Kinesis console.
+9. When the application transitions to "Ready" you can open the Flink Dashboard to verify the job is running, and you can inspect the data published to S3 bucket.
 
 #### Publishing code changes to Amazon Managed Service for Apache Flink
 

@@ -48,11 +48,13 @@ For this application, the configuration properties to specify are:
 
 | Group ID        | Key           | Value                                | Notes                         |
 |-----------------|---------------|--------------------------------------|-------------------------------|
-| `OutputStream0` | `stream.name` | `TumblingWindowProcessingTimeOutput` | Output stream .               |
+| `OutputStream0` | `stream.name` | `ExampleOutputStream` | Output stream .               |
 | `OutputStream0` | `aws.region`  | `us-east-1`                          | Region for the output stream. |
 
 In addition to these configuration properties, when running a PyFlink application in Managed Flink you need to set two
 [Additional configuring for PyFink application on Managed Flink](#additional-configuring-for-pyfink-application-on-managed-flink).
+
+---
 
 ### How to run and build the application
 
