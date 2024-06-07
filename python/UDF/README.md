@@ -28,7 +28,9 @@ Random data are generated internally, by the application. The result is sent to 
 
 The application expects a Kinesis Data Stream.
 
-The stream name is defined in the configuration (see [below](#runtime-configuration)), by default is `ExampleOutputStream` and in `us-east-1`.
+The stream names are defined in the configuration (see [below](#runtime-configuration)).
+The application defines no default name and region. 
+The [configuration for local development](./application_properties.json) set them, by default, to: `ExampleInputStream`, `us-east-1`.
 
 #### IAM permissions
 
@@ -46,10 +48,10 @@ When running locally, you need active valid AWS credentials that allow publishin
 For this application, the configuration properties to specify are:
 
 
-| Group ID        | Key           | Value                                | Notes                         |
-|-----------------|---------------|--------------------------------------|-------------------------------|
-| `OutputStream0` | `stream.name` | `ExampleOutputStream` | Output stream .               |
-| `OutputStream0` | `aws.region`  | `us-east-1`                          | Region for the output stream. |
+| Group ID        | Key           | Mandatory | Example Value (default for local) | Notes                         |
+|-----------------|---------------|-----------|-----------------------------------|-------------------------------|
+| `OutputStream0` | `stream.name` | Y         | `ExampleOutputStream`             | Output stream .               |
+| `OutputStream0` | `aws.region`  | Y         | `us-east-1`                       | Region for the output stream. |
 
 In addition to these configuration properties, when running a PyFlink application in Managed Flink you need to set two
 [Additional configuring for PyFink application on Managed Flink](#additional-configuring-for-pyfink-application-on-managed-flink).
@@ -82,8 +84,8 @@ Note: if you modify the Python code, you do not need to re-run `mvn package` bef
 1. Make sure you have the 4 required Kinesis Streams
 2. Create a Managed Flink application
 3. Modify the application IAM role to allow writing to all the 4 Kinesis Streams
-4. Package the application: run `mvn package` from this directory
-5. Upload to an S3 bucket the zip file named `managed-flink-pyflink-windows-examples-1.0.0.zip` you find in the [`./target`](./target) subdirectory that was created when you run `mvn package`
+4. Package the application: run `mvn clean package` from this directory
+5. Upload to an S3 bucket the zip file that the previous creates in the [`./target`](./target) subdirectory
 6. Configure the Managed Flink application: set Application Code Location to the bucket and zip file you just uploaded
 7. Configure the Runtime Properties of the application, creating the Group ID, Keys and Values as defined in the [application_properties.json](./application_properties.json)
 8. Start the application
@@ -94,7 +96,7 @@ Note: if you modify the Python code, you do not need to re-run `mvn package` bef
 Follow this process to make changes to the Python code
 
 1. Modify the code locally (test/run locally, as required)
-2. Re-run `mvn package` - **if you skip this step, the zipfile is not updated**, and contains the old Python script.
+2. Re-run `mvn clean package` - **if you skip this step, the zipfile is not updated**, and contains the old Python script.
 3. Upload the new zip file to the same location on S3 (overwriting the previous zip file)
 4. In the Managed Flink application console, enter *Configure*, scroll down and press *Save Changes*
    * If your application was running when you published the change, Managed Flink stops the application and restarts it with the new code
@@ -140,8 +142,8 @@ both jar dependencies and your Python code.
 To tell Managed Flink what Python script to run and the fat-jar containing all dependencies, you need to specific some
 additional Runtime Properties, as part of the application configuration:
 
-| Group ID | Key | Value | Notes                                                                     |
-|----------|-----|-------|---------------------------------------------------------------------------|
-| `kinesis.analytics.flink.run.options` | `python` | `main.py` | The Python script containing the main() method to start the job.          |
-| `kinesis.analytics.flink.run.options` | `jarfile` | `lib/pyflink-dependencies.jar` | Location (inside the zip) of the fat-jar containing all jar dependencies. |
+| Group ID                              | Key       | Mandatory | Value                          | Notes                                                                     |
+|---------------------------------------|-----------|-----------|--------------------------------|---------------------------------------------------------------------------|
+| `kinesis.analytics.flink.run.options` | `python`  | Y         | `main.py`                      | The Python script containing the main() method to start the job.          |
+| `kinesis.analytics.flink.run.options` | `jarfile` | Y         | `lib/pyflink-dependencies.jar` | Location (inside the zip) of the fat-jar containing all jar dependencies. |
 

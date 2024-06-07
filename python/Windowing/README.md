@@ -33,14 +33,15 @@ The job can run both on Amazon Managed Service for Apache Flink, and locally for
 
 The application expects 4 Kinesis Data Streams.
 
-The stream names defined in the configuration (see [below](#runtime-configuration)), and by default are:
+The stream names are defined in the configuration (see [below](#runtime-configuration)).
+The application defines no default name and region. 
+The [configuration for local development](./application_properties.json) set them, by default, to: 
 
-* `SlidingWindowProcessingTimeOutput`
-* `SlidingWindowEventTimeOutput`
-* `TumblingWindowProcessingTimeOutput`
-* `TumblingWindowEventTimeOutput`
 
-By default, all Streams are in `us-east-1`.
+* `SlidingWindowProcessingTimeOutput`, `us-east-1`.
+* `SlidingWindowEventTimeOutput`, `us-east-1`.
+* `TumblingWindowProcessingTimeOutput`, `us-east-1`.
+* `TumblingWindowEventTimeOutput`, `us-east-1`.
 
 Single-shard Streams in Provisioned mode will be sufficient for the emitted throughput.
 
@@ -59,16 +60,16 @@ When running locally, you need active valid AWS credentials that allow publishin
 
 For this application, the configuration properties to specify :
 
-| Group ID        | Key           | Value                                | Notes                                                             |
-|-----------------|---------------|--------------------------------------|-------------------------------------------------------------------|
-| `OutputStream0` | `stream.name` | `TumblingWindowProcessingTimeOutput` | Output stream for Tumbing Windowing in Procesing Time.            |
-| `OutputStream0` | `aws.region`  | `us-east-1`                          | Region for the Tumbing Windowing in Procesing Time output stream. |
-| `OutputStream1` | `stream.name` | `TumblingWindowEventTimeOutput` | Output stream for Tumbing Windowing in Event Time.                |
-| `OutputStream1` | `aws.region`  | `us-east-1`                          | Region for the Tumbing Windowing in Event Time output stream.     |
-| `OutputStream2` | `stream.name` | `SlidingWindowProcessingTimeOutput` | Output stream for Sliding Windowing in Procesing Time.            |
-| `OutputStream2` | `aws.region`  | `us-east-1`                          | Region for the Sliding Windowing in Procesing Time output stream. |
-| `OutputStream3` | `stream.name` | `SlidingWindowEventTimeOutput` | Output stream for Sliding Windowing in Event Time.                |
-| `OutputStream3` | `aws.region`  | `us-east-1`                          | Region for the Sliding Windowing in Event Time output stream.     |
+| Group ID        | Key           | Mandatory | Example Value (default for local)    | Notes                                                             |
+|-----------------|---------------|-----------|--------------------------------------|-------------------------------------------------------------------|
+| `OutputStream0` | `stream.name` | Y         | `TumblingWindowProcessingTimeOutput` | Output stream for Tumbing Windowing in Procesing Time.            |
+| `OutputStream0` | `aws.region`  | Y         | `us-east-1`                          | Region for the Tumbing Windowing in Procesing Time output stream. |
+| `OutputStream1` | `stream.name` | Y         | `TumblingWindowEventTimeOutput`      | Output stream for Tumbing Windowing in Event Time.                |
+| `OutputStream1` | `aws.region`  | Y         | `us-east-1`                          | Region for the Tumbing Windowing in Event Time output stream.     |
+| `OutputStream2` | `stream.name` | Y         | `SlidingWindowProcessingTimeOutput`  | Output stream for Sliding Windowing in Procesing Time.            |
+| `OutputStream2` | `aws.region`  | Y         | `us-east-1`                          | Region for the Sliding Windowing in Procesing Time output stream. |
+| `OutputStream3` | `stream.name` | Y         | `SlidingWindowEventTimeOutput`       | Output stream for Sliding Windowing in Event Time.                |
+| `OutputStream3` | `aws.region`  | Y         | `us-east-1`                          | Region for the Sliding Windowing in Event Time output stream.     |
 
 In addition to these configuration properties, when running a PyFlink application in Managed Flink you need to set two
 [Additional configuring for PyFink application on Managed Flink](#additional-configuring-for-pyfink-application-on-managed-flink).
@@ -101,8 +102,8 @@ Note: if you modify the Python code, you do not need to re-run `mvn package` bef
 1. Make sure you have the 4 required Kinesis Streams
 2. Create a Managed Flink application
 3. Modify the application IAM role to allow writing to all the 4 Kinesis Streams
-4. Package the application: run `mvn package` from this directory
-5. Upload to an S3 bucket the zip file named `managed-flink-pyflink-windows-examples-1.0.0.zip` you find in the [`./target`](./target) subdirectory that was created when you run `mvn package`
+4. Package the application: run `mvn clean package` from this directory
+5. Upload to an S3 bucket the zip file that the previous creates in the [`./target`](./target) subdirectory
 6. Configure the Managed Flink application: set Application Code Location to the bucket and zip file you just uploaded
 7. Configure the Runtime Properties of the application, creating the Group ID, Keys and Values as defined in the [application_properties.json](./application_properties.json)
 8. Start the application
@@ -113,7 +114,7 @@ Note: if you modify the Python code, you do not need to re-run `mvn package` bef
 Follow this process to make changes to the Python code
 
 1. Modify the code locally (test/run locally, as required)
-2. Re-run `mvn package` - **if you skip this step, the zipfile is not updated**, and contains the old Python script.
+2. Re-run `mvn clean package` - **if you skip this step, the zipfile is not updated**, and contains the old Python script.
 3. Upload the new zip file to the same location on S3 (overwriting the previous zip file)
 4. In the Managed Flink application console, enter *Configure*, scroll down and press *Save Changes*
    * If your application was running when you published the change, Managed Flink stops the application and restarts it with the new code
@@ -167,8 +168,7 @@ both jar dependencies and your Python code.
 To tell Managed Flink what Python script to run and the fat-jar containing all dependencies, you need to specific some
 additional Runtime Properties, as part of the application configuration:
 
-| Group ID | Key | Value | Notes                                                                     |
-|----------|-----|-------|---------------------------------------------------------------------------|
-| `kinesis.analytics.flink.run.options` | `python` | `main.py` | The Python script containing the main() method to start the job.          |
-| `kinesis.analytics.flink.run.options` | `jarfile` | `lib/pyflink-dependencies.jar` | Location (inside the zip) of the fat-jar containing all jar dependencies. |
-
+| Group ID                              | Key       | Mandatory | Value                          | Notes                                                                     |
+|---------------------------------------|-----------|-----------|--------------------------------|---------------------------------------------------------------------------|
+| `kinesis.analytics.flink.run.options` | `python`  | Y         | `main.py`                      | The Python script containing the main() method to start the job.          |
+| `kinesis.analytics.flink.run.options` | `jarfile` | Y         | `lib/pyflink-dependencies.jar` | Location (inside the zip) of the fat-jar containing all jar dependencies. |
