@@ -5,7 +5,7 @@ Example showing how to implement and use a User Defined Function (UDF) in PyFlin
 * Flink version: 1.18
 * Flink API: Table API & SQL
 * Flink Connectors: Kinesis Connector
-* Language: Python (3.10)
+* Language: Python
 
 The application demonstrates the implementation of [User Defined Functions](https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/dev/python/table/udfs/overview/)
 in PyFlink.
@@ -17,8 +17,8 @@ Random data are generated internally, by the application. The result is sent to 
 
 #### Development and build environment requirements
 
-* Pyhon 3.10
-* PyFlink library: `apache-flink==1.18.1`
+* Pyhon 3.10 or 3.11
+* PyFlink library: `apache-flink==1.19.0`
 * Java JDK 11+ and Maven
 
 > JDK and Maven are uses to download and package any required Flink dependencies, e.g. connectors, and

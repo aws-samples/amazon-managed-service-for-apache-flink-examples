@@ -5,7 +5,7 @@ Example showing a PyFlink application writing to S3.
 * Flink version: 1.18
 * Flink API: Table API & SQL
 * Flink Connectors: FileSystem (S3)
-* Language: Python (3.10)
+* Language: Python
 
 The application demonstrates setting up a sink writing JSON files to S3.
 
@@ -19,8 +19,8 @@ The job can run both on Amazon Managed Service for Apache Flink, and locally for
 
 #### Development and build environment requirements
 
-* Pyhon 3.10
-* PyFlink library: `apache-flink==1.18.1`
+* Pyhon 3.10 or 3.11
+* PyFlink library: `apache-flink==1.19.0`
 * Java JDK 11+ and Maven
 
 > JDK and Maven are required to download and package any required Flink dependencies, e.g. connectors, and
@@ -90,13 +90,13 @@ and copy it in the directory where PyFlink is installed.
    ```
    $ python -c "import pyflink;import os;print(os.path.dirname(os.path.abspath(pyflink.__file__)))"
    ```
-2. For Flink 1.18, download  `flink-s3-fs-hadoop-1.18.1.jar`
-   from [this link](https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/1.18.1/flink-s3-fs-hadoop-1.18.1.jar).
+2. For Flink 1.18, download  `flink-s3-fs-hadoop-1.19.0.jar`
+   from [this link](https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/1.19.0/flink-s3-fs-hadoop-1.19.0.jar).
    If you are using e different Flink version, download the plugin for the correct version 
    (see [available plugin versions](https://mvnrepository.com/artifact/org.apache.flink/flink-s3-fs-hadoop)).
 3. Copy it into the `<flink-home>/lib/` directory
 
-> Note: [Flink documentation](https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/deployment/filesystems/plugins/#file-systems) 
+> Note: [Flink documentation](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/deployment/filesystems/plugins/#file-systems) 
 > currently contains an error, stating that you need to install this dependency in the `<flink-home>/plugins` directory instead.
 
 

@@ -2,10 +2,10 @@
 
 Example showing how to send data to Amazon Data Firehose from a PyFlink application.
 
-* Flink version: 1.18
+* Flink version: 1.19
 * Flink API: Table API & SQL
 * Flink Connectors: Firehose Connector
-* Language: Python (3.10)
+* Language: Python
 
 The application uses the Firehose connector to send JSON data directly to an Amazon Data Firehose delivery stream.
 Random data are generated internally, by the application. 
@@ -16,8 +16,8 @@ Random data are generated internally, by the application.
 
 #### Development and build environment requirements
 
-* Pyhon 3.10
-* PyFlink library: `apache-flink==1.18.1`
+* Pyhon 3.10 or 3.11
+* PyFlink library: `apache-flink==1.19.0`
 * Java JDK 11+ and Maven
 
 > JDK and Maven are uses to download and package any required Flink dependencies, e.g. connectors, and
