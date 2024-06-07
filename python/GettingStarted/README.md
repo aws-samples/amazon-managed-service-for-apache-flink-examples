@@ -56,12 +56,13 @@ When running locally, you need active valid AWS credentials that allow publishin
 For this application, the configuration properties to specify are:
 
 
-| Group ID        | Key           | Mandatory | Example Value (default for local)    | Notes                         |
-|-----------------|---------------|-----------|--------------------------------------|-------------------------------|
-| `InputStream0`  | `stream.name` | Y         | `ExampleInputStream`                 | Input stream.                 |
-| `InputStream0`  | `aws.region`  | Y         | `us-east-1`                          | Region for the input stream.  |
-| `OutputStream0` | `stream.name` | Y         | `TumblingWindowProcessingTimeOutput` | Output stream .               |
-| `OutputStream0` | `aws.region`  | Y         | `us-east-1`                          | Region for the output stream.        |
+| Group ID        | Key                    | Mandatory | Example Value (default for local)    | Notes                         |
+|-----------------|------------------------|-----------|--------------------------------------|-------------------------------|
+| `InputStream0`  | `stream.name`          | Y         | `ExampleInputStream`                 | Input stream.                 |
+| `InputStream0`  | `aws.region`           | Y         | `us-east-1`                          | Region for the input stream.  |
+| `InputStream0`  | `flink.stream.initpos` | N         | `LATEST`                             | Start position in the input stream. `LATEST` by default |
+| `OutputStream0` | `stream.name`          | Y         | `TumblingWindowProcessingTimeOutput` | Output stream .               |
+| `OutputStream0` | `aws.region`           | Y         | `us-east-1`                          | Region for the output stream.        |
 
 
 In addition to these configuration properties, when running a PyFlink application in Managed Flink you need to set two
