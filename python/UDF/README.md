@@ -2,12 +2,12 @@
 
 Example showing how to implement and use a User Defined Function (UDF) in PyFlink.
 
-* Flink version: 1.18
+* Flink version: 1.19
 * Flink API: Table API & SQL
 * Flink Connectors: Kinesis Connector
 * Language: Python
 
-The application demonstrates the implementation of [User Defined Functions](https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/dev/python/table/udfs/overview/)
+The application demonstrates the implementation of [User Defined Functions](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/dev/python/table/udfs/overview/)
 in PyFlink.
 Random data are generated internally, by the application. The result is sent to a Kinesis Data Stream.
 
@@ -111,7 +111,7 @@ Follow this process to make changes to the Python code
 
 ### Application structure
 
-The application generates synthetic data using the [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/connectors/table/datagen/) connector.
+The application generates synthetic data using the [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/connectors/table/datagen/) connector.
 No external data generator is required.
 
 It demonstrates writing a query that uses a UDF, implemented in Python, and send the results to a Kinesis Data Stream.

@@ -119,7 +119,7 @@ Follow this process to make changes to the Python code
 
 ### Application structure
 
-The application generates synthetic data using the [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/connectors/table/datagen/) connector.
+The application generates synthetic data using the [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/connectors/table/datagen/) connector.
 No external data generator is required.
 
 Records are sent to a Firehose delivery stream, as JSON, without any transformations.

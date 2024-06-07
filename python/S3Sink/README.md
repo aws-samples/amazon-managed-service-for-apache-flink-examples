@@ -2,7 +2,7 @@
 
 Example showing a PyFlink application writing to S3.
 
-* Flink version: 1.18
+* Flink version: 1.19
 * Flink API: Table API & SQL
 * Flink Connectors: FileSystem (S3)
 * Language: Python
@@ -90,7 +90,7 @@ and copy it in the directory where PyFlink is installed.
    ```
    $ python -c "import pyflink;import os;print(os.path.dirname(os.path.abspath(pyflink.__file__)))"
    ```
-2. For Flink 1.18, download  `flink-s3-fs-hadoop-1.19.0.jar`
+2. For Flink 1.19, download  `flink-s3-fs-hadoop-1.19.0.jar`
    from [this link](https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/1.19.0/flink-s3-fs-hadoop-1.19.0.jar).
    If you are using e different Flink version, download the plugin for the correct version 
    (see [available plugin versions](https://mvnrepository.com/artifact/org.apache.flink/flink-s3-fs-hadoop)).
@@ -146,7 +146,7 @@ Follow this process to make changes to the Python code
 
 ### Application structure
 
-The application generates synthetic data using the [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/connectors/table/datagen/) connector.
+The application generates synthetic data using the [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/connectors/table/datagen/) connector.
 No external data generator is required.
 
 Generated records are written to a destination table, writing to S3.

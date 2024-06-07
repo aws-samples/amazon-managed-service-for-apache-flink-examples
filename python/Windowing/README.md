@@ -2,7 +2,7 @@
 
 Example showing a basic PyFlink job doing data aggregation over time windows.
 
-* Flink version: 1.18
+* Flink version: 1.19
 * Flink API: Table API & SQL
 * Flink Connectors: Kinesis Connector
 * Language: Python
@@ -129,7 +129,7 @@ Follow this process to make changes to the Python code
 
 ### Application structure
 
-The application generates synthetic data using the [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/connectors/table/datagen/) connector.
+The application generates synthetic data using the [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/connectors/table/datagen/) connector.
 No external data generator is required.
 
 It demonstrates 4 types of windowing aggregations:
