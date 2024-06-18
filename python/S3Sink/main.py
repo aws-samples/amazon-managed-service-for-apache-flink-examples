@@ -148,7 +148,7 @@ def main():
             PARTITIONED BY (sensor_id)
             WITH (
                   'connector'='filesystem',
-                  'path'='s3a://{0}/pyflinkl-filesink-example-output/',
+                  'path'='s3a://{0}/pyflink-filesink-example-output/',
                   'format'='json',
                   'json.timestamp-format.standard' = 'ISO-8601',
                   'sink.partition-commit.policy.kind'='success-file',
