@@ -1,0 +1,37 @@
+[
+  {
+    "PropertyGroupId": "kinesis.analytics.flink.run.options",
+    "PropertyMap": {
+      "python": "main.py",
+      "jarfile": "lib/pyflink-dependencies.jar"
+    }
+  },
+  {
+    "PropertyGroupId": "OutputStream0",
+    "PropertyMap": {
+      "aws.region": "us-east-1",
+      "stream.name": "TumblingWindowProcessingTimeOutput"
+    }
+  },
+  {
+    "PropertyGroupId": "OutputStream1",
+    "PropertyMap": {
+      "aws.region": "us-east-1",
+      "stream.name": "TumblingWindowEventTimeOutput"
+    }
+  },
+  {
+    "PropertyGroupId": "OutputStream2",
+    "PropertyMap": {
+      "aws.region": "us-east-1",
+      "stream.name": "SlidingWindowProcessingTimeOutput"
+    }
+  },
+  {
+    "PropertyGroupId": "OutputStream3",
+    "PropertyMap": {
+      "aws.region": "us-east-1",
+      "stream.name": "SlidingWindowEventTimeOutput"
+    }
+  }
+]

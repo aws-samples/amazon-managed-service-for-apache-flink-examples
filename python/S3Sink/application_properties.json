@@ -7,10 +7,9 @@
     }
   },
   {
-    "PropertyGroupId": "OutputStream0",
+    "PropertyGroupId": "bucket",
     "PropertyMap": {
-      "stream.name": "ExampleOutputStream",
-      "aws.region": "us-east-1"
+      "name": "<output-bucket>"
     }
   }
 ]

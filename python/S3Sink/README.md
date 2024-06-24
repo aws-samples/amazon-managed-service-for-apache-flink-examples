@@ -1,17 +1,19 @@
-## Example of UDF in a PyFlink application
+## Example of writing to S3 in PyFlink 
 
-Example showing how to implement and use a User Defined Function (UDF) in PyFlink.
+Example showing a PyFlink application writing to S3.
 
 * Flink version: 1.19
 * Flink API: Table API & SQL
-* Flink Connectors: Kinesis Connector
+* Flink Connectors: FileSystem (S3)
 * Language: Python
 
-The application demonstrates the implementation of [User Defined Functions](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/dev/python/table/udfs/overview/)
-in PyFlink.
-Random data are generated internally, by the application. The result is sent to a Kinesis Data Stream.
+The application demonstrates setting up a sink writing JSON files to S3.
 
----
+The application is written in Python, but operators are defined using SQL.
+This is a popular way of defining applications in PyFlink, but not the only one. You could attain the same results
+using Table API ar DataStream API, in Python.
+
+The job can run both on Amazon Managed Service for Apache Flink, and locally for development.
 
 ### Requirements
 
@@ -21,40 +23,38 @@ Random data are generated internally, by the application. The result is sent to 
 * PyFlink library: `apache-flink==1.19.0`
 * Java JDK 11+ and Maven
 
-> JDK and Maven are uses to download and package any required Flink dependencies, e.g. connectors, and
+> JDK and Maven are required to download and package any required Flink dependencies, e.g. connectors, and
   to package the application as `.zip` file, for deployment to Amazon Managed Service for Apache Flink.
 
 #### External dependencies
 
-The application expects a Kinesis Data Stream.
+The application requires an S3 bucket to write data to.
 
-The stream names are defined in the configuration (see [below](#runtime-configuration)).
-The application defines no default name and region. 
-The [configuration for local development](./application_properties.json) set them, by default, to: `ExampleInputStream`, `us-east-1`.
+The name of the output bucket must be specified in the application configuration (see [below](#runtime-configuration)).
 
 #### IAM permissions
 
-The application must have sufficient permissions to publish data to the Kinesis Data Stream.
+The application must have sufficient permissions to write data to the destination S3 bucket.
 
-When running locally, you need active valid AWS credentials that allow publishing data to the Stream.
+When running locally, you need active valid AWS credentials that allow publishing writing to the bucket.
 
----
+## Runtime configuration
 
-### Runtime configuration
-
-* **Local development**: uses the local file [application_properties.json](./application_properties.json)
+* **Local development**: uses the local file [application_properties.json](./application_properties.json) - **Edit the file with your output bucket name**
 * **On Amazon Managed Service for Apache Fink**: define Runtime Properties, using Group ID and property names based on the content of [application_properties.json](./application_properties.json)
 
 For this application, the configuration properties to specify are:
 
 
-| Group ID        | Key           | Mandatory | Example Value (default for local) | Notes                         |
-|-----------------|---------------|-----------|-----------------------------------|-------------------------------|
-| `OutputStream0` | `stream.name` | Y         | `ExampleOutputStream`             | Output stream .               |
-| `OutputStream0` | `aws.region`  | Y         | `us-east-1`                       | Region for the output stream. |
+| Group ID       | Key      | Mandatory | Example Value    | Default for local development | Notes                                                  |
+|----------------|----------|-----------|------------------|-------------------------------|--------------------------------------------------------|
+| `bucket`       | `name`   | Y         | `my-bucket-name` | no default                    | Name of the destination bucket, without `s3://` prefix |
+
 
 In addition to these configuration properties, when running a PyFlink application in Managed Flink you need to set two
 [Additional configuring for PyFink application on Managed Flink](#additional-configuring-for-pyfink-application-on-managed-flink).
+
+> If you forget to edit the local `application_properties.json` configuration to point your destination bucket, the application will fail to start locally.
 
 ---
 
@@ -79,17 +79,52 @@ If you forget the set the environment variable `IS_LOCAL=true` or forget to run 
 
 Note: if you modify the Python code, you do not need to re-run `mvn package` before running the application locally.
 
+
+##### 🚨 Install local Flink dependencies
+
+To run locally, PyFlink requires you to download the 
+[S3 File System Hadoop plugin](https://nightlies.apache.org/flink/flink-docs-master/docs/deployment/filesystems/s3/) 
+and copy it in the directory where PyFlink is installed.
+
+1. To find the PyFlink home directory run the following command (if you are using Virtual Environments, make sure the environment is activated before running this command):
+   ```
+   $ python -c "import pyflink;import os;print(os.path.dirname(os.path.abspath(pyflink.__file__)))"
+   ```
+2. For Flink 1.19, download  `flink-s3-fs-hadoop-1.19.0.jar`
+   from [this link](https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/1.19.0/flink-s3-fs-hadoop-1.19.0.jar).
+   If you are using e different Flink version, download the plugin for the correct version 
+   (see [available plugin versions](https://mvnrepository.com/artifact/org.apache.flink/flink-s3-fs-hadoop)).
+3. Copy it into the `<flink-home>/lib/` directory
+
+> Note: [Flink documentation](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/deployment/filesystems/plugins/#file-systems) 
+> currently contains an error, stating that you need to install this dependency in the `<flink-home>/plugins` directory instead.
+
+
+##### Troubleshooting when running the application locally
+
+By default, the PyFlink application running locally does not send logs to the console. 
+Any exception thrown by the Flink runtime (i.e. not due to Python error) will not appear in the console. 
+The application may appear to be running, but actually continuously failing and restarting.
+
+To see any error messages, you need to inspect the Flink logs.
+By default, PyFlink will send logs to the directory where the PyFlink module is installed (Flink home).
+Use this command to find the directory:
+
+```
+$ python -c "import pyflink;import os;print(os.path.dirname(os.path.abspath(pyflink.__file__))+'/log')"
+```
+
 #### Deploy and run on Amazon Managed Service for Apache Flink
 
-1. Make sure you have the 4 required Kinesis Streams
+1. Make sure you have the destination bucket
 2. Create a Managed Flink application
-3. Modify the application IAM role to allow writing to all the 4 Kinesis Streams
+3. Modify the application IAM role to allow writing to the destination bucket
 4. Package the application: run `mvn clean package` from this directory
 5. Upload to an S3 bucket the zip file that the previous creates in the [`./target`](./target) subdirectory
 6. Configure the Managed Flink application: set Application Code Location to the bucket and zip file you just uploaded
 7. Configure the Runtime Properties of the application, creating the Group ID, Keys and Values as defined in the [application_properties.json](./application_properties.json)
 8. Start the application
-9. When the application transitions to "Ready" you can open the Flink Dashboard to verify the job is running, and you can inspect the data published to the Kinesis Streams, using the Data Viewer in the Kinesis console.
+9. When the application transitions to "Ready" you can open the Flink Dashboard to verify the job is running, and you can inspect the data published to S3 bucket.
 
 #### Publishing code changes to Amazon Managed Service for Apache Flink
 
@@ -114,7 +149,15 @@ Follow this process to make changes to the Python code
 The application generates synthetic data using the [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/connectors/table/datagen/) connector.
 No external data generator is required.
 
-It demonstrates writing a query that uses a UDF, implemented in Python, and send the results to a Kinesis Data Stream.
+Generated records are written to a destination table, writing to S3.
+
+Data format is JSON, and partitioning is by the `sensor_id`.
+
+Note that the FileSink connector writes to S3 on checkpoint. For this reason, when running locally checkpoint is set up
+programmatically by the application every minute. When deployed on Amazon Managed Service for Apache Flink, the checkpoint
+configuration is configured as part of the Managed Flink application configuration. By default, it's every minute.
+
+If you disable checkpoints (or forget to set it up when running locally) the application runs but never writes any file to S3.
 
 ---
 
@@ -124,7 +167,7 @@ This examples also demonstrate how to include jar dependencies - e.g. connectors
 package it, for deploying on Amazon Managed Service for Apache Flink.
 
 Any jar dependencies must be added to the `<dependencies>` block in the [pom.xml](pom.xml) file.
-In this case, you can see we have included `flink-sql-connector-kinesis`
+In this case, you can see we have included `flink-s3-fs-hadoop` to support the S3 (`s3a://`) file system.
 
 Executing `mvn package` takes care of downloading any defined dependencies and create a single "fat-jar" containing all of them.
 This file, is generated in the `./target` subdirectory and is called `pyflink-dependencies.jar`
@@ -146,4 +189,3 @@ additional Runtime Properties, as part of the application configuration:
 |---------------------------------------|-----------|-----------|--------------------------------|---------------------------------------------------------------------------|
 | `kinesis.analytics.flink.run.options` | `python`  | Y         | `main.py`                      | The Python script containing the main() method to start the job.          |
 | `kinesis.analytics.flink.run.options` | `jarfile` | Y         | `lib/pyflink-dependencies.jar` | Location (inside the zip) of the fat-jar containing all jar dependencies. |
-

@@ -1,15 +1,20 @@
-## Example of UDF in a PyFlink application
+## Examples of windowing aggregations, with PyFlink/SQL
 
-Example showing how to implement and use a User Defined Function (UDF) in PyFlink.
+Example showing a basic PyFlink job doing data aggregation over time windows.
 
 * Flink version: 1.19
 * Flink API: Table API & SQL
 * Flink Connectors: Kinesis Connector
 * Language: Python
 
-The application demonstrates the implementation of [User Defined Functions](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/dev/python/table/udfs/overview/)
-in PyFlink.
-Random data are generated internally, by the application. The result is sent to a Kinesis Data Stream.
+The application demonstrates the behavior some of the most used combinations of windowing: 
+sliding and tumbling windows, in processing and event time.
+
+The application is written in Python, but operators are defined using SQL.
+This is a popular way of defining applications in PyFlink, but not the only one. You could attain the same results
+using Table API ar DataStream API, in Python.
+
+The job can run both on Amazon Managed Service for Apache Flink, and locally for development.
 
 ---
 
@@ -21,22 +26,30 @@ Random data are generated internally, by the application. The result is sent to 
 * PyFlink library: `apache-flink==1.19.0`
 * Java JDK 11+ and Maven
 
-> JDK and Maven are uses to download and package any required Flink dependencies, e.g. connectors, and
+> JDK and Maven are used to download and package any required Flink dependencies, e.g. connectors, and
   to package the application as `.zip` file, for deployment to Amazon Managed Service for Apache Flink.
 
 #### External dependencies
 
-The application expects a Kinesis Data Stream.
+The application expects 4 Kinesis Data Streams.
 
 The stream names are defined in the configuration (see [below](#runtime-configuration)).
 The application defines no default name and region. 
-The [configuration for local development](./application_properties.json) set them, by default, to: `ExampleInputStream`, `us-east-1`.
+The [configuration for local development](./application_properties.json) set them, by default, to: 
+
+
+* `SlidingWindowProcessingTimeOutput`, `us-east-1`.
+* `SlidingWindowEventTimeOutput`, `us-east-1`.
+* `TumblingWindowProcessingTimeOutput`, `us-east-1`.
+* `TumblingWindowEventTimeOutput`, `us-east-1`.
+
+Single-shard Streams in Provisioned mode will be sufficient for the emitted throughput.
 
 #### IAM permissions
 
-The application must have sufficient permissions to publish data to the Kinesis Data Stream.
+The application must have sufficient permissions to publish data to the Kinesis Data Streams.
 
-When running locally, you need active valid AWS credentials that allow publishing data to the Stream.
+When running locally, you need active valid AWS credentials that allow publishing data to the Streams.
 
 ---
 
@@ -45,13 +58,18 @@ When running locally, you need active valid AWS credentials that allow publishin
 * **Local development**: uses the local file [application_properties.json](./application_properties.json)
 * **On Amazon Managed Service for Apache Fink**: define Runtime Properties, using Group ID and property names based on the content of [application_properties.json](./application_properties.json)
 
-For this application, the configuration properties to specify are:
+For this application, the configuration properties to specify :
 
-
-| Group ID        | Key           | Mandatory | Example Value (default for local) | Notes                         |
-|-----------------|---------------|-----------|-----------------------------------|-------------------------------|
-| `OutputStream0` | `stream.name` | Y         | `ExampleOutputStream`             | Output stream .               |
-| `OutputStream0` | `aws.region`  | Y         | `us-east-1`                       | Region for the output stream. |
+| Group ID        | Key           | Mandatory | Example Value (default for local)    | Notes                                                             |
+|-----------------|---------------|-----------|--------------------------------------|-------------------------------------------------------------------|
+| `OutputStream0` | `stream.name` | Y         | `TumblingWindowProcessingTimeOutput` | Output stream for Tumbing Windowing in Procesing Time.            |
+| `OutputStream0` | `aws.region`  | Y         | `us-east-1`                          | Region for the Tumbing Windowing in Procesing Time output stream. |
+| `OutputStream1` | `stream.name` | Y         | `TumblingWindowEventTimeOutput`      | Output stream for Tumbing Windowing in Event Time.                |
+| `OutputStream1` | `aws.region`  | Y         | `us-east-1`                          | Region for the Tumbing Windowing in Event Time output stream.     |
+| `OutputStream2` | `stream.name` | Y         | `SlidingWindowProcessingTimeOutput`  | Output stream for Sliding Windowing in Procesing Time.            |
+| `OutputStream2` | `aws.region`  | Y         | `us-east-1`                          | Region for the Sliding Windowing in Procesing Time output stream. |
+| `OutputStream3` | `stream.name` | Y         | `SlidingWindowEventTimeOutput`       | Output stream for Sliding Windowing in Event Time.                |
+| `OutputStream3` | `aws.region`  | Y         | `us-east-1`                          | Region for the Sliding Windowing in Event Time output stream.     |
 
 In addition to these configuration properties, when running a PyFlink application in Managed Flink you need to set two
 [Additional configuring for PyFink application on Managed Flink](#additional-configuring-for-pyfink-application-on-managed-flink).
@@ -114,7 +132,15 @@ Follow this process to make changes to the Python code
 The application generates synthetic data using the [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/connectors/table/datagen/) connector.
 No external data generator is required.
 
-It demonstrates writing a query that uses a UDF, implemented in Python, and send the results to a Kinesis Data Stream.
+It demonstrates 4 types of windowing aggregations:
+
+* Sliding Window based on processing time
+* Sliding Window based on event time
+* Tumbling Window based on processing time
+* Tumbling Window based on event time
+
+The result of each aggregation is sent to a different Kinesis Data Streams. 
+You can inspect the results consuming the Streams or using the Data Viewer from the AWS Console.
 
 ---
 
@@ -146,4 +172,3 @@ additional Runtime Properties, as part of the application configuration:
 |---------------------------------------|-----------|-----------|--------------------------------|---------------------------------------------------------------------------|
 | `kinesis.analytics.flink.run.options` | `python`  | Y         | `main.py`                      | The Python script containing the main() method to start the job.          |
 | `kinesis.analytics.flink.run.options` | `jarfile` | Y         | `lib/pyflink-dependencies.jar` | Location (inside the zip) of the fat-jar containing all jar dependencies. |
-
