@@ -14,7 +14,7 @@
         <jar.finalName>pyflink-dependencies</jar.finalName>
         <flink.version>1.19.0</flink.version>
         <!-- At the moment of publishing this example, there are no connectors specific for Flink 1.19 -->
-        <aws.connector.version>4.2.0-1.18</aws.connector.version>
+        <aws.connector.version>4.3.0-1.19</aws.connector.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
     </properties>
 

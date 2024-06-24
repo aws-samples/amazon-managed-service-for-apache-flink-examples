@@ -139,7 +139,7 @@ def main():
     # 5. Define sink tables to S3
     ##############################
 
-    table_env.execute_sql("""
+    table_env.execute_sql(f"""
             CREATE TABLE sensors_out (
                 sensor_id INT NOT NULL,
                 temperature NUMERIC(6,2) NOT NULL,
@@ -148,12 +148,12 @@ def main():
             PARTITIONED BY (sensor_id)
             WITH (
                   'connector'='filesystem',
-                  'path'='s3a://{0}/pyflink-filesink-example-output/',
+                  'path'='s3a://{s3_bucket_name}/pyflink-filesink-example-output/',
                   'format'='json',
                   'json.timestamp-format.standard' = 'ISO-8601',
                   'sink.partition-commit.policy.kind'='success-file',
                   'sink.partition-commit.delay' = '1 min'
-            ) """.format(s3_bucket_name))
+            ) """)
 
     #
     # table_env.execute_sql("""

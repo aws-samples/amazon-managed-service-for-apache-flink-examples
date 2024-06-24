@@ -125,7 +125,7 @@ def main():
     init_pos = "\n'scan.stream.initpos' = '{0}',".format(input_stream_initpos) if input_stream_initpos is not None else ''
     init_pos_timestamp = "\n'scan.stream.initpos-timestamp' = '{0}',".format(input_stream_initpos_timestamp) if input_stream_initpos_timestamp is not None else ''
 
-    table_env.execute_sql("""
+    table_env.execute_sql(f"""
         CREATE TABLE prices (
                 ticker VARCHAR(6),
                 price DOUBLE,
@@ -135,19 +135,19 @@ def main():
               PARTITIONED BY (ticker)
               WITH (
                 'connector' = 'kinesis',
-                'stream' = '{0}',
-                'aws.region' = '{1}',
-                {2}{3}
+                'stream' = '{input_stream_name}',
+                'aws.region' = '{input_stream_region}',
+                {init_pos}{init_pos_timestamp}
                 'format' = 'json',
                 'json.timestamp-format.standard' = 'ISO-8601'
-              ) """.format(input_stream_name, input_stream_region, init_pos, init_pos_timestamp))
+              ) """)
 
 
     #################################################
     # 5. Define sink table using kinesis connector
     #################################################
 
-    table_env.execute_sql("""
+    table_env.execute_sql(f"""
             CREATE TABLE output (
                 ticker VARCHAR(6),
                 price DOUBLE,
@@ -156,14 +156,13 @@ def main():
               PARTITIONED BY (ticker)
               WITH (
                 'connector' = 'kinesis',
-                'stream' = '{0}',
-                'aws.region' = '{1}',
+                'stream' = '{output_stream_name}',
+                'aws.region' = '{output_stream_region}',
                 'sink.partitioner-field-delimiter' = ';',
                 'sink.batch.max-size' = '100',
                 'format' = 'json',
                 'json.timestamp-format.standard' = 'ISO-8601'
-              )""".format(
-        output_stream_name, output_stream_region))
+              )""")
 
     # For local development purposes, you might want to print the output to the console, instead of sending it to a
     # Kinesis Stream. To do that, you can replace the sink table using the 'kinesis' connector, above, with a sink table

@@ -128,7 +128,7 @@ def main():
     # 5. Creates a sink table to Amazon Data Firehose, using the 'firehose' connector
     ###################################################################################
 
-    table_env.execute_sql("""
+    table_env.execute_sql(f"""
             CREATE TABLE output (
                 sensor_id INT,
                 temperature_f DOUBLE,
@@ -136,12 +136,12 @@ def main():
               )
               WITH (
                 'connector' = 'firehose',
-                'delivery-stream' = '{0}',
-                'aws.region' = '{1}',
+                'delivery-stream' = '{output_delivery_stream_name}',
+                'aws.region' = '{output_delivery_stream_region}',
                 'format' = 'json',
                 'json.timestamp-format.standard' = 'ISO-8601'
               )
-        """.format(output_delivery_stream_name, output_delivery_stream_region))
+        """)
 
     # For local development purposes, you might want to print the output to the console, instead of sending it to a
     # Kinesis Stream. To do that, you can replace the sink table using the 'kinesis' connector, above, with a sink table

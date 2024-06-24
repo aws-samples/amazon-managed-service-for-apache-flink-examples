@@ -163,7 +163,7 @@ def main():
     # 7. Define sink table using kinesis connector
     #################################################
 
-    table_env.execute_sql("""
+    table_env.execute_sql(f"""
             CREATE TABLE output (
                 sensor_id INT,
                 temperature_f DOUBLE,
@@ -172,14 +172,14 @@ def main():
               PARTITIONED BY (sensor_id)
               WITH (
                 'connector' = 'kinesis',
-                'stream' = '{0}',
-                'aws.region' = '{1}',
+                'stream' = '{output_stream_name}',
+                'aws.region' = '{output_stream_region}',
                 'sink.partitioner-field-delimiter' = ';',
                 'sink.batch.max-size' = '100',
                 'format' = 'json',
                 'json.timestamp-format.standard' = 'ISO-8601'
               )
-        """.format(output_stream_name, output_stream_region))
+        """)
 
 
     # For local development purposes, you might want to print the output to the console, instead of sending it to a

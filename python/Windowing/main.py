@@ -150,7 +150,7 @@ def main():
     ##########################################
 
     # Sink table
-    table_env.execute_sql("""
+    table_env.execute_sql(f"""
             CREATE TABLE tumbling_proc_time_out (
                 sensor_id INT,
                 avg_temp NUMERIC(6,2),
@@ -159,12 +159,11 @@ def main():
               PARTITIONED BY (sensor_id)
               WITH (
                 'connector' = 'kinesis',
-                'stream' = '{0}',
-                'aws.region' = '{1}',
+                'stream' = '{tumbling_windows_proc_time_output_stream_name}',
+                'aws.region' = '{tumbling_windows_proc_time_output_stream_region}',
                 'format' = 'json',
                 'json.timestamp-format.standard' = 'ISO-8601'
-              ) """.format(tumbling_windows_proc_time_output_stream_name,
-                           tumbling_windows_proc_time_output_stream_region))
+              ) """)
 
     # Processing-time tumbling window aggregation
     stmt_set.add_insert_sql("""
@@ -182,7 +181,7 @@ def main():
     ##########################################
 
     # Sink table
-    table_env.execute_sql("""
+    table_env.execute_sql(f"""
             CREATE TABLE tumbling_event_time_out (
                 sensor_id INT,
                 avg_temp NUMERIC(6,2),
@@ -191,12 +190,11 @@ def main():
               PARTITIONED BY (sensor_id)
               WITH (
                 'connector' = 'kinesis',
-                'stream' = '{0}',
-                'aws.region' = '{1}',
+                'stream' = '{tumbling_windows_event_time_output_stream_name}',
+                'aws.region' = '{tumbling_windows_event_time_output_stream_region}',
                 'format' = 'json',
                 'json.timestamp-format.standard' = 'ISO-8601'
-              ) """.format(tumbling_windows_event_time_output_stream_name,
-                           tumbling_windows_event_time_output_stream_region))
+              ) """)
 
     # Event-time tumbling window aggregation
     stmt_set.add_insert_sql("""
@@ -214,7 +212,7 @@ def main():
     ##########################################
 
     # Sink table
-    table_env.execute_sql("""
+    table_env.execute_sql(f"""
             CREATE TABLE sliding_proc_time_out (
                 sensor_id INT,
                 avg_temp NUMERIC(6,2),
@@ -223,12 +221,11 @@ def main():
               PARTITIONED BY (sensor_id)
               WITH (
                 'connector' = 'kinesis',
-                'stream' = '{0}',
-                'aws.region' = '{1}',
+                'stream' = '{sliding_windows_proc_time_output_stream_name}',
+                'aws.region' = '{sliding_windows_proc_time_output_stream_region}',
                 'format' = 'json',
                 'json.timestamp-format.standard' = 'ISO-8601'
-              ) """.format(sliding_windows_proc_time_output_stream_name,
-                           sliding_windows_proc_time_output_stream_region))
+              ) """)
 
     # Processing-time sliding (or "hopping") window aggregation
     # Windows have fixed durations of 10 seconds, and slide (or "hop") of 2 seconds
@@ -247,7 +244,7 @@ def main():
     ##########################################
 
     # Sink table
-    table_env.execute_sql("""
+    table_env.execute_sql(f"""
             CREATE TABLE sliding_event_time_out (
                 sensor_id INT,
                 avg_temp NUMERIC(6,2),
@@ -256,12 +253,11 @@ def main():
               PARTITIONED BY (sensor_id)
               WITH (
                 'connector' = 'kinesis',
-                'stream' = '{0}',
-                'aws.region' = '{1}',
+                'stream' = '{sliding_windows_event_time_output_stream_name}',
+                'aws.region' = '{sliding_windows_event_time_output_stream_region}',
                 'format' = 'json',
                 'json.timestamp-format.standard' = 'ISO-8601'
-              ) """.format(sliding_windows_event_time_output_stream_name,
-                           sliding_windows_event_time_output_stream_region))
+              ) """)
 
     # Event-time sliding (or "hopping") window aggregation
     # Windows have fixed durations of 10 seconds, and slide (or "hop") of 2 seconds
