@@ -1,87 +1,81 @@
 package com.amazonaws.services.msf;
 
 import com.amazonaws.services.kinesisanalytics.runtime.KinesisAnalyticsRuntime;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
-import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.connector.aws.config.AWSConfigConstants;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;
+import org.apache.flink.connector.datagen.source.DataGeneratorSource;
 import org.apache.flink.connector.firehose.sink.KinesisFirehoseSink;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.connectors.kinesis.FlinkKinesisConsumer;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import static org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants.STREAM_INITIAL_POSITION;
 
 
 public class FirehoseStreamingJob {
 
-    private static final String DEFAULT_SOURCE_STREAM = "ExampleInputStream";
+    // Name of the local JSON resource with the application properties in the same format as they are received from the Amazon Managed Service for Apache Flink runtime
+    private static final String LOCAL_APPLICATION_PROPERTIES_RESOURCE = "flink-application-properties-dev.json";
 
-    private static final String DEFAULT_SINK_FIREHOSE_STREAM = "ExampleOutputStream";
+    // Create ObjectMapper instance to serialise POJOs into JSONs
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    private static final String DEFAULT_AWS_REGION = "us-east-1";
+    private static boolean isLocal(StreamExecutionEnvironment env) {
+        return env instanceof LocalStreamEnvironment;
+    }
 
     /**
-     * Get configuration properties from Amazon Managed Service for Apache Flink runtime properties
-     * GroupID "FlinkApplicationProperties", or from command line parameters when running locally
+     * Load application properties from Amazon Managed Service for Apache Flink runtime or from a local resource, when the environment is local
      */
-    private static ParameterTool loadApplicationParameters(String[] args, StreamExecutionEnvironment env) throws IOException {
-        if (env instanceof LocalStreamEnvironment) {
-            return ParameterTool.fromArgs(args);
+    private static Map<String, Properties> loadApplicationProperties(StreamExecutionEnvironment env) throws IOException {
+        if (isLocal(env)) {
+            return KinesisAnalyticsRuntime.getApplicationProperties(
+                    FirehoseStreamingJob.class.getClassLoader()
+                            .getResource(LOCAL_APPLICATION_PROPERTIES_RESOURCE).getPath());
         } else {
-            Map<String, Properties> applicationProperties = KinesisAnalyticsRuntime.getApplicationProperties();
-            Properties flinkProperties = applicationProperties.get("FlinkApplicationProperties");
-            if (flinkProperties == null) {
-                throw new RuntimeException("Unable to load FlinkApplicationProperties properties from runtime properties");
-            }
-            Map<String, String> map = new HashMap<>(flinkProperties.size());
-            flinkProperties.forEach((k, v) -> map.put((String) k, (String) v));
-            return ParameterTool.fromMap(map);
+            return KinesisAnalyticsRuntime.getApplicationProperties();
         }
     }
 
-    private static FlinkKinesisConsumer<String> createKinesisSource(
-            ParameterTool applicationProperties) {
-
-        // Properties for Amazon Kinesis Data Streams Source, we need to specify from where we want to consume the data.
-        // STREAM_INITIAL_POSITION: LATEST: consume messages that have arrived from the moment application has been deployed
-        // STREAM_INITIAL_POSITION: TRIM_HORIZON: consume messages starting from first available in the Kinesis Stream
-        Properties kinesisConsumerConfig = new Properties();
-        kinesisConsumerConfig.put(AWSConfigConstants.AWS_REGION, applicationProperties.get("kinesis.region", DEFAULT_AWS_REGION));
-        kinesisConsumerConfig.put(STREAM_INITIAL_POSITION, "LATEST");
-
-        return new FlinkKinesisConsumer<>(applicationProperties.get("kinesis.source.stream", DEFAULT_SOURCE_STREAM), new SimpleStringSchema(), kinesisConsumerConfig);
+    private static DataGeneratorSource<StockPrice> getStockPriceDataGeneratorSource() {
+        long recordPerSecond = 100;
+        return new DataGeneratorSource<>(
+                new StockPriceGeneratorFunction(),
+                Long.MAX_VALUE,
+                RateLimiterStrategy.perSecond(recordPerSecond),
+                TypeInformation.of(StockPrice.class));
     }
 
     private static KinesisFirehoseSink<String> createKinesisFirehoseSink(
-            ParameterTool applicationProperties) {
-
-        Properties sinkProperties = new Properties();
-        // Required
-        sinkProperties.put(AWSConfigConstants.AWS_REGION, applicationProperties.get("kinesis.region", DEFAULT_AWS_REGION));
-
+            Properties sinkProperties) {
         return KinesisFirehoseSink.<String>builder()
                 .setFirehoseClientProperties(sinkProperties)
                 .setSerializationSchema(new SimpleStringSchema())
-                .setDeliveryStreamName(applicationProperties.get("kinesis.firehose.sink.stream", DEFAULT_SINK_FIREHOSE_STREAM))
+                .setDeliveryStreamName(sinkProperties.getProperty("stream.name"))
                 .build();
     }
 
     public static void main(String[] args) throws Exception {
         // set up the streaming execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        final ParameterTool applicationProperties = loadApplicationParameters(args, env);
+        final Map<String, Properties> applicationProperties = loadApplicationProperties(env);
 
-        FlinkKinesisConsumer<String> source = createKinesisSource(applicationProperties);
-        DataStream<String> input = env.addSource(source, "Kinesis source");
+        // Source
+        DataGeneratorSource<StockPrice> source = getStockPriceDataGeneratorSource();
 
-        KinesisFirehoseSink<String> sink = createKinesisFirehoseSink(applicationProperties);
-        input.sinkTo(sink);
+        // DataStream from Source
+        DataStream<StockPrice> input = env.fromSource(
+                source, WatermarkStrategy.noWatermarks(), "data-generator").setParallelism(1);
+
+        KinesisFirehoseSink<String> sink = createKinesisFirehoseSink(applicationProperties.get("OutputStream0"));
+
+        input.map(OBJECT_MAPPER::writeValueAsString).uid("object-to-string-map")
+                .sinkTo(sink);
 
         env.execute("Flink Kinesis Firehose Sink examples");
     }

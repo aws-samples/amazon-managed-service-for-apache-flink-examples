@@ -1,0 +1,15 @@
+[
+  {
+    "PropertyGroupId": "kinesis.analytics.flink.run.options",
+    "PropertyMap": {
+      "python": "main.py",
+      "jarfile": "lib/pyflink-dependencies.jar"
+    }
+  },
+  {
+    "PropertyGroupId": "bucket",
+    "PropertyMap": {
+      "name": "<output-bucket>"
+    }
+  }
+]

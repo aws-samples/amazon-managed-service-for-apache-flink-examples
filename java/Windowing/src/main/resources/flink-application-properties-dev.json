@@ -1,0 +1,30 @@
+[
+  {
+    "PropertyGroupId": "OutputStream0",
+    "PropertyMap": {
+      "aws.region": "us-east-1",
+      "stream.name": "SlidingWindowProcessingTimeOutput"
+    }
+  },
+  {
+    "PropertyGroupId": "OutputStream1",
+    "PropertyMap": {
+      "aws.region": "us-east-1",
+      "stream.name": "SlidingWindowEventTimeOutput"
+    }
+  },
+  {
+    "PropertyGroupId": "OutputStream2",
+    "PropertyMap": {
+      "aws.region": "us-east-1",
+      "stream.name": "TumblingWindowProcessingTimeOutput"
+    }
+  },
+  {
+    "PropertyGroupId": "OutputStream3",
+    "PropertyMap": {
+      "aws.region": "us-east-1",
+      "stream.name": "TumblingWindowEventTimeOutput"
+    }
+  }
+]

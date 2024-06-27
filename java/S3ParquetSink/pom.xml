@@ -10,6 +10,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <buildDirectory>${project.basedir}/target</buildDirectory>
+        <jar.finalName>${project.name}</jar.finalName>
         <target.java.version>11</target.java.version>
         <maven.compiler.source>${target.java.version}</maven.compiler.source>
         <main.class>com.amazonaws.services.msf.StreamingJob</main.class>
@@ -170,8 +172,9 @@
     </dependencies>
 
     <build>
+        <directory>${buildDirectory}</directory>
+        <finalName>${jar.finalName}</finalName>
 
-        <finalName>${project.name}</finalName>
         <plugins>
             <!-- AVRO source generator -->
             <plugin>
