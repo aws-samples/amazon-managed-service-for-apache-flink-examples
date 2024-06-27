@@ -16,7 +16,7 @@ Random data are generated internally, by the application.
 
 #### Development and build environment requirements
 
-* Pyhon 3.10 or 3.11
+* Python 3.10 or 3.11
 * PyFlink library: `apache-flink==1.19.0`
 * Java JDK 11+ and Maven
 

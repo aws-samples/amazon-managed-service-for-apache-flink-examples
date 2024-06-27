@@ -21,7 +21,7 @@ The job can run both on Amazon Managed Service for Apache Flink, and locally for
 
 #### Development and build environment requirements
 
-* Pyhon 3.10 or 3.11
+* Python 3.10 or 3.11
 * PyFlink library: `apache-flink==1.19.0`
 * Java JDK 11+ and Maven
 

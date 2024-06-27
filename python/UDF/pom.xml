@@ -12,8 +12,7 @@
         <buildDirectory>${project.basedir}/target</buildDirectory>
         <zip.finalName>${project.name}-${project.version}</zip.finalName>
         <jar.finalName>pyflink-dependencies</jar.finalName>
-        <flink.version>1.19.0</flink.version>
-        <!-- At the moment of publishing this example, there are no connectors specific for Flink 1.19 -->
+        <flink.version>1.19.1</flink.version>
         <aws.connector.version>4.3.0-1.19</aws.connector.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
     </properties>

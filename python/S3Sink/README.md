@@ -19,7 +19,7 @@ The job can run both on Amazon Managed Service for Apache Flink, and locally for
 
 #### Development and build environment requirements
 
-* Pyhon 3.10 or 3.11
+* Python 3.10 or 3.11
 * PyFlink library: `apache-flink==1.19.0`
 * Java JDK 11+ and Maven
 
@@ -90,8 +90,8 @@ and copy it in the directory where PyFlink is installed.
    ```
    $ python -c "import pyflink;import os;print(os.path.dirname(os.path.abspath(pyflink.__file__)))"
    ```
-2. For Flink 1.19, download  `flink-s3-fs-hadoop-1.19.0.jar`
-   from [this link](https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/1.19.0/flink-s3-fs-hadoop-1.19.0.jar).
+2. For Flink 1.19, download `flink-s3-fs-hadoop-1.19.1.jar` (the latest as of 2024-06-27)
+   from [this link](https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/1.19.1/flink-s3-fs-hadoop-1.19.1.jar).
    If you are using e different Flink version, download the plugin for the correct version 
    (see [available plugin versions](https://mvnrepository.com/artifact/org.apache.flink/flink-s3-fs-hadoop)).
 3. Copy it into the `<flink-home>/lib/` directory
