@@ -1,4 +1,4 @@
-## Run Apache Flink application on MSF with Kafka source (MSK) using mTLS
+## Running Apache Flink application on Amazon MSF with Kafka source (Amazon MSK) using mTLS authentication
 
 
 This example describes the steps performed to configure and run an Apache Flink application on Amazon Managed Service for Apache Flink (MSF), with Amazon Managed Streaming for Apache Kafka (Amazon MSK) as the source, using TLS mutual authentication.
