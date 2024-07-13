@@ -1,6 +1,6 @@
 ## Sample illustrating how to use MSK config providers in Flink Kafka connectors
 
-* Flink version: 1.15
+* Flink version: 1.19
 * Flink API: DataStream API
 * Language: Java (11)
 
@@ -19,6 +19,8 @@ NOTE: Steps 1 and 2 are optional because this repo already includes a previously
 3. Build this repo using `mvn clean package`.
 4. Setup Flink app using the jar from the build above. Please follow the instructions [here](https://docs.aws.amazon.com/managed-flink/latest/java/getting-started.html).
 5. Please ensure that you specify appropriate values for the application properties (S3 location, secrets manager key, etc...).
+
+See [here](docs/FLINKAPP_MSF_MTLS_SAMPLE.md) for a detailed example describing the steps performed to configure and run Apache Flink application on Amazon Managed Service for Apache Flink (Amazon MSF), with Amazon Managed Streaming for Apache Kafka (Amazon MSK) as the source, using TLS mutual authentication.
 
 ### Configuring the Kafka connector
 
