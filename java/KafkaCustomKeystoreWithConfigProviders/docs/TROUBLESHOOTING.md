@@ -16,4 +16,6 @@ Few important points to consider that will help troubleshoot or prevent any pote
 
 3. While configuring the Runtime properties for the Apache Flink application, please ensure that the values for `KeystoreS3Bucket` and `TruststoreS3Bucket` do not contain the prefix `s3://` . This is different from `Application code location` section where the specified Amazon S3 bucket needs to have the format `s3://bucket`.Also, the path to S3 object(s) e.g. `KeystoreS3Path` doesn’t need a trailing slash. For e.g., if the keystore `kafka.client.keystore.jks` is stored within the S3 bucket `kafkaclientstore`, then the runtime properties can be as follows-
 
-![Flink Properties](../images/flink-keystore-s3-example.png)
+    ![Flink Properties](../images/flink-keystore-s3-example.png)
+
+4. When running the Apache Flink application, if you are getting a `SecretsManagerException` with Status Code 400 (e.g. not authorized to perform: secretsmanager:GetSecretValue on resource: SSL_KEYSTORE_PASS because no identity-based policy allows the secretsmanager:GetSecretValue action), please make sure that the IAM Role for the application has the necessary permission policy for SecretsManager.
