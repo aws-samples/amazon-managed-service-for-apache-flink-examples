@@ -13,6 +13,7 @@
             <outputDirectory>/</outputDirectory>
             <includes>
                 <include>**/*.py</include>
+                <include>requirements.txt</include>
             </includes>
         </fileSet>
 
