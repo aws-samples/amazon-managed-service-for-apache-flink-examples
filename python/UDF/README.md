@@ -86,9 +86,9 @@ Note: if you modify the Python code, you do not need to re-run `mvn package` bef
 
 #### Deploy and run on Amazon Managed Service for Apache Flink
 
-1. Make sure you have the 4 required Kinesis Streams
+1. Make sure you have the required Kinesis Streams
 2. Create a Managed Flink application
-3. Modify the application IAM role to allow writing to all the 4 Kinesis Streams
+3. Modify the application IAM role to allow writing to the Kinesis Streams
 4. Package the application: run `mvn clean package` from this directory
 5. Upload to an S3 bucket the zip file that the previous creates in the [`./target`](./target) subdirectory
 6. Configure the Managed Flink application: set Application Code Location to the bucket and zip file you just uploaded
