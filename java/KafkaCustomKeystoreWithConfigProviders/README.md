@@ -12,13 +12,11 @@ No secret is packaged with the application.
 
 ### High level approach
 
-NOTE: Steps 1 and 2 are optional because this repo already includes a previously built version of the msk-config-providers jar
+NOTE: This repo already includes a previously built version of the msk-config-providers jar
 
-1. (Optional) Clone and build [MSK config providers repo](https://github.com/aws-samples/msk-config-providers).
-2. (Optional) Pull in the built jar into `local-repo` in this repo (See [pom.xml](pom.xml)).
-3. Build this repo using `mvn clean package`.
-4. Setup Flink app using the jar from the build above. Please follow the instructions [here](https://docs.aws.amazon.com/managed-flink/latest/java/getting-started.html).
-5. Please ensure that you specify appropriate values for the application properties (S3 location, secrets manager key, etc...).
+1. Build this repo using `mvn clean package`.
+2. Setup Flink app using the jar from the build above. Please follow the instructions [here](https://docs.aws.amazon.com/managed-flink/latest/java/getting-started.html).
+3. Please ensure that you specify appropriate values for the application properties (S3 location, secrets manager key, etc.).
 
 See [here](docs/FLINKAPP_MSF_MTLS_SAMPLE.md) for a detailed example describing the steps performed to configure and run Apache Flink application on Amazon Managed Service for Apache Flink (Amazon MSF), with Amazon Managed Streaming for Apache Kafka (Amazon MSK) as the source, using TLS mutual authentication.
 
@@ -69,10 +67,9 @@ Access Policy/Role associated with the application that is running a config prov
 ### Runtime configuration
 
 The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for Apache Flink,
-or from command line parameters, when running locally.
+or from `flink-application-properties-dev.json`, when running locally.
 
-Runtime Properties are expected in the Group ID `FlinkApplicationProperties`.
-Command line parameters should be prepended by `--` and separated by space.
+Runtime Properties are expected in the Group ID `Input0`.
 
 They are all case-sensitive.
 
@@ -93,4 +90,4 @@ Configuration parameters:
 To run the application in IntelliJ
 
 1. Edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*
-2. Pass all configuration parameters from the command line, prepending `--` to each parameter (e.g. `--MSKBootstrapServers localhost:9094 --KafkaSourceTopic source-topic ...`)
+2. Update the property values (for `bootstrap.servers`, `topic` etc.) in `flink-application-properties-dev.json` that are to be passed as input.
