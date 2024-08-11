@@ -1,0 +1,17 @@
+[
+  {
+    "PropertyGroupId": "Input0",
+    "PropertyMap": {
+      "bootstrap.servers": "<BootstrapServers>",
+      "topic": "<Topic>",
+      "group.id": "<GroupId>",
+      "bucket.region": "<S3BucketRegion>",
+      "keystore.bucket": "<KeystoreS3Bucket>",
+      "keystore.path": "<KeystoreS3Path>",
+      "truststore.bucket": "<TruststoreS3Bucket>",
+      "truststore.path": "<TruststoreS3Path>",
+      "keystore.secret": "<KeystorePassSecret>",
+      "keystore.secret.field": "<KeystorePassSecretField>"
+    }
+  }
+]
