@@ -54,6 +54,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Flink Connector base -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-base</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+
         <!-- Amazon Managed Service for Apache Flink (formerly Amazon Kinesis Data Analytics) runtime-->
         <dependency>
             <groupId>com.amazonaws</groupId>
