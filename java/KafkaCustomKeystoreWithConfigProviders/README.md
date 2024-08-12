@@ -3,6 +3,7 @@
 * Flink version: 1.19
 * Flink API: DataStream API
 * Language: Java (11)
+* Connectors: Kafka
 
 This sample illustrates how to configure the Flink Kafka connectors (KafkaSource and KafkaSink) with keystore and/or truststore certs using the MSK config providers described [here](https://github.com/aws-samples/msk-config-providers).
 
@@ -18,7 +19,9 @@ NOTE: This repo already includes a previously built version of the msk-config-pr
 2. Setup Flink app using the jar from the build above. Please follow the instructions [here](https://docs.aws.amazon.com/managed-flink/latest/java/getting-started.html).
 3. Please ensure that you specify appropriate values for the application properties (S3 location, secrets manager key, etc.).
 
-See [here](docs/FLINKAPP_MSF_MTLS_SAMPLE.md) for a detailed example describing the steps performed to configure and run Apache Flink application on Amazon Managed Service for Apache Flink (Amazon MSF), with Amazon Managed Streaming for Apache Kafka (Amazon MSK) as the source, using TLS mutual authentication.
+Follow the [step-by-step instructions](docs/step-by-step.md) for the details about configuring and running Flink application on Amazon Managed Service for Apache Flink, with Amazon Managed Streaming for Apache Kafka (Amazon MSK) as the source, using TLS mutual authentication.
+Also look at the [troubleshooting guide](docs/troubleshoot-guide.md) for solving common issues during the setup. 
+
 
 ### Configuring the Kafka connector
 
@@ -69,25 +72,25 @@ Access Policy/Role associated with the application that is running a config prov
 The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for Apache Flink,
 or from `flink-application-properties-dev.json`, when running locally.
 
-Runtime Properties are expected in the Group ID `Input0`.
+Runtime Properties are expected in the Group ID `Input0` and they are all case-sensitive.
 
-They are all case-sensitive.
+| GroupId | Key                     | Default     | Description                                                        |
+|---------|-------------------------|-------------|--------------------------------------------------------------------|
+| `Input0` | `bootstrap.servers`     |             | kafka cluster boostrap servers                                     |
+| `Input0` | `topic`                 | `source`    | source topic name                                                  |
+| `Input0` | `group.id`              | `flink-app` | kafka consumer group id                                            |
+| `Input0` | `bucket.region`         |             | region of the S3 bucket(s) containing the keystore and truststore  |
+| `Input0` | `keystore.bucket`       |             | name of the S3 bucket containing the keystore                      |
+| `Input0` | `keystore.path`         |             | path to the keystore object, omitting any trailing `/`             |
+| `Input0` | `truststore.bucket`     |             | name of the S3 bucket containing the truststore                    |
+| `Input0` | `truststore.path`       |             | path to the truststore object, omitting any trailing `/`           |
+| `Input0` | `keystore.secret`       |             | SecretManager secret ID  containing the password of the keystore   |
+| `Input0` | `keystore.secret.field` |             | SecretManager secret key containing the password of the keystore   |
 
-Configuration parameters:
-
-* `MSKBootstrapServers` cluster boostrap servers
-* `KafkaSourceTopic` source topic (default: `source`)
-* `KafkaConsumerGroupId` consumer group id (default: `flink-app`)
-* `S3BucketRegion` region of the S3 bucket containing the keystore and truststore
-* `KeystoreS3Bucket` name of the S3 bucket containing the keystore
-* `KeystoreS3Path` path to the keystore object, omitting any trailing `/` 
-* `TruststoreS3Bucket` name of the S3 bucket containing the truststore
-* `TruststoreS3Path` path to the truststore object, omitting any trailing `/` 
-* `KeystorePassSecret` and `KeystorePassSecretField` SecretManager secret ID and key containing the password of the keystore
 
 ## Running locally in IntelliJ
 
 To run the application in IntelliJ
 
 1. Edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*
-2. Update the property values (for `bootstrap.servers`, `topic` etc.) in `flink-application-properties-dev.json` that are to be passed as input.
+2. Update `flink-application-properties-dev.json` with property values (`bootstrap.servers`, `topic` etc.) that fit your environment.
