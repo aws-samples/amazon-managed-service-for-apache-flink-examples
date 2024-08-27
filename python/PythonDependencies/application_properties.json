@@ -1,0 +1,23 @@
+[
+  {
+    "PropertyGroupId": "kinesis.analytics.flink.run.options",
+    "PropertyMap": {
+    "python": "main.py",
+    "jarfile": "lib/pyflink-dependencies.jar"
+    }
+  },
+    {
+    "PropertyGroupId": "Bedrock",
+    "PropertyMap": {
+      "model.id": "ai21.j2-mid-v1",
+      "aws.region": "us-east-1"
+    }
+  },
+  {
+    "PropertyGroupId": "OutputStream0",
+    "PropertyMap": {
+      "stream.name": "ExampleOutputStream",
+      "aws.region": "us-east-1"
+    }
+  }
+]
