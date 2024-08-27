@@ -9,8 +9,6 @@ This example demonstrates how to write data into an Amazon S3 Bucket.
 The Flink application uses a synthetic source to generate records, 
 parses the records, and it sinks the results to a given S3 Bucket.
 
-![Flink Example](images/flink-kinesis-s3.png)
-
 ### Sample Output
 
 The data gets written to the given S3 bucket.
