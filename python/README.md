@@ -2,17 +2,26 @@
 
 This folder contains examples of Flink applications written in Python.
 
+---
+
 ### Packaging dependencies for running in Amazon Managed Service for Apache Flink
 
-There multiple ways of packaging a PyFlink application with multiple dependencies, Python libraries or JAR dependencies, like connectors.
-[Amazon Managed Service for Apache Flink](https://aws.amazon.com/managed-service-apache-flink/) expects a specific packaging
-and runtime configuration, for PyFlink applications.
+There multiple ways of packaging a PyFlink application with multiple dependencies, Python libraries or JAR dependencies, like connectors. [Amazon Managed Service for Apache Flink](https://aws.amazon.com/managed-service-apache-flink/) expects a specific packaging and runtime configuration for PyFlink applications.
 
-In the [Getting Started](./GettingStarted) example, as most of the other examples in this directory, shows an effective way
-packaging dependencies, allowing you to run the application both locally, in your IDE, and deployed on Amazon Managed Service for Apache Flink.
+#### JAR dependencies
 
-Note that packaging dependencies require installing Java JDK and [Maven](https://maven.apache.org/) on the development machine. 
-Maven is used to "merge" multiple jar dependencies and to build the `.zip` file to deploy on Managed Flink.
+Amazon Managed Service for Apache Flink expects **a single JAR file** containing all JAR dependencies of a PyFlink application. These dependencies include any Flink connector and any other Java library your PyFlink application requires. All these dependencies must be packaged in a single *uber-jar* using [Maven](https://maven.apache.org/) or other similar tools.
+
+The [Getting Started](./GettingStarted/) example, and most of the other example in this directory, show a project set up that allows you to add any number of JAR dependencies to your PyFlink project. It requires Java JDK and [Maven](https://maven.apache.org/) to develop and to package the PyFlink application, and uses Maven to build the *uber-jar* and to package the PyFlink application in the `zip` file for deploymenbt on Managed Service for Apache Flink. This set up also allows you to run your application in your IDE, for debugging and development, and in Managed Service for Apache Flink **without any code changes**.
+
+
+#### Python dependencies
+
+In Apache Flink supports multiple ways of adding Python libraries to your PyFlink application.
+
+Thre [Python Dependencies](./PythonDependencies/) example shows the most general way of adding any number of Python libraries to your application, using the `requriement.txt` file. This method works with any type of Python library, and does not require packaging these dependencies into the `zip` file deployed on Managed Service for Apache Flink. This also allows you to run the application in your IDE, for debugging and development, and in Managed Service for Apache Flink **without any code changes**.
+
+---
 
 ### Python and Flink versions for local development
 
