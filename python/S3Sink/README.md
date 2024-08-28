@@ -2,7 +2,7 @@
 
 Example showing a PyFlink application writing to S3.
 
-* Flink version: 1.19
+* Flink version: 1.20
 * Flink API: Table API & SQL
 * Flink Connectors: FileSystem (S3)
 * Language: Python
@@ -20,13 +20,13 @@ The job can run both on Amazon Managed Service for Apache Flink, and locally for
 #### Development and build environment requirements
 
 * Python 3.11
-* PyFlink library: `apache-flink==1.19.1`
+* PyFlink library: `apache-flink==1.20.0`
 * Java JDK 11+ and Maven
 
 
 > ⚠️ As of 2024-06-27, the Flink Python library 1.19.x may fail installing on Python 3.12.
 > We recommend using Python 3.11 for development, the same Python version used by Amazon Managed Service for Apache Flink
-> runtime 1.19.
+> runtime 1.20.
 
 > JDK and Maven are required to download and package any required Flink dependencies, e.g. connectors, and
   to package the application as `.zip` file, for deployment to Amazon Managed Service for Apache Flink.
@@ -95,13 +95,13 @@ and copy it in the directory where PyFlink is installed.
    ```
    $ python -c "import pyflink;import os;print(os.path.dirname(os.path.abspath(pyflink.__file__)))"
    ```
-2. For Flink 1.19, download `flink-s3-fs-hadoop-1.19.1.jar` (the latest as of 2024-06-27)
-   from [this link](https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/1.19.1/flink-s3-fs-hadoop-1.19.1.jar).
+2. For Flink 1.20, download `flink-s3-fs-hadoop-1.20.0.jar` (the latest as of 2024-08-27)
+   from [this link](https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/1.20.0/flink-s3-fs-hadoop-1.20.0.jar).
    If you are using e different Flink version, download the plugin for the correct version 
    (see [available plugin versions](https://mvnrepository.com/artifact/org.apache.flink/flink-s3-fs-hadoop)).
 3. Copy it into the `<flink-home>/lib/` directory
 
-> Note: [Flink documentation](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/deployment/filesystems/plugins/#file-systems) 
+> Note: [Flink documentation](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/deployment/filesystems/plugins/#file-systems) 
 > currently contains an error, stating that you need to install this dependency in the `<flink-home>/plugins` directory instead.
 
 
@@ -151,7 +151,7 @@ Follow this process to make changes to the Python code
 
 ### Application structure
 
-The application generates synthetic data using the [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/connectors/table/datagen/) connector.
+The application generates synthetic data using the [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/table/datagen/) connector.
 No external data generator is required.
 
 Generated records are written to a destination table, writing to S3.

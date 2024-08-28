@@ -121,7 +121,7 @@ def main():
 
     # Some trick is required to generate the string defining the initial position, depending on the configuration
     # See Flink documentation for further details about configuring a Kinesis source table
-    # https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/connectors/table/kinesis/
+    # https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/table/kinesis/
     init_pos = "\n'scan.stream.initpos' = '{0}',".format(input_stream_initpos) if input_stream_initpos is not None else ''
     init_pos_timestamp = "\n'scan.stream.initpos-timestamp' = '{0}',".format(input_stream_initpos_timestamp) if input_stream_initpos_timestamp is not None else ''
 

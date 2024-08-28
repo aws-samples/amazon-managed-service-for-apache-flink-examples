@@ -141,7 +141,7 @@ def main():
     # the set.
     # Note that this only applies to INSERT statements. You can add as many CREATE TABLE as needed using execute_sql().
     # Only INSERT causes the job execution to be triggered.
-    # See: https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/dev/table/sql/insert/#insert-statement
+    # See: https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/dev/table/sql/insert/#insert-statement
 
     stmt_set = table_env.create_statement_set()
 

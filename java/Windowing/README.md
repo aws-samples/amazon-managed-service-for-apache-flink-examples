@@ -2,7 +2,7 @@
 
 Example of project for a basic Flink Java application using data aggregation in Time based Windows.
 
-* Flink version: 1.19
+* Flink version: 1.20
 * Flink API: DataStream API
 * Flink Connectors: Kinesis Connector
 * Language: Java (11)
