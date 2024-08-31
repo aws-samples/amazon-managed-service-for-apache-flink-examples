@@ -1,15 +1,17 @@
 ## Example showing configuring Kafka connector for SASL/SCRAM using MSK Config Providers
 
-Flink version: 1.19
-Flink API: DataStream API
-Language: Java (11)
-Connectors: Kafka
+* Flink version: 1.19
+* Flink API: DataStream API
+* Language: Java (11)
+* Connectors: Kafka
 
 This example illustrates how to set up a Kafka connector to MSK using SASL/SCRAM authentication, fetching the credentials
 at runtime directly from SecretsManager.
 
 In this sample application we demonstrate how to configure a KafkaSink. 
 The process of configuring a KafkaSource SASL/SCRAM is identical.
+
+> TBD complete description of the approach
 
 ### TrustStore for SASL_SSL
 
