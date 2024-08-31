@@ -42,14 +42,14 @@ The following permissions must be added to the Managed Service for Apache Flink 
 to allow fetching the truststore from S3 and the SASL/SCRAM credentials from Secrets manager:
 
 1. Read the secret from Secret Manager:
-   * Actions: "secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret", "secretsmanager:DescribeSecret", "secretsmanager:GetResourcePolicy", "secretsmanager:ListSecretVersionIds"
-   * Resource: "arn:aws:secretsmanager:<region>:<account-id>:secret:<secret-name>"
+   * Actions: `secretsmanager:GetSecretValue`, `secretsmanager:DescribeSecret`, `secretsmanager:DescribeSecret`, `secretsmanager:GetResourcePolicy`, `secretsmanager:ListSecretVersionIds`
+   * Resource: `arn:aws:secretsmanager:<region>:<account-id>:secret:<secret-name>`
 2. Fetch the TrustStore from S3
-   * Actions: "s3:GetObject"
-   * Resource: "arn:aws:s3:::<bucket-name>/<object-key>"
+   * Actions: `s3:GetObject`
+   * Resource: `arn:aws:s3:::<bucket-name>/<object-key>`
 3. Decrypt the secret stored in SecretsManager - This is the KMS key used to encrypt the secret that contains  SASL/SCRAM credentials
-   * Action: "kms:Decrypt"
-   * Resource: "arn:aws:kms:<region>:<account-id>:key/<key-id>"
+   * Action: `kms:Decrypt`
+   * Resource: `arn:aws:kms:<region>:<account-id>:key/<key-id>`
 
 ### Application configuration parameters
 
