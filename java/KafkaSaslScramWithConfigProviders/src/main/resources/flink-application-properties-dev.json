@@ -8,8 +8,8 @@
       "truststore.bucket": "<TruststoreS3Bucket>",
       "truststore.path": "<TruststoreS3Path>",
       "credentials.secret": "<SecretsManager-SecretName>",
-      "credentials.secret.username.field": "<SecretsManager-Secret-UsernameField>",
-      "credentials.secret.password.field": "<SecretsManager-Secret-PasswordField>"
+      "credentials.secret.username.field": "username",
+      "credentials.secret.password.field": "password"
     }
   }
 ]
