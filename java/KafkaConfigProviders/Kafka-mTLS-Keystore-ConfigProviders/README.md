@@ -1,19 +1,21 @@
-## Sample illustrating how to use MSK config providers in Flink Kafka connectors
+## Sample illustrating how to use MSK config providers in Flink Kafka connectors, for mTLS authentication
 
 * Flink version: 1.19
 * Flink API: DataStream API
 * Language: Java (11)
-* Connectors: Kafka
+* Connectors: Kafka (mTLS authentication)
 
-This sample illustrates how to configure the Flink Kafka connectors (KafkaSource and KafkaSink) with keystore and/or truststore certs using the MSK config providers described [here](https://github.com/aws-samples/msk-config-providers).
+This sample illustrates how to configure the Flink Kafka connectors (KafkaSource and KafkaSink) 
+retrieving custom KeyStore and TrustStore at runtime, using Config Providers.
+More details on the MSK Config Providers in [this repo](https://github.com/aws-samples/msk-config-providers).
 
-The keystore and truststore are fetched from S3 at runtime.
-The password of both is fetched from AWS Secret Manager, at runtime.
-No secret is packaged with the application.
+* KeyStore and TrustStore are fetched from S3, when the job starts.
+* The passwords to open both KeyStore and TrustStore are also fetched when the job starts, from AWS Secret Manager.
+* No secret is packaged with the application.
 
 ### High level approach
 
-NOTE: This repo already includes a previously built version of the msk-config-providers jar
+NOTE: This repo already includes a previously built version of the msk-config-providers JAR from [this repo](https://github.com/aws-samples/msk-config-providers).
 
 1. Build this repo using `mvn clean package`.
 2. Setup Flink app using the jar from the build above. Please follow the instructions [here](https://docs.aws.amazon.com/managed-flink/latest/java/getting-started.html).
