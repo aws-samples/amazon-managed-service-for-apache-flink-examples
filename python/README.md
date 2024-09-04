@@ -27,11 +27,11 @@ Thre [Python Dependencies](./PythonDependencies/) example shows the most general
 
 There are some known issues with some specific Python and PyFlink versions, for local development
 
-* We recommend using **Python 3.11** to develop Python Flink 1.19.1 applications.
+* We recommend using **Python 3.11** to develop Python Flink 1.20.0 applications.
   This is also the runtime used by Amazon Managed Service for Apache Flink.
   Installation of the Python Flink 1.19 library on Python 3.12 may fail.
 * Installation of the Python Flink **1.15** library on machines based on **Apple Silicon** fail. 
-  We recommend upgrading to the Flink 1.19 or 1.18. Versions 1.18+ work correctly also on Apple Silicon machines.
+  We recommend upgrading to the Flink 1.20, 1.19 or 1.18. Versions 1.18+ work correctly also on Apple Silicon machines.
   If you need to maintain a Flink 1.15 application using a machine based on Apple Silicon, you can follow [the guide to develop Flink 1.15 on Apple Silicon](LocalDevelopmentOnAppleSilicon).
 
 

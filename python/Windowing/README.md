@@ -2,7 +2,7 @@
 
 Example showing a basic PyFlink job doing data aggregation over time windows.
 
-* Flink version: 1.19
+* Flink version: 1.20
 * Flink API: Table API & SQL
 * Flink Connectors: Kinesis Connector
 * Language: Python
@@ -23,7 +23,7 @@ The job can run both on Amazon Managed Service for Apache Flink, and locally for
 #### Development and build environment requirements
 
 * Python 3.11
-* PyFlink library: `apache-flink==1.19.1`
+* PyFlink library: `apache-flink==1.20.0`
 * Java JDK 11+ and Maven
 
 > JDK and Maven are used to download and package any required Flink dependencies, e.g. connectors, and
@@ -31,7 +31,7 @@ The job can run both on Amazon Managed Service for Apache Flink, and locally for
 
 > ⚠️ As of 2024-06-27, the Flink Python library 1.19.x may fail installing on Python 3.12.
 > We recommend using Python 3.11 for development, the same Python version used by Amazon Managed Service for Apache Flink
-> runtime 1.19.
+> runtime 1.20.
 
 #### External dependencies
 
@@ -133,7 +133,7 @@ Follow this process to make changes to the Python code
 
 ### Application structure
 
-The application generates synthetic data using the [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/connectors/table/datagen/) connector.
+The application generates synthetic data using the [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/table/datagen/) connector.
 No external data generator is required.
 
 It demonstrates 4 types of windowing aggregations:

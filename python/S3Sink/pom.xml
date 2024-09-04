@@ -12,7 +12,7 @@
         <buildDirectory>${project.basedir}/target</buildDirectory>
         <zip.finalName>${project.name}-${project.version}</zip.finalName>
         <jar.finalName>pyflink-dependencies</jar.finalName>
-        <flink.version>1.19.1</flink.version>
+        <flink.version>1.20.0</flink.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
     </properties>
 

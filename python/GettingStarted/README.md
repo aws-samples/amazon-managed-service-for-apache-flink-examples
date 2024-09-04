@@ -2,7 +2,7 @@
 
 Sample PyFlink application reading from and writing to Kinesis Data Stream.
 
-* Flink version: 1.19
+* Flink version: 1.20
 * Flink API: Table API & SQL
 * Flink Connectors: Kinesis Connector
 * Language: Python
@@ -22,13 +22,13 @@ The job can run both on Amazon Managed Service for Apache Flink, and locally for
 #### Development and build environment requirements
 
 * Python 3.11
-* PyFlink library: `apache-flink==1.19.1`
+* PyFlink library: `apache-flink==1.20.0`
 * Java JDK 11+ and Maven
 
 
 > ⚠️ As of 2024-06-27, the Flink Python library 1.19.x may fail installing on Python 3.12.
 > We recommend using Python 3.11 for development, the same Python version used by Amazon Managed Service for Apache Flink
-> runtime 1.19.
+> runtime 1.20.
 
 > JDK and Maven are used to download and package any required Flink dependencies, e.g. connectors, and
   to package the application as `.zip` file, for deployment to Amazon Managed Service for Apache Flink.

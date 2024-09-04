@@ -2,12 +2,12 @@
 
 Example showing how to implement and use a User Defined Function (UDF) in PyFlink.
 
-* Flink version: 1.19
+* Flink version: 1.20
 * Flink API: Table API & SQL
 * Flink Connectors: Kinesis Connector
 * Language: Python
 
-The application demonstrates the implementation of [User Defined Functions](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/dev/python/table/udfs/overview/)
+The application demonstrates the implementation of [User Defined Functions](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/dev/python/table/udfs/overview/)
 in PyFlink.
 Random data are generated internally, by the application. The result is sent to a Kinesis Data Stream.
 
@@ -18,13 +18,13 @@ Random data are generated internally, by the application. The result is sent to 
 #### Development and build environment requirements
 
 * Python 3.11
-* PyFlink library: `apache-flink==1.19.1`
+* PyFlink library: `apache-flink==1.20.0`
 * Java JDK 11+ and Maven
 
 
 > ⚠️ As of 2024-06-27, the Flink Python library 1.19.x may fail installing on Python 3.12.
 > We recommend using Python 3.11 for development, the same Python version used by Amazon Managed Service for Apache Flink
-> runtime 1.19.
+> runtime 1.20.
 
 > JDK and Maven are uses to download and package any required Flink dependencies, e.g. connectors, and
   to package the application as `.zip` file, for deployment to Amazon Managed Service for Apache Flink.
@@ -116,7 +116,7 @@ Follow this process to make changes to the Python code
 
 ### Application structure
 
-The application generates synthetic data using the [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/connectors/table/datagen/) connector.
+The application generates synthetic data using the [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/table/datagen/) connector.
 No external data generator is required.
 
 It demonstrates writing a query that uses a UDF, implemented in Python, and send the results to a Kinesis Data Stream.
