@@ -172,3 +172,15 @@ The application expects the following Runtime properties:
 | `Output0` | `credentials.secret`                | Name of the secret (not the ARN) in SecretsManager containing the SASL/SCRAM credentials               |
 | `Output0` | `credentials.secret.username.field` | Name of the field (the key) of the secret, containing the SASL username. Optional, default: `username` |
 | `Output0` | `credentials.secret.password.field` | Name of the field (the key) of the secret, containing the SASL password. Optional, default: `password` |
+
+## Running locally in IntelliJ
+
+> Due to MSK VPC networking, to run this example on your machine you need to set up network connectivity to the VPC where MSK is deployed, for example with a VPN.
+> Setting this connectivity depends on your set up and is out of scope for this example.
+
+Update `PropertyMap` in [configuration file](src/main/resources/flink-application-properties-dev.json).
+
+To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to 
+the classpath'*.
+
+Use the [AWS Toolkit](https://aws.amazon.com/intellij/) plugin to run the application with an AWS profile with access to the source and destination Kinesis Streams.
