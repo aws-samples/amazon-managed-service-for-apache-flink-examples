@@ -20,6 +20,7 @@ Runtime parameters:
 | Group ID        | Key           | Description               | 
 |-----------------|---------------|---------------------------|
 | `OutputStream0` | `stream.name` | Name of the output stream |
+| `OutputStream0`  | `aws.region`  | (optional) Region of the output stream. If not specified, it will use the application region or the default region of the AWS profile, when running locally. |
 
 All parameters are case-sensitive.
 
@@ -28,8 +29,8 @@ This simple example assumes the Kinesis Stream is in the same region as the appl
 
 ### Running locally in IntelliJ
 
-Update `PropertyMap` in [configuration file](src/main/resources/flink-application-properties-dev.json).
+To run the application locally, in IntelliJ:
 
-To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*.
-
-Use the [AWS Toolkit](https://aws.amazon.com/intellij/) plugin to run the application with an AWS profile with access to the destination bucket.
+1. Update `PropertyMap` in [configuration file](src/main/resources/flink-application-properties-dev.json).
+2. Edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*.
+3. Use the [AWS Toolkit](https://aws.amazon.com/intellij/) plugin to run the application with an AWS profile with access to the destination Kinesis Stream.

@@ -60,9 +60,9 @@ When using IAM Auth, the following Runtime Properties are expected at the Group 
 > Alternatively, you can use a local Kafka installation, for example in a container.
 > Setting up the connectivity or a local containerized Kafka depends on your set up and is out of scope for this example.
 
-Update `PropertyMap` in [configuration file](src/main/resources/flink-application-properties-dev.json).
+To run the application locally, in IntelliJ:
 
-To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to 
-the classpath'*.
+1. Update `PropertyMap` in [configuration file](src/main/resources/flink-application-properties-dev.json).
+2. Edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*.
+3. If you use MSK IAM authentication, use the [AWS Toolkit](https://aws.amazon.com/intellij/) plugin to run the application with an AWS profile with permissions to the MSK cluster and topic.
 
-Use the [AWS Toolkit](https://aws.amazon.com/intellij/) plugin to run the application with an AWS profile with access to the source and destination Kinesis Streams.

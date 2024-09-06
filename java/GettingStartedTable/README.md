@@ -32,9 +32,8 @@ All parameters are case-sensitive.
 
 ### Running in IntelliJ
 
-Update `PropertyMap` in [configuration file](src/main/resources/flink-application-properties-dev.json).
+To run the application locally, in IntelliJ:
 
-To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to
-the classpath'*.
-
-Use the [AWS Toolkit](https://aws.amazon.com/intellij/) plugin to run the application with an AWS profile with access to the destination bucket.
+1. Update `PropertyMap` in [configuration file](src/main/resources/flink-application-properties-dev.json).
+2. Edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*.
+3. Use the [AWS Toolkit](https://aws.amazon.com/intellij/) plugin to run the application with an AWS profile with access to the destination S3 bucket.
