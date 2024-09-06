@@ -17,21 +17,18 @@ control of the generated data. In this example we implemented a `GeneratorFuncti
 
 ### Runtime configuration
 
+When running on Amazon Managed Service for Apache Flink the runtime configuration is read from *Runtime Properties*.
 
-The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for Apache Flink,
-or, when running locally, from the [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json) file located in the resources folder.
+When running locally, the configuration is read from the [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json) file located in the resources folder.
 
-All parameters are case-sensitive.
+Runtime parameters:
 
 | Group ID        | Key           | Description               | 
 |-----------------|---------------|---------------------------|
 | `bucket`        | `name`        | Name of the destination bucket, **without** the prefix "s3://" |
 | `bucket`        | `path`        | Path withing the bucket the output will ebe written to, without the trailing "/" |
 
-To configure the applicaton on Managed Service for Apache Flink, set up these parameter in the *Runtime properties*.
-
-To configure the application for running locally, edit the [json file](resources/flink-application-properties-dev.json).
-
+All parameters are case-sensitive.
 
 ### Running in IntelliJ
 

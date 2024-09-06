@@ -13,21 +13,20 @@ The application shows how to get runtime configuration, and set up a Kinesis Dat
 
 ### Runtime configuration
 
-The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for Apache Flink,
-or, when running locally, from the [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json) file located in the resources folder.
+When running on Amazon Managed Service for Apache Flink the runtime configuration is read from *Runtime Properties*.
 
-All parameters are case-sensitive.
+When running locally, the configuration is read from the [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json) file located in the resources folder.
+
+Runtime parameters:
 
 | Group ID        | Key           | Description               | 
 |-----------------|---------------|---------------------------|
 | `InputStream0`  | `stream.name` | Name of the input stream  |
+| `InputStream0`  | `aws.region`  | (optional) Region of the input stream. If not specified, it will use the application region or the default region of the AWS profile, when running locally. |
 | `OutputStream0` | `stream.name` | Name of the output stream |
+| `OutputStream0`  | `aws.region`  | (optional) Region of the output stream. If not specified, it will use the application region or the default region of the AWS profile, when running locally. |
 
-To configure the applicaton on Managed Service for Apache Flink, set up these parameter in the *Runtime properties*.
-
-To configure the application for running locally, edit the [json file](resources/flink-application-properties-dev.json).
-
-This simple example assumes the Kinesis Streams is in the same region as the application, or in the default region for the authentication profile, when running locally.
+All parameters are case-sensitive.
 
 ### Running in IntelliJ
 

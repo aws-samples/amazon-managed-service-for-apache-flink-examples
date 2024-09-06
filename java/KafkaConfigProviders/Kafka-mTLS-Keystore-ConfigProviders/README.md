@@ -71,10 +71,11 @@ Access Policy/Role associated with the application that is running a config prov
 
 ### Runtime configuration
 
-The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for Apache Flink,
-or from `flink-application-properties-dev.json`, when running locally.
+When running on Amazon Managed Service for Apache Flink the runtime configuration is read from *Runtime Properties*.
 
-Runtime Properties are expected in the Group ID `Input0` and they are all case-sensitive.
+When running locally, the configuration is read from the [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json) file located in the resources folder.
+
+Runtime parameters:
 
 | GroupId | Key                     | Default     | Description                                                        |
 |---------|-------------------------|-------------|--------------------------------------------------------------------|
@@ -89,6 +90,7 @@ Runtime Properties are expected in the Group ID `Input0` and they are all case-s
 | `Input0` | `keystore.secret`       |             | SecretManager secret ID  containing the password of the keystore   |
 | `Input0` | `keystore.secret.field` |             | SecretManager secret key containing the password of the keystore   |
 
+All parameters are case-sensitive.
 
 ## Running locally in IntelliJ
 

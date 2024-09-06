@@ -4,7 +4,7 @@
     "PropertyMap": {
       "bootstrap.servers": "<BootstrapServers>",
       "topic": "<Topic>",
-      "group.id": "<S3Path>"
+      "group.id": "<ConsumerGroupID>"
     }
   },
   {
