@@ -30,11 +30,9 @@ All parameters are case-sensitive.
 
 ### Running in IntelliJ
 
-To run the application locally, in IntelliJ:
+You can run this example directly in IntelliJ, without any local Flink cluster or local Flink installation.
 
-1. Update `PropertyMap` in [configuration file](src/main/resources/flink-application-properties-dev.json).
-2. Edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*.
-3. Use the [AWS Toolkit](https://aws.amazon.com/intellij/) plugin to run the application with an AWS profile with access to the source and destination Kinesis Streams.
+See [Running examples locally](../running-examples-locally.md) for details.
 
 ### Generating data
 

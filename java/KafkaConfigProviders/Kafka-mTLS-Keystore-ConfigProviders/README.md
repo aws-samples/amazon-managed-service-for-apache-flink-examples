@@ -97,8 +97,6 @@ All parameters are case-sensitive.
 > Due to MSK VPC networking, to run this example on your machine you need to set up network connectivity to the VPC where MSK is deployed, for example with a VPN.
 > Setting this connectivity depends on your set up and is out of scope for this example.
 
-To run the application locally, in IntelliJ:
+You can run this example directly in IntelliJ, without any local Flink cluster or local Flink installation.
 
-1. Update `PropertyMap` in [configuration file](src/main/resources/flink-application-properties-dev.json).
-2. Edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*.
-3. Use the [AWS Toolkit](https://aws.amazon.com/intellij/) plugin to run the application with an AWS profile with access to the S3 bucket containing keystore/truststore, and SecretsManager.
+See [Running examples locally](../running-examples-locally.md) for details.
