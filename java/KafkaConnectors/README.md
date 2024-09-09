@@ -14,7 +14,10 @@ This example uses KafkaSource and KafkaSink.
 ![Flink Example](images/flink-example.png),
 
 > In this example, the Kafka Sink uses *exactly-once* delivery guarantees. This leverages Kafka transaction under the hood, improving guarantees but 
-> adding some overhead and increasing the effective latency of the output to the consumers of the destination Kafka topic.
+> adding some overhead and increasing the effective latency of the output to the consumers of the destination Kafka topic. 
+> 
+> Moreover, there are failure scenarios were the Kafka Sink may still cause duplicates, even when set for exactly-once guarantees.
+> See [FLIP-319](https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=255071710) for more details.
 >
 > We recommend not to consider Kafka Sink *exactly-once* guarantees as a default setting for all sinks to Kafka. 
 > Make sure you understand the implications before enabling it. Refer to the [Flink Kafka sink documentation](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/connectors/datastream/kafka/#fault-tolerance) for details.

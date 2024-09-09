@@ -13,7 +13,7 @@ The applications generates data internally and writes to a Kinesis Stream.
 
 When running on Amazon Managed Service for Apache Flink the runtime configuration is read from *Runtime Properties*.
 
-When running locally, the configuration is read from the [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json) file located in the resources folder.
+When running locally, the configuration is read from the [`resources/flink-application-properties-dev.json`](src/main/resources/flink-application-properties-dev.json) file located in the resources folder.
 
 Runtime parameters:
 

@@ -26,7 +26,7 @@ Runtime parameters:
 | Group ID        | Key           | Description               | 
 |-----------------|---------------|---------------------------|
 | `bucket`        | `name`        | Name of the destination bucket, **without** the prefix "s3://" |
-| `bucket`        | `path`        | Path withing the bucket the output will ebe written to, without the trailing "/" |
+| `bucket`        | `path`        | Path withing the bucket the output will be written to, without the trailing "/" |
 
 All parameters are case-sensitive.
 
