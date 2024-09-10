@@ -37,8 +37,8 @@ Use the [AWS toolkit](https://aws.amazon.com/intellij/) IntelliJ plugin to run t
 
 #### Network access to VPC-networked services
 
-If your application uses VPC-networked services, like MSK or RDS, you need to set up a network connection
-from your development machine to the VPC hosting the service. For example using a VPN.
+Note that, if your application connects to any AWS service using VPC networking, like MSK or RDS, you need to set up connectivity
+between your developer machine and the VPC hosting the service, for example using a VPN.
 
-If this is not possible, you should consider running a local version of the database. For example, if you are using Kafka,
-you can either run a small Kafka cluster in your machine directly or in a container.
+If this is not possible, you should consider running a local version of the service, installed directly or your machine 
+in a container.
