@@ -16,12 +16,19 @@ You need to have `sbt` tool installed on you machine to build a Scala project. U
 
 ### Build
 - Run `sbt assembly` to build an uber jar
-- Use `target/scala-3.3.0/ScalaGettingStarted-flink_1.18.jar` in your MSF application
+- Use `target/scala-3.3.0/ScalaGettingStarted-flink_1.20.jar` in your MSF application
 
 ### Runtime configuration
 
 The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for
-Apache Flink, or from command line parameters, when running locally.
+Apache Flink.
+
+The following runtime properties are required:
+
+| Group ID       | Key           | Description              |
+|----------------|---------------|--------------------------|
+| `InputStream0` | `stream.name` | Name of the input stream |
+| `InputStream0` | `aws.region`  | Region of the input stream, e.g. `us-east-1` |
 
 Runtime Properties are expected in the Group IDs `InputStream0` and `OutputStream0`.
 
