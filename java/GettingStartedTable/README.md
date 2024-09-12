@@ -5,6 +5,7 @@ Example of project for a basic Flink Java application using the Table API & SQL 
 * Flink version: 1.20
 * Flink API: Table API & SQL, and DataStream API
 * Language: Java (11)
+* Flink connectors: Kinesis Sink
 
 The project can run both on Amazon Managed Service for Apache Flink, and locally for development.
 
@@ -16,20 +17,21 @@ control of the generated data. In this example we implemented a `GeneratorFuncti
 
 ### Runtime configuration
 
-The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for
-Apache Flink, or from command line parameters, when running locally.
+When running on Amazon Managed Service for Apache Flink the runtime configuration is read from *Runtime Properties*.
 
-Runtime Properties are expected in the Group ID `FlinkApplicationProperties`.
+When running locally, the configuration is read from the [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json) file located in the resources folder.
 
-Command line parameters should be prepended by `--`.
+Runtime parameters:
 
-Configuration parameters:
+| Group ID        | Key           | Description               | 
+|-----------------|---------------|---------------------------|
+| `bucket`        | `name`        | Name of the destination bucket, **without** the prefix "s3://" |
+| `bucket`        | `path`        | Path withing the bucket the output will be written to, without the trailing "/" |
 
-* `s3Path` <s3-bucket>/<path> of the S3 destination , **without** the prefix `s3://`
-
-They parameters all case-sensitive.
+All parameters are case-sensitive.
 
 ### Running in IntelliJ
 
-To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to
-the classpath'*.
+You can run this example directly in IntelliJ, without any local Flink cluster or local Flink installation.
+
+See [Running examples locally](../running-examples-locally.md) for details.

@@ -4,11 +4,14 @@ Example of project for a basic Flink Java application using data aggregation in 
 
 * Flink version: 1.20
 * Flink API: DataStream API
-* Flink Connectors: Kinesis Connector
 * Language: Java (11)
+* Flink connectors: Kinesis Sink
 
 The project can run both on Amazon Managed Service for Apache Flink, and locally for development.
 There is one sample application which demonstrates behaviour of different windows supported by Flink. 
+
+The appllication generates random synthetic data internally, aggregates them with four different types of windowing aggregations and writes to four separate Kinesis Streams. 
+
 
 ### Application structure
 
@@ -28,19 +31,32 @@ into dedicated Kinesis Data Streams.
 
 ### Runtime configuration
 
-The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for
-Apache Flink, or from local [configuration file](src/main/resources/flink-application-properties-dev.json), when running locally.
+The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for Apache Flink,
+or, when running locally, from the [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json) file located in the resources folder.
 
-They are all case-sensitive.
+All parameters are case-sensitive.
 
-Output stream are configured using dedicated PropertyGroup's (`OutputStream[0-3]`). Each of the streams requires following configuration properties:
-* `aws.region`: region of the output stream
-* `stream.name`: name of the output Kinesis Data Stream
+| Group ID        | Key           | Description               | 
+|-----------------|---------------|---------------------------|
+| `OutputStream0` | `stream.name` | Name of the output stream |
+| `OutputStream0`  | `aws.region`  | (optional) Region of the output stream. If not specified, it will use the application region or the default region of the AWS profile, when running locally. |
 
-## Running in IntelliJ
-To run this example locally:
 
-* Create sink Kinesis streams.
-* Ensure that use profile is configured and user has required permission to read/write from Kinesis streams. 
-* To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to
+To configure the applicaton on Managed Service for Apache Flink, set up these parameter in the *Runtime properties*.
+
+To configure the application for running locally, edit the [json file](resources/flink-application-properties-dev.json).
+
+### Running in IntelliJ
+
+Update `PropertyMap` in [configuration file](src/main/resources/flink-application-properties-dev.json).
+
+To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to 
 the classpath'*.
+
+Use the [AWS Toolkit](https://aws.amazon.com/intellij/) plugin to run the application with an AWS profile with access to the destination Kinesis Streams.
+
+### Running in IntelliJ
+
+You can run this example directly in IntelliJ, without any local Flink cluster or local Flink installation.
+
+See [Running examples locally](../running-examples-locally.md) for details.

@@ -55,11 +55,11 @@ When running locally, you need active valid AWS credentials that allow publishin
 
 ### Runtime configuration
 
-* **Local development**: uses the local file [application_properties.json](./application_properties.json)
-* **On Amazon Managed Service for Apache Fink**: define Runtime Properties, using Group ID and property names based on the content of [application_properties.json](./application_properties.json)
+ When running on Amazon Managed Service for Apache Flink the runtime configuration is read from *Runtime Properties*.
 
-For this application, the configuration properties to specify are:
+ When running locally, the configuration is read from the [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json) file located in the resources folder.
 
+Runtime parameters:
 
 | Group ID        | Key                    | Mandatory | Example Value (default for local)    | Notes                         |
 |-----------------|------------------------|-----------|--------------------------------------|-------------------------------|

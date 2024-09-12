@@ -3,7 +3,7 @@
 * Flink version: 1.19
 * Flink API: DataStream API
 * Language: Java (11)
-* Connectors: Kafka (mTLS authentication)
+* Flink connectors: Kafka (mTLS authentication)
 
 This sample illustrates how to configure the Flink Kafka connectors (KafkaSource and KafkaSink) 
 retrieving custom KeyStore and TrustStore at runtime, using Config Providers.
@@ -71,10 +71,11 @@ Access Policy/Role associated with the application that is running a config prov
 
 ### Runtime configuration
 
-The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for Apache Flink,
-or from `flink-application-properties-dev.json`, when running locally.
+When running on Amazon Managed Service for Apache Flink the runtime configuration is read from *Runtime Properties*.
 
-Runtime Properties are expected in the Group ID `Input0` and they are all case-sensitive.
+When running locally, the configuration is read from the [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json) file located in the resources folder.
+
+Runtime parameters:
 
 | GroupId | Key                     | Default     | Description                                                        |
 |---------|-------------------------|-------------|--------------------------------------------------------------------|
@@ -89,10 +90,13 @@ Runtime Properties are expected in the Group ID `Input0` and they are all case-s
 | `Input0` | `keystore.secret`       |             | SecretManager secret ID  containing the password of the keystore   |
 | `Input0` | `keystore.secret.field` |             | SecretManager secret key containing the password of the keystore   |
 
+All parameters are case-sensitive.
 
 ## Running locally in IntelliJ
 
-To run the application in IntelliJ
+> Due to MSK VPC networking, to run this example on your machine you need to set up network connectivity to the VPC where MSK is deployed, for example with a VPN.
+> Setting this connectivity depends on your set up and is out of scope for this example.
 
-1. Edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*
-2. Update `flink-application-properties-dev.json` with property values (`bootstrap.servers`, `topic` etc.) that fit your environment.
+You can run this example directly in IntelliJ, without any local Flink cluster or local Flink installation.
+
+See [Running examples locally](../running-examples-locally.md) for details.

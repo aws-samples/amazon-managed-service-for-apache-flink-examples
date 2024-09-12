@@ -108,41 +108,11 @@ The following dependencies related to AVRO and S3 are included (for FLink 1.15.4
 
 ### Running in Intellij
 
-For running this example locally, you will need to make additional changes in the configuration. 
+You can run this example directly in IntelliJ, without any local Flink cluster or local Flink installation.
 
-Steps to follow:
-* Update `resources/flink-application-properties-dev.json`. Add Kinesis Data Stream Name , Stream Region and S3 path to write the data to.
-```shell
-## Example
-[
-  {
-    "PropertyGroupId": "FlinkApplicationProperties",
-    "PropertyMap": {
-      "input.stream": "stream-input",
-      "stream.region": "ap-south-1",
-      "s3.path": "s3://aksh-flink-sink/flink/msf/"
-    }
-  }
-]
-```
-* Execute with AWS user that has permissions to consume data from a Kinesis Data Stream and write data into Amazon S3.
-* To start the Flink job in IntelliJ edit the Run/Debug configuration enabling 'Add dependencies with "provided" scope to
-  the classpath'.
-* Following is the screenshot of run configuration
-  ![Run Configuration](images/runConfiguration.png)
+See [Running examples locally](../running-examples-locally.md) for details.
 
 
-
-## Running locally through Maven command line
-* Update `resources/flink-application-properties-dev.json`. Add Kinesis Data Stream Name , Stream Region and S3 path to write the data to.
-* Execute with AWS user that has permissions to consume data from a Kinesis Data Stream and write data into Amazon S3.
-* Execute following command from the project home directory -
-
-```
- mvn clean compile exec:java  -Dexec.classpathScope="compile" \
- -Dexec.mainClass="com.amazonaws.services.msf.StreamingJob" 
-
-```
 
 ## Deploying using CloudFormation to Amazon Managed Service for Apache Flink
 ### Pre-requisite

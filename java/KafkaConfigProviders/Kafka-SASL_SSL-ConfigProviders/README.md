@@ -160,7 +160,11 @@ is controlled via networking (SecurityGroups, NACL) and by the SASL credentials 
 
 ### Application configuration parameters
 
-The application expects the following Runtime properties:
+When running on Amazon Managed Service for Apache Flink the runtime configuration is read from *Runtime Properties*.
+
+When running locally, the configuration is read from the [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json) file located in the resources folder.
+
+Runtime parameters:
 
 | Group ID  | Key                                 | Description                                                                                            | 
 |-----------|-------------------------------------|--------------------------------------------------------------------------------------------------------|
@@ -172,3 +176,14 @@ The application expects the following Runtime properties:
 | `Output0` | `credentials.secret`                | Name of the secret (not the ARN) in SecretsManager containing the SASL/SCRAM credentials               |
 | `Output0` | `credentials.secret.username.field` | Name of the field (the key) of the secret, containing the SASL username. Optional, default: `username` |
 | `Output0` | `credentials.secret.password.field` | Name of the field (the key) of the secret, containing the SASL password. Optional, default: `password` |
+
+All parameters are case-sensitive.
+
+## Running locally in IntelliJ
+
+> Due to MSK VPC networking, to run this example on your machine you need to set up network connectivity to the VPC where MSK is deployed, for example with a VPN.
+> Setting this connectivity depends on your set up and is out of scope for this example.
+
+You can run this example directly in IntelliJ, without any local Flink cluster or local Flink installation.
+
+See [Running examples locally](../running-examples-locally.md) for details.

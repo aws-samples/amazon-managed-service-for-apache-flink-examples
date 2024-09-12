@@ -3,6 +3,7 @@
 * Flink version: 1.20
 * Flink API: DataStream API
 * Language Java (11)
+* Flink connectors: FileSystem Sink
 
 This example demonstrates how to write data into an Amazon S3 Bucket.
 
@@ -32,31 +33,26 @@ In order for to have this sample running locally or in Amazon Managed Service Fo
 
 * Existing S3 Bucket (Please add your S3 Bucket Name in flink-application-properties-dev.json )
 
-## Flink compatibility
-
-**Note:** This project is compatible with Flink 1.18 and Amazon Managed Service for Apache Flink.
-
 It uses the `FileSink` (as opposed to `StreamingFileSink`).
 
-## Starting the Flink Job 
 
-### Running locally
+### Runtime configuration
 
-Steps to follow:
-* Update `resources/flink-application-properties-dev.json`. Add Kinesis Data Stream Name , Stream Region and S3 path to write the data to. 
-```shell
-## Example
-[
-  {
-    "PropertyGroupId": "bucket",
-    "PropertyMap": {
-      "name": "my-bucket-name"
-    }
-  }
-]
-```
-* Execute using credentials with permissions write data into Amazon S3.
+The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for Apache Flink,
+or, when running locally, from the [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json) file located in the resources folder.
 
-##### Running in IntelliJ
-* To start the Flink job in IntelliJ edit the Run/Debug configuration enabling 'Add dependencies with "provided" scope to
-the classpath'.
+All parameters are case-sensitive.
+
+| Group ID        | Key           | Description               | 
+|-----------------|---------------|---------------------------|
+| `bucket`        | `name`        | Name of the destination S3 bucket. |
+
+To configure the applicaton on Managed Service for Apache Flink, set up these parameter in the *Runtime properties*.
+
+To configure the application for running locally, edit the [json file](resources/flink-application-properties-dev.json).
+
+### Running in IntelliJ
+
+You can run this example directly in IntelliJ, without any local Flink cluster or local Flink installation.
+
+See [Running examples locally](../running-examples-locally.md) for details.
