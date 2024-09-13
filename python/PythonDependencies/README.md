@@ -2,7 +2,7 @@
 
 Examples showing how to include Python libraries in your PyFlink application.
 
-* Flink version: 1.19
+* Flink version: 1.20
 * Flink API: Table API & SQL
 * Flink Connectors: Kinesis Connector
 * Language: Python
@@ -33,12 +33,12 @@ The output is sent to a Kinesis Data Stream.
 #### Development and build environment requirements
 
 * Python 3.11
-* PyFlink library: `apache-flink==1.19.1` + any libraries defined in `requirements.txt`
+* PyFlink library: `apache-flink==1.20.0` + any libraries defined in `requirements.txt`
 * Java JDK 11+ and Maven
 
-> ⚠️ As of 2024-06-27, the Flink Python library 1.19.x may fail installing on Python 3.12.
+> ⚠️ The Flink Python library 1.20.0 may fail installing on Python 3.12.
 > We recommend using Python 3.11 for development, the same Python version used by Amazon Managed Service for Apache Flink
-> runtime 1.19.
+> runtime 1.20.
 
 > JDK and Maven are uses to download and package any required Flink dependencies, e.g. connectors, and
   to package the application as `.zip` file, for deployment to Amazon Managed Service for Apache Flink.
@@ -89,14 +89,14 @@ In addition to these configuration properties, when running a PyFlink applicatio
 > We recommend to use Virtual Environments or any equivalent tool to create isolated environment
 
 To run the application locally, from the command line or in your IDE, you need to install the following Python dependencies:
-* `apache-flink==1.19.1`
+* `apache-flink==1.20.0`
 * Any requirements defined in `requirements.txt`
 
 Assuming you use `virtualenv` and you have it installed already:
 
 1. Create the Virtual Environment in the project directory: `virtualenv venv`
 2. Activate the Virtual Environment you just created: `source venv/bin/activate`
-3. Install PyFlink library: `pip install apache-flink==1.19.1`
+3. Install PyFlink library: `pip install apache-flink==1.20.0`
 4. Install other dependencies from `requirements.txt`: `pip install -r requirements.txt`
 
 
