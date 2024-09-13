@@ -171,6 +171,7 @@ def main():
                   )
                   WITH (
                     'connector' = 'datagen',
+                    'rows-per-second' = '1',
                     'fields.a_number.min' = '0',
                     'fields.a_number.max' = '100'
                   )
@@ -203,7 +204,7 @@ def main():
                 'stream' = '{output_stream_name}',
                 'aws.region' = '{output_stream_region}',
                 'sink.partitioner-field-delimiter' = ';',
-                'sink.batch.max-size' = '100',
+                'sink.batch.max-size' = '5',
                 'format' = 'json',
                 'json.timestamp-format.standard' = 'ISO-8601'
               )
