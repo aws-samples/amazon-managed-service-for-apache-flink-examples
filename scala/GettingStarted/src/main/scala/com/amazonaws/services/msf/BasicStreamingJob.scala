@@ -48,11 +48,10 @@ object BasicStreamingJob {
 
   def main(args: Array[String]): Unit = {
     val environment = StreamExecutionEnvironment.getExecutionEnvironment
-
-    val kinesisSink = createSink(environment)
+    
     environment
       .addSource(createSource(environment))
-      .sinkTo(kinesisSink)
+      .sinkTo(createSink(environment))
     environment.execute("Flink Streaming Scala Example")
   }
 }

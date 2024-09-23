@@ -23,9 +23,9 @@ libraryDependencies ++= Seq(
   "org.apache.flink" % "flink-connector-base" % flinkVersion % "provided",
   "org.apache.flink" % "flink-clients" % flinkVersion % "provided",
   // Logging
-  "org.apache.logging.log4j" % "log4j-slf4j-impl" % log4jVersion,
-  "org.apache.logging.log4j" % "log4j-api" % log4jVersion,
-  "org.apache.logging.log4j" % "log4j-core" % log4jVersion,
+  "org.apache.logging.log4j" % "log4j-slf4j-impl" % log4jVersion % "provided",
+  "org.apache.logging.log4j" % "log4j-api" % log4jVersion % "provided",
+  "org.apache.logging.log4j" % "log4j-core" % log4jVersion % "provided",
 )
 
 artifactName := { (_: ScalaVersion, _: ModuleID, _: Artifact) => jarName }

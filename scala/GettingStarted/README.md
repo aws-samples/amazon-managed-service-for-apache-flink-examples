@@ -31,8 +31,8 @@ The following runtime properties are required:
 |-----------------|---------------|-----------------------------------------------|
 | `InputStream0`  | `stream.name` | Name of the input stream                      |
 | `InputStream0`  | `aws.region`  | Region of the input stream, e.g. `us-east-1`  |
-| `OutoutStream0` | `stream.name` | Name of the output stream                     |
-| `OutoutStream0` | `aws.region`  | Region of the output stream, e.g. `us-east-1` |
+| `OutputStream0` | `stream.name` | Name of the output stream                     |
+| `OutputStream0` | `aws.region`  | Region of the output stream, e.g. `us-east-1` |
 
 
 ### Running in IntelliJ
