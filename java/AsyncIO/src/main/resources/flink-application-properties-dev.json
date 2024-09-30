@@ -1,0 +1,18 @@
+[
+  {
+    "PropertyGroupId": "OutputStream",
+    "PropertyMap": {
+      "aws.region": "us-east-1",
+      "stream.name": "arn:aws:kinesis:us-east-1:143479883528:stream/ExampleOutputStream",
+      "flink.stream.initpos": "LATEST"
+    }
+  },
+  {
+    "PropertyGroupId": "EndpointService",
+    "PropertyMap": {
+      "aws.region": "us-east-1",
+      "api.url": "https://gzisjatpxh.execute-api.us-east-1.amazonaws.com/prod/lambda",
+      "api.key": "S8h7fLV8PO3XrUUFd3Lq34FDB5BGKuyT71zZwm9m"
+    }
+  }
+]
