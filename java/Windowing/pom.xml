@@ -58,11 +58,12 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Amazon Managed Service for Apache Flink (formerly Amazon Kinesis Data Analytics) runtime -->
+        <!-- Library to retrieve runtime application properties in Managed Service for Apache Flink  -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-kinesisanalytics-runtime</artifactId>
             <version>${kda.runtime.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Connectors and Formats -->

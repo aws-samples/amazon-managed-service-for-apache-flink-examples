@@ -23,10 +23,6 @@
         <log4j.version>2.17.1</log4j.version>
         <iceberg.version>1.4.2</iceberg.version>
         <hadoop.version>3.3.6</hadoop.version>
-
-
-
-
     </properties>
 
     <dependencies>
@@ -129,6 +125,7 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-files</artifactId>
             <version>${flink.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
@@ -137,11 +134,12 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Amazon Managed Service for Apache Flink (formerly Amazon Kinesis Data Analytics) runtime-->
+        <!-- Library to retrieve runtime application properties in Managed Service for Apache Flink  -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-kinesisanalytics-runtime</artifactId>
             <version>${kda.runtime.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Flink Kinesis connector -->
@@ -163,19 +161,16 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
             <version>${log4j.version}</version>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
             <version>${log4j.version}</version>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>${log4j.version}</version>
-            <scope>runtime</scope>
         </dependency>
     </dependencies>
 

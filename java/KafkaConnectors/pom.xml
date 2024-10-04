@@ -43,11 +43,12 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Amazon Managed Service for Apache Flink (formerly Amazon Kinesis Data Analytics) runtime-->
+        <!-- Library to retrieve runtime application properties in Managed Service for Apache Flink  -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-kinesisanalytics-runtime</artifactId>
             <version>${kda.runtime.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Flink Kafka connector -->
@@ -62,6 +63,7 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-base</artifactId>
             <version>${flink.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Logging framework, to produce console output when running in the IDE. -->
@@ -81,6 +83,7 @@
             <artifactId>log4j-core</artifactId>
             <version>${log4j.version}</version>
         </dependency>
+
         <!-- MSK IAM Authentication -->
         <dependency>
             <groupId>software.amazon.msk</groupId>
