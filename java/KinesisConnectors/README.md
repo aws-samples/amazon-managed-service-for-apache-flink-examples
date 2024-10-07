@@ -23,13 +23,14 @@ All parameters are case-sensitive.
 
 | Group ID        | Key           | Description               | 
 |-----------------|---------------|---------------------------|
-| `InputStream0`  | `stream.name` | Name of the input stream  |
-| `InputStream0`  | `aws.region`  | (optional) Region of the input stream. If not specified, it will use the application region or the default region of the AWS profile, when running locally. |
-| `InputStream0`  | `flink.stream.initpos ` | (optional) Starting position when the application starts with no state. Default is `LATEST`|
-| `InputStream0` | `flink.stream.recordpublisher` | (optional) Choose between standard (`POLLING`) and Enhanced Fan-Out (`EFO`) consumer. Default is `POLLING`. |
-| `InputStream0` | `flink.stream.efo.consumername` | (optional, for EFO consumer mode only) Name of the EFO consumer. Only used if `flink.stream.recordpublisher=EFO`. |
-| `OutputStream0` | `stream.name` | Name of the output stream |
-| `OutputStream0`  | `aws.region`  | (optional) Region of the output stream. If not specified, it will use the application region or the default region of the AWS profile, when running locally. |
+| `InputStream0`  | `stream.arn` | ARN of the input stream.  |
+| `InputStream0`  | `aws.region`  | Region of the input stream. |
+| `InputStream0`  | `kinesis.stream.init.position` | (optional) Starting position when the application starts with no state. Default is `LATEST`|
+| `InputStream0` | `kinesis.stream.reader.type` | (optional) Choose between standard (`POLLING`) and Enhanced Fan-Out (`EFO`) consumer. Default is `POLLING`. |
+| `InputStream0` | `kinesis.stream.efo.consumer.name` | (optional, for EFO consumer mode only) Name of the EFO consumer. Only used if `kinesis.stream.reader.type=EFO`. |
+| `InputStream0` | `kinesis.stream.efo.consumer.lifecycle` | (optional, for EFO consumer mode only) Lifecycle management mode of EFO consumer. Choose between `JOB_MANAGED` and `SELF_MANAGED`. Default is `JOB_MANAGED`. |
+| `OutputStream0` | `stream.arn` | ARN of the output stream. |
+| `OutputStream0`  | `aws.region`  | Region of the output stream. |
 
 Every parameter in the `InputStream0` group is passed to the Kinesis consumer, and every parameter in the `OutputStream0` is passed to the Kinesis client of the sink.
 
