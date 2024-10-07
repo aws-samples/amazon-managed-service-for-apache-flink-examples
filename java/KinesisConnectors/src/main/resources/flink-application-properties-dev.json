@@ -1,0 +1,17 @@
+[
+  {
+    "PropertyGroupId": "InputStream0",
+    "PropertyMap": {
+      "stream.arn": "arn:aws:kinesis:us-east-1:012345678900:stream/ExampleInputStream",
+      "kinesis.stream.init.position": "LATEST",
+      "aws.region": "us-east-1"
+    }
+  },
+  {
+    "PropertyGroupId": "OutputStream0",
+    "PropertyMap": {
+      "stream.arn": "arn:aws:kinesis:us-east-1:012345678900:stream/ExampleOutputStream",
+      "aws.region": "us-east-1"
+    }
+  }
+]

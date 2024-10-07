@@ -1,25 +1,22 @@
 package com.amazonaws.services.msf;
 
 import com.amazonaws.services.kinesisanalytics.runtime.KinesisAnalyticsRuntime;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
-import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.connector.kinesis.sink.KinesisStreamsSink;
+import org.apache.flink.connector.kinesis.source.KinesisStreamsSource;
+import org.apache.flink.shaded.guava31.com.google.common.collect.Maps;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.connectors.kinesis.FlinkKinesisConsumer;
-import org.apache.flink.streaming.connectors.kinesis.config.AWSConfigConstants;
-import org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import static org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants.*;
-import static org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants.RecordPublisherType.EFO;
 
 
 public class StreamingJob {
@@ -47,20 +44,22 @@ public class StreamingJob {
         }
     }
 
-    private static FlinkKinesisConsumer<String> createKinesisSource(
-            Properties inputProperties) {
-
-        return new FlinkKinesisConsumer<>(inputProperties.getProperty("stream.name"), new SimpleStringSchema(), inputProperties);
+    private static KinesisStreamsSource<String> createKinesisSource(Properties inputProperties) {
+        final String inputStreamArn = inputProperties.getProperty("stream.arn");
+        return KinesisStreamsSource.<String>builder()
+                .setStreamArn(inputStreamArn)
+                .setSourceConfig(Configuration.fromMap(Maps.fromProperties(inputProperties)))
+                .setDeserializationSchema(new SimpleStringSchema())
+                .build();
     }
 
-    private static KinesisStreamsSink<String> createKinesisSink(
-            Properties outputProperties) {
-
+    private static KinesisStreamsSink<String> createKinesisSink(Properties outputProperties) {
+        final String outputStreamArn = outputProperties.getProperty("stream.arn");
         return KinesisStreamsSink.<String>builder()
+                .setStreamArn(outputStreamArn)
                 .setKinesisClientProperties(outputProperties)
                 .setSerializationSchema(new SimpleStringSchema())
                 .setPartitionKeyGenerator(element -> String.valueOf(element.hashCode()))
-                .setStreamName(outputProperties.getProperty("stream.name"))
                 .build();
     }
 
@@ -70,8 +69,11 @@ public class StreamingJob {
         final Map<String, Properties> applicationProperties = loadApplicationProperties(env);
         LOG.warn("Application properties: {}", applicationProperties);
 
-        FlinkKinesisConsumer<String> source = createKinesisSource(applicationProperties.get("InputStream0"));
-        DataStream<String> input = env.addSource(source, "Kinesis source");
+        KinesisStreamsSource<String> source = createKinesisSource(applicationProperties.get("InputStream0"));
+        DataStream<String> input = env.fromSource(source,
+                WatermarkStrategy.noWatermarks(),
+                "Kinesis source",
+                TypeInformation.of(String.class));
 
         KinesisStreamsSink<String> sink = createKinesisSink(applicationProperties.get("OutputStream0"));
         input.sinkTo(sink);
