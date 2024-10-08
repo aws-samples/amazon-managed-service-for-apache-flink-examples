@@ -1,55 +1,88 @@
 # Flink Iceberg Sink using DataStream API Examples
 
-* Flink version: 1.15.2
+* Flink version: 1.20.0
 * Flink API: DataStream API
-* Iceberg 1.3.1
+* Iceberg 1.6.1
 * Language: Java (11)
+* Flink connectors: [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/datastream/datagen/) 
+   and [Iceberg](https://iceberg.apache.org/docs/latest/flink/)
 
 This example demonstrate how to use
 [Flink Iceberg Sink Connector](https://iceberg.apache.org/docs/latest/flink-writes/) with the Glue Data Catalog
 
-This samples consumes messages from a Kinesis Data Stream in JSON and writes them into an Iceberg Table in Amazon S3. 
-It uses AVRO for
-* Passing the schema of the table to the application
-* Automatically converting input JSON messages into AVRO
-* Converting the messages automatically into Iceberg table schema
+For simplicity, the application generates synthetic data, random stock prices, internally. 
+Data is generated as AVRO Generic Record, simulating a real source, for example a Kafka Source, that receives records 
+serialized with AVRO.
 
-AVRO is not used for serializing the input. It is mainly used to simplify the iceberg table creation and sink by getting the schema from AVRO.
+### Prerequisites
+
+The application expects the following resources:
+* A Glue Data Catalog database in the current AWS region. The database is configurable. The default name is "default".
+  The application creates the Table in the catalog, but the catalog must exist already.
+* An S3 bucket to write the Iceberg table. The S3 prefix path is configurable.
+
+
+
+#### IAM Permissions
+
+The application must have IAM permissions to
+* Show and alter Glue Data Catalog databases, show and create Glue Data Catalog tables. 
+  See [Glue Data Catalog permissions](https://docs.aws.amazon.com/athena/latest/ug/fine-grained-access-to-glue-resources.html).
+* Read and Write from the S3 bucket
+
+### Runtime configuration
+
+When running on Amazon Managed Service for Apache Flink the runtime configuration is read from Runtime Properties.
+
+When running locally, the configuration is read from the
+[resources/flink-application-properties-dev.json](./src/main/resources/flink-application-properties-dev.json) file.
+
+Runtime parameters:
+
+| Group ID | Key                      | Default          | Description                                                                                                        |
+|----------|--------------------------|------------------|--------------------------------------------------------------------------------------------------------------------|
+| `DataGen` | `records.per.sec`        | `10.0`           | Records per second generated                                                                                       |
+| `Iceberg` | `bucket.prefix`          | (mandatory)      | S3 bucket prefix, for example `s3://my-bucket/iceberg`                                                             |
+| `Iceberg` | `catalog.db`             | `default`        | Name of the Glue Data Catalog database                                                                             |
+| `Iceberg` | `catalog.table`          | `prices_iceberg` | Name of the Glue Data Catalog table                                                                                |
+| `Iceberg` | `partition.fields`       | `symbol`         | Comma separated list of partition fields                                                                           |
+| `Iceberg` | `sort.field`             | `timestamp`      | Sort field                                                                                                         |
+| `Iceberg` | `operation`              | `updsert`        | Iceberg operation. One of `upsert`, `append` or `overwrite`                                                        |
+| `Iceberg` | `upsert.equality.fields` | `symbol`         | Comma separated list of fields used for upsert. It must match partition fields. Required if `operation` = `upsert` |
+
+
+### Checkpoints
+
+Iceberg in Flink requires Checkpointing to be enabled. Flink commits the records on checkpoint.
+
+The application enables checkpoints programmatically, every 10 seconds, when running locally,
+When the application is deployed to Managed Service for Apache Flink, checkpoint is controlled by the application configuration.
+
+
+### Known limitations
 
 At the moment there are current limitations concerning Flink Iceberg integration
 * Doesn't support Iceberg Table with hidden partitioning
 * Doesn't support adding columns, removing columns, renaming columns or changing columns.
 
-**Note** : Iceberg in Flink requires Checkpointing to be enabled. Flink will commit the records whenever checkpoint is being triggered.
+### Schema and Schema evolution
 
-This example uses the Iceberg Flink Sink wrapper for Avro Generic Record. The schema used (`.avsc`) is provided in [./src/main/resources](./src/main/resources)
+Note that the application must "know" the AVRO schema on start. The schema cannot be dynamically inferred based on the 
+incoming records, for example using a schema registry. This is due to a limitation of the Flink Iceberg integration, that
+requires knowing the table schema upfront.
 
-This example uses `FlinkKinesisConsumer` and Iceberg `FlinkSink`.
 
-### Runtime configuration
+This implementation does support schema evolution in the incoming data, as long as new schema versions are FORWARD compatible.
+It does not propagate the schema changes to Iceberg. Incoming data is deserialized in the schema that is known by the application
+on start (as long as this is FORWARD compatible with it). Any new field is ignored.
 
-The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for Apache Flink,
-or from command line parameters, when running locally.
+In this example, we load the schema from a schema definition file, [price.avsc](./src/main/resources/price.avsc) embedded 
+as resource. It is technically possible to fetch the schema from an external source, like a schema registry or a schema 
+definition  file in an S3 bucket, on application start. This is beyond the scope of this example.
 
-Runtime Properties are expected in the Group ID `FlinkApplicationProperties`.
-Command line parameters should be prepended by `--`.
+### Running locally, in IntelliJ
 
-They are all case-sensitive.
+You can run this example directly in IntelliJ, without any local Flink cluster or local Flink installation.
 
-Configuration parameters:
-
-* `kinesis.source` Kinesis Data Streams source
-* `kinesis.region` AWS Kinesis Region
-* `iceberg.warehouse` S3 Bucket URI used for Iceberg Warehouse
-* `iceberg.db` Glue Database (Needs to be created before)
-* `iceberg.table` Iceberg Table Name
-* `iceberg.partition.fields` Fields used for partitioning the table. (Comma separated fields, Ex. symbol,accountNr)
-* `iceberg.sort.field` Field used for SortOrder in Iceberg Table
-* `iceberg.operation` Operation to be done in Iceberg Table (append,upsert,overwrite)
-* `iceberg.upsert.equality.fields` If doing upsert, fields to be used for performing upsert, it must match partition fields. (Comma separated fields, Ex. symbol,accountNr)
-
-### Running locally in IntelliJ
-
-To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*.
-
-You must have a Kinesis Data Stream running as well as a Glue Database in the Glue Data Catalog
+See [Running examples locally](https://github.com/nicusX/amazon-managed-service-for-apache-flink-examples/blob/main/java/running-examples-locally.md) 
+for details.
