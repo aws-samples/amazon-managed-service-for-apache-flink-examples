@@ -1,5 +1,5 @@
 <!--
-*Thank you for contributing to the Apache Flink Prometheus Connector - we are happy that you want to help us improve our Flink connectors. To help the community review your contribution in the best possible way, please go through the checklist below, which will get the contribution into a shape in which it can be best reviewed.*
+*Thank you for contributing to the Amazon Managed Service for Apache Flink examples - we are happy that you want to help us improve our examples. Please go through the checklist below, which will get the contribution into a shape in which it can be best reviewed.*
 
 ## Contribution Checklist
 
