@@ -1,6 +1,6 @@
 [
   {
-    "PropertyGroupId": "ProcessedOutputStreams",
+    "PropertyGroupId": "ProcessedOutputStream",
     "PropertyMap": {
       "aws.region": "us-east-1",
       "stream.name": "ExampleOutputStream",

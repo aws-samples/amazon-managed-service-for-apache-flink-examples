@@ -99,7 +99,7 @@ public class SideOutputsFlinkJob {
 
         mainStream
                 .map(value -> String.format("%s", value.message))
-                .sinkTo(createSink(applicationParameters.get("ProcessedOutputStreams")));
+                .sinkTo(createSink(applicationParameters.get("ProcessedOutputStream")));
 
         LOGGER.info("Starting flink job: {}", "Side Outputs");
 
