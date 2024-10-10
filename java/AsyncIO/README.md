@@ -33,8 +33,8 @@ Here is the JSON data in the desired table format, with personally identifiable 
 
 | Group ID          | Key           | Description                                                                                                                                                  |
 |-------------------|---------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `OutputStream`    | `stream.name` | Name of the output stream.                                                                                                                                   |
-| `OutputStream`    | `aws.region`  | (optional) Region of the output stream. If not specified, it will use the application region or the default region of the AWS profile, when running locally. |
+| `OutputStream0`    | `stream.arn` | ARN of the output stream.                                                                                                                                   |
+| `OutputStream0`    | `aws.region`  | (optional) Region of the output stream. If not specified, it will use the application region or the default region of the AWS profile, when running locally. |
 | `EndpointService` | `api.url`     | API URL for accessing the API Gateway Endpoint (found in CFN Outputs Tab)                                                                                    |
 | `EndpointService` | `api.key`     | API key for authentication to the API Gateway Endpoint (found in CFN Outputs Tab)                                                                            |
 | `EndpointService` | `aws.region`  | (Optional) Region of the output stream. If not specified, it will use the application region or the default region of the AWS profile, when running locally. | 

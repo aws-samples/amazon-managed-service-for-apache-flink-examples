@@ -30,9 +30,9 @@ Here is the JSON data in the desired table format, with personally identifiable 
 
 | Group ID          | Key           | Description                                                                                                                                                  |
 |-------------------|---------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `ProcessedOutputStream`    | `stream.name` | Name of the output stream for *successfully* processed messages.                                                                                                                                   |
+| `ProcessedOutputStream`    | `stream.arm` | ARN of the output stream for *successfully* processed messages.                                                                                                                                   |
 | `ProcessedOutputStream`    | `aws.region`  | (optional) Region of the processed output stream. If not specified, it will use the application region or the default region of the AWS profile, when running locally. |
-| `DLQOutputStream`    | `stream.name` | Name of the output stream for *unsuccessfully* processed messages ("Poison" messages).                                                                                                                                   |
+| `DLQOutputStream`    | `stream.arn` | ARN of the output stream for *unsuccessfully* processed messages ("Poison" messages).                                                                                                                                   |
 | `DLQOutputStream`    | `aws.region`  | (optional) Region of the DLQ output stream. If not specified, it will use the application region or the default region of the AWS profile, when running locally. |
 
 
