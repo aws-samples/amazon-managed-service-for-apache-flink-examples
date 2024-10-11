@@ -14,7 +14,7 @@ Each example illustrates a single, specific pattern, trying to make it simple re
 
 The examples also try to illustrate best practices and consistent approaches to common problems.
 
-The goal of this repository is not to illustrates *solutions*, end-to-end architectures.
+The goal of this repository is not to illustrate *solutions*, end-to-end architectures.
 
 The AWS team managing the repository reserves the right to modify or reject new example proposals.
 
