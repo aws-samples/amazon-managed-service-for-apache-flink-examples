@@ -5,7 +5,7 @@ import java.util.UUID;
 public class IncomingEvent {
 
     final String message;
-    String id;
+    private String id;
 
     @Override
     public String toString() {
@@ -17,7 +17,6 @@ public class IncomingEvent {
 
     public IncomingEvent(String message) {
         this.message = message;
-        this.id = UUID.randomUUID().toString().replace("-", "");
 
     }
 
@@ -28,6 +27,11 @@ public class IncomingEvent {
 
     public String getId() {
         return id;
+    }
+
+    public void setId(String id)
+    {
+        this.id = id;
     }
 
 }

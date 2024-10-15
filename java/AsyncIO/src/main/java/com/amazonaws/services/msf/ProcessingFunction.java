@@ -14,6 +14,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 public class ProcessingFunction extends RichAsyncFunction<IncomingEvent, ProcessedEvent> {
@@ -58,7 +59,7 @@ public class ProcessingFunction extends RichAsyncFunction<IncomingEvent, Process
                 LOG.debug("trying to get response for {}", incomingEvent.getId());
                 Response response = future.get();
                 return response.getStatusCode();
-            } catch (Exception e) {
+            } catch (InterruptedException | ExecutionException e) {
                 LOG.error("Error during async HTTP call: {}", e.getMessage());
                 return -1;
             }

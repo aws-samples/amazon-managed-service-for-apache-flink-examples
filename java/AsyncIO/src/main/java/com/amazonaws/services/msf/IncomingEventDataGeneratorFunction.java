@@ -2,6 +2,8 @@ package com.amazonaws.services.msf;
 
 import org.apache.flink.connector.datagen.source.GeneratorFunction;
 
+import java.util.UUID;
+
 class IncomingEventDataGeneratorFunction implements GeneratorFunction<Long, IncomingEvent> {
 
     @Override
@@ -9,9 +11,10 @@ class IncomingEventDataGeneratorFunction implements GeneratorFunction<Long, Inco
 
         String message = "Hello World";
 
-        return new IncomingEvent(
-                message
-        );
+        IncomingEvent incomingEvent =  new IncomingEvent(message);
+        incomingEvent.setId(UUID.randomUUID().toString().replace("-", ""));
+
+        return incomingEvent;
     }
 
 }
