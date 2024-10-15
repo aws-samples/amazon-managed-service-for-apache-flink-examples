@@ -1,9 +1,9 @@
 [
   {
-    "PropertyGroupId": "OutputStream",
+    "PropertyGroupId": "OutputStream0",
     "PropertyMap": {
       "aws.region": "us-east-1",
-      "stream.name": "ExampleOutputStream-ARN-GOES-HERE",
+      "stream.arn": "ExampleOutputStream-ARN-GOES-HERE",
       "flink.stream.initpos": "LATEST"
     }
   },

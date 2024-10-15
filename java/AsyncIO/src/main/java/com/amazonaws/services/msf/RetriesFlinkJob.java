@@ -80,7 +80,7 @@ public class RetriesFlinkJob {
 
                 processedStream
                                 .map(value -> String.format("%s,%s", value.message, value.processed))
-                                .sinkTo(createSink(applicationParameters.get("OutputStream")));
+                                .sinkTo(createSink(applicationParameters.get("OutputStream0")));
 
                 LOGGER.debug("Starting flink job: {}", "Async I/O Retries");
 
@@ -97,11 +97,11 @@ public class RetriesFlinkJob {
         }
 
         private static KinesisStreamsSink<String> createSink(Properties outputProperties) {
-                String outputStreamName = outputProperties.getProperty("stream.name");
-                LOGGER.debug("Creating sink for stream: {}", outputStreamName);
+                String outputStreamArn = outputProperties.getProperty("stream.arn");
+                LOGGER.debug("Creating sink for stream: {}", outputStreamArn);
                 return KinesisStreamsSink.<String>builder()
                                 .setKinesisClientProperties(outputProperties)
-                                .setStreamArn(outputStreamName)
+                                .setStreamArn(outputStreamArn)
                                 .setSerializationSchema(new SimpleStringSchema())
                                 .setPartitionKeyGenerator(element -> UUID.randomUUID().toString())
                                 .build();

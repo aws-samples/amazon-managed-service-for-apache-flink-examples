@@ -71,13 +71,6 @@
             <version>${flink.version}</version>
         </dependency>
 
-        <!-- Add serialization framework, for accessing state objects. -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-
         <!-- Add logging framework, to produce console output when running in the IDE. -->
         <!-- These dependencies are excluded from the application JAR by default. -->
         <dependency>

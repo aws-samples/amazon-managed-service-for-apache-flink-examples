@@ -99,7 +99,7 @@ public class SideOutputsFlinkJob {
 
         mainStream
                 .map(value -> String.format("%s", value.message))
-                .sinkTo(createSink(applicationParameters.get("ProcessedOutputStreams")));
+                .sinkTo(createSink(applicationParameters.get("ProcessedOutputStream")));
 
         LOGGER.info("Starting flink job: {}", "Side Outputs");
 
@@ -116,11 +116,11 @@ public class SideOutputsFlinkJob {
     }
 
     private static KinesisStreamsSink<String> createSink(Properties outputProperties) {
-        String outputStreamName = outputProperties.getProperty("stream.name");
-        LOGGER.info("Creating sink for stream: {}", outputStreamName);
+        String outputStreamArn = outputProperties.getProperty("stream.arn");
+        LOGGER.info("Creating sink for stream: {}", outputStreamArn);
         return KinesisStreamsSink.<String>builder()
                 .setKinesisClientProperties(outputProperties)
-                .setStreamName(outputStreamName)
+                .setStreamArn(outputStreamArn)
                 .setSerializationSchema(new SimpleStringSchema())
                 .setPartitionKeyGenerator(element -> UUID.randomUUID().toString())
                 .build();
