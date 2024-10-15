@@ -1,0 +1,18 @@
+[
+  {
+    "PropertyGroupId": "ProcessedOutputStream",
+    "PropertyMap": {
+      "aws.region": "us-east-1",
+      "stream.arn": "ExampleOutputStream-ARN-GOES-HERE",
+      "flink.stream.initpos": "LATEST"
+    }
+  },
+  {
+    "PropertyGroupId": "DLQOutputStream",
+    "PropertyMap": {
+      "aws.region": "us-east-1",
+      "stream.arn": "DLQStream-ARN-GOES-HERE",
+      "flink.stream.initpos": "LATEST"
+    }
+  }
+]
