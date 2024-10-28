@@ -22,9 +22,9 @@ Also add a self-reference inbound rule to the Security Group for port 9094, that
 
 ### 2. Setup client bastion
 
-We can use the AWS Cloud9 environment and `KafkaClientEC2Instance` setup as described in the [MSK Labs Workshop](https://catalog.workshops.aws/msk-labs/en-US/overview/setup) for testing.
+We can setup the Kafka client EC2 instance using the steps described in the [MSK Labs Workshop](https://catalog.workshops.aws/msk-labs/en-US/overview/prerequisites) for testing.
 
-SSH into `KafkaClientEC2Instance` from Cloud9 terminal.
+Connect to the Kafka client EC2 instance via SSM.
 
 Export the brokers and zookeeper connection strings for the Amazon MSK cluster-
 ```
@@ -109,13 +109,12 @@ bin/kafka-acls.sh --authorizer-properties zookeeper.connect=$zkeeper --add --all
 
 ### 6. Setup Amazon S3 Bucket to be used by Amazon Managed Service for Apache Flink
 
-Create an S3 bucket in the required AWS region e.g. us-east-1. We will use this bucket e.g. `kafkaclientstore` to get the keystore/truststore and the Flink application jar in subsequent steps.
+Create an S3 bucket in the required AWS region e.g. us-east-1. We will use this bucket e.g. `kafkaclientstore` to get the keystore and Flink application jar in subsequent steps.
 
-Now copy the keystore and truststore from `/tmp` to this S3 bucket
+Now copy the keystore from `/tmp` to this S3 bucket
 ```
 cd /tmp
 aws s3 cp kafka.client.keystore.jks s3://kafkaclientstore
-aws s3 cp kafka.client.truststore.jks s3://kafkaclientstore
 aws s3 cp private_key.pem s3://kafkaclientstore
 aws s3 cp client_cert.pem s3://kafkaclientstore
 ```
@@ -165,11 +164,9 @@ Under `Runtime properties`, add the following properties:
 | `Input0` | `bootstrap.servers`     |             | kafka cluster boostrap servers                                     |
 | `Input0` | `topic`                 | `source`    | source topic name                                                  |
 | `Input0` | `group.id`              | `flink-app` | kafka consumer group id                                            |
-| `Input0` | `bucket.region`         |             | region of the S3 bucket(s) containing the keystore and truststore  |
+| `Input0` | `bucket.region`         |             | region of the S3 bucket(s) containing the keystore  |
 | `Input0` | `keystore.bucket`       |             | name of the S3 bucket containing the keystore                      |
 | `Input0` | `keystore.path`         |             | path to the keystore object, omitting any trailing `/`             |
-| `Input0` | `truststore.bucket`     |             | name of the S3 bucket containing the truststore                    |
-| `Input0` | `truststore.path`       |             | path to the truststore object, omitting any trailing `/`           |
 | `Input0` | `keystore.secret`       |             | SecretManager secret ID  containing the password of the keystore   |
 | `Input0` | `keystore.secret.field` |             | SecretManager secret key containing the password of the keystore   |
 

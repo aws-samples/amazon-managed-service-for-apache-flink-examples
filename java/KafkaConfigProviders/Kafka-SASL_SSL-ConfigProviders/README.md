@@ -162,7 +162,7 @@ is controlled via networking (SecurityGroups, NACL) and by the SASL credentials 
 
 When running on Amazon Managed Service for Apache Flink the runtime configuration is read from *Runtime Properties*.
 
-When running locally, the configuration is read from the [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json) file located in the resources folder.
+When running locally, the configuration is read from the [`resources/flink-application-properties-dev.json`](src/main/resources/flink-application-properties-dev.json) file located in the resources folder.
 
 Runtime parameters:
 
@@ -186,4 +186,4 @@ All parameters are case-sensitive.
 
 You can run this example directly in IntelliJ, without any local Flink cluster or local Flink installation.
 
-See [Running examples locally](../running-examples-locally.md) for details.
+See [Running examples locally](../../running-examples-locally.md) for details.
