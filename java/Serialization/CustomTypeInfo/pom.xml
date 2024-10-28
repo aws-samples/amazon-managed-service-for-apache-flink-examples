@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.amazonaws</groupId>
-    <artifactId>amazon-msf-windowing-app</artifactId>
+    <artifactId>custom-typeinfo</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
@@ -20,21 +20,9 @@
         <aws.connector.version>4.3.0-1.19</aws.connector.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
         <log4j.version>2.23.1</log4j.version>
-        <jackson.version>2.17.0</jackson.version>
+        <junit5.version>5.8.1</junit5.version>
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.amazonaws</groupId>
-                <artifactId>aws-java-sdk-bom</artifactId>
-                <!-- Get the latest SDK version from https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
-                <version>1.12.677</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <!-- Apache Flink dependencies -->
@@ -69,6 +57,12 @@
         <!-- Connectors and Formats -->
         <dependency>
             <groupId>org.apache.flink</groupId>
+            <artifactId>flink-json</artifactId>
+            <version>${flink.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-datagen</artifactId>
             <version>${flink.version}</version>
         </dependency>
@@ -83,6 +77,7 @@
             <artifactId>flink-connector-kinesis</artifactId>
             <version>${aws.connector.version}</version>
         </dependency>
+
 
         <!-- Add logging framework, to produce console output when running in the IDE. -->
         <!-- These dependencies are excluded from the application JAR by default. -->
@@ -102,17 +97,28 @@
             <version>${log4j.version}</version>
         </dependency>
 
+        <!-- Tests -->
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit5.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit5.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-test-utils</artifactId>
+            <version>${flink.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
-
     <build>
-        <directory>${buildDirectory}</directory>
-        <finalName>${jar.finalName}</finalName>
-
+        <finalName>${project.artifactId}-${flink.version}</finalName>
         <plugins>
             <!-- Java Compiler -->
             <plugin>
@@ -161,7 +167,7 @@
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.amazonaws.services.msf.windowing.WindowStreamingJob</mainClass>
+                                    <mainClass>com.amazonaws.services.msf.CustomTypeInfoJob</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
