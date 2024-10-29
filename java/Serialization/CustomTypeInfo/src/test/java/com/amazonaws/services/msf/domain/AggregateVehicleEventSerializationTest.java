@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.Map;
 
+import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -35,9 +36,9 @@ public class AggregateVehicleEventSerializationTest {
                 "V123456X"
                 , 42L,
                 Map.ofEntries(
-                        Map.entry("speed", 100L),
-                        Map.entry("rpm", 2000L),
-                        Map.entry("fuelLevel", 12345L)
+                        entry("speed", 100L),
+                        entry("rpm", 2000L),
+                        entry("fuelLevel", 12345L)
                 ),
                 42);
 

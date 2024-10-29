@@ -5,9 +5,10 @@ import org.apache.flink.types.PojoTestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -36,14 +37,14 @@ public class VehicleEventSerializationTest {
                 "V123456X"
                 , 42L,
                 Map.ofEntries(
-                        Map.entry("speed", 100L),
-                        Map.entry("rpm", 2000L),
-                        Map.entry("fuelLevel", 12345L)
+                        entry("speed", 100L),
+                        entry("rpm", 2000L),
+                        entry("fuelLevel", 12345L)
                 ),
-                new ArrayList<String>() {{
-                    add("OIL_TEMPERATURE");
-                    add("TIRE_PRESSURE");
-                }}
+                List.of(
+                        "OIL_TEMPERATURE",
+                        "TIRE_PRESSURE"
+                )
         );
 
         // Serialize and deserialize the record forcing Kryo
