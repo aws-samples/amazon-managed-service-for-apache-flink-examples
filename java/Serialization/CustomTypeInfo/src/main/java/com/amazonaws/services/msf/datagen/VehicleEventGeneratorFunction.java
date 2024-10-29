@@ -5,7 +5,7 @@ import org.apache.flink.connector.datagen.source.GeneratorFunction;
 import com.amazonaws.services.msf.domain.VehicleEvent;
 import org.apache.commons.lang3.RandomUtils;
 
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -20,12 +20,14 @@ public class VehicleEventGeneratorFunction implements GeneratorFunction<Long, Ve
         return new VehicleEvent(
                 String.format("V%08d", RandomUtils.nextInt(0, 100)),
                 System.currentTimeMillis(),
-                Map.of(
-                        "speed", RandomUtils.nextLong(0, 120),
-                        "rpm", RandomUtils.nextLong(1000, 10000),
-                        "fuelLevel", RandomUtils.nextLong(0, 100)
+                Map.ofEntries(
+                        Map.entry("speed", RandomUtils.nextLong(0, 120)),
+                        Map.entry("rpm", RandomUtils.nextLong(1000, 10000)),
+                        Map.entry("fuelLevel", RandomUtils.nextLong(0, 100))
                 ),
-                List.of(WARNING_LIGHTS[RandomUtils.nextInt(0, WARNING_LIGHTS.length)])
+                new ArrayList<String>() {{
+                    add(WARNING_LIGHTS[RandomUtils.nextInt(0, WARNING_LIGHTS.length)]);
+                }}
         );
     }
 }

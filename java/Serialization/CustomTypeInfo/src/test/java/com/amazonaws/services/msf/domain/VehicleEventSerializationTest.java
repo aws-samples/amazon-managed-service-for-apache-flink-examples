@@ -5,7 +5,7 @@ import org.apache.flink.types.PojoTestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,17 +35,20 @@ public class VehicleEventSerializationTest {
         VehicleEvent record = new VehicleEvent(
                 "V123456X"
                 , 42L,
-                Map.of(
-                        "speed", 100L,
-                        "rpm", 2000L,
-                        "fuelLevel", 12345L
+                Map.ofEntries(
+                        Map.entry("speed", 100L),
+                        Map.entry("rpm", 2000L),
+                        Map.entry("fuelLevel", 12345L)
                 ),
-                List.of("OIL_TEMPERATURE", "TIRE_PRESSURE")
+                new ArrayList<String>() {{
+                    add("OIL_TEMPERATURE");
+                    add("TIRE_PRESSURE");
+                }}
         );
 
         // Serialize and deserialize the record forcing Kryo
         // This will fail if Flink has to fallback to Kryo
-        VehicleEvent deserialized =  FlinkSerializationTestUtils.serializeDeserializeNoKryo(record, VehicleEvent.class);
+        VehicleEvent deserialized = FlinkSerializationTestUtils.serializeDeserializeNoKryo(record, VehicleEvent.class);
 
         // Compare the original record with the deserialized record
         // If you made a mistake in defining the TypeInfo, this comparison will fail

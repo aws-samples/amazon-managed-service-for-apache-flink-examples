@@ -34,10 +34,10 @@ public class AggregateVehicleEventSerializationTest {
         AggregateVehicleEvent record = new AggregateVehicleEvent(
                 "V123456X"
                 , 42L,
-                Map.of(
-                        "speed", 100L,
-                        "rpm", 2000L,
-                        "fuelLevel", 12345L
+                Map.ofEntries(
+                        Map.entry("speed", 100L),
+                        Map.entry("rpm", 2000L),
+                        Map.entry("fuelLevel", 12345L)
                 ),
                 42);
 
