@@ -86,11 +86,11 @@ When running locally, the configuration is read from the [`resources/flink-appli
 
 Runtime parameters:
 
-| Group ID        | Key          | Description                                                                                                                                       | 
-|-----------------|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
-| `DataGen`       | `records.per.sec` | (optional) Number of generated records per second. Default = 100.
-| `OutputStream0` | `stream.name` | Name of the output stream                                                                                                                         |
-| `OutputStream0` | `aws.region` | Region of the output stream. If not specified, it will use the application region or the default region of the AWS profile, when running locally. |
+| Group ID        | Key               | Description                                                                                                                                       | 
+|-----------------|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| `DataGen`       | `records.per.sec` | (optional) Number of generated records per second. Default = 100.                                                                                 
+| `OutputStream0` | `stream.arn`      | ARN of the output stream                                                                                                                          |
+| `OutputStream0` | `aws.region`      | Region of the output stream. If not specified, it will use the application region or the default region of the AWS profile, when running locally. |
 
 All parameters are case-sensitive.
 

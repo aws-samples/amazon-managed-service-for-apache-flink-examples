@@ -56,9 +56,9 @@ public class CustomTypeInfoJob {
     }
 
     private static <T> KinesisStreamsSink<T> createKinesisSink(Properties kinesisClientProperties) {
-        String streamName = kinesisClientProperties.getProperty("stream.name", "ExampleOutputStream");
+        String streamArn = kinesisClientProperties.getProperty("stream.arn", "ExampleOutputStream");
         return KinesisStreamsSink.<T>builder()
-                .setStreamName(streamName)
+                .setStreamArn(streamArn)
                 .setSerializationSchema(new JsonSerializationSchema<>())
                 .setPartitionKeyGenerator(element -> String.valueOf(element.hashCode()))
                 .setKinesisClientProperties(kinesisClientProperties)
