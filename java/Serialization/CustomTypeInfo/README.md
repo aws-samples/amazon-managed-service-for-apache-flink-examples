@@ -76,6 +76,19 @@ and [`AggregateVehicleEventSerializationTest`](src/test/java/com/amazonaws/servi
 These tests use a test utility class that can be reused to test any record class:
 [`FlinkSerializationTestUtils`](src/test/java/com/amazonaws/services/msf/domain/FlinkSerializationTestUtils.java)
 
+#### More serialization cases 
+
+The test class [MoreKryoSerializationExamplesTest](src/test/java/com/amazonaws/services/msf/domain/MoreKryoSerializationExamplesTest.java)
+illustrates more cases where serialization does or does not fall back to Kryo.
+
+Serialization tests are `@Disabled` for those cases where Kryo is used. You can enable these tests to observe how they
+actually catch the Kryo fallback.
+
+In particular:
+* Any Collection falls back tpo Kryo. You can create custom `TypeInfoFactory` for `List` and `Map`. There is no SetTypeInfo<T> though.
+* Some non-basic types like `java.time.Instant` serialize nicely without Kryo
+* Most of `java.time.*` types require Kryo
+* Nested POJO serialze without Kryo, as long as each component does not require Kryo
 
 
 ### Runtime configuration

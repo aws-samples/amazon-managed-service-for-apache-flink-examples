@@ -22,10 +22,9 @@ public class VehicleEventSerializationTest {
         // It does not test whether the serialization/deserialization actually work
         // If you make a mistake defining the TypeInfo for the class, this test will succeed
         // but the serialization may still fail or give unexpected results.
+        PojoTestUtils.assertSerializedAsPojoWithoutKryo(VehicleEvent.class);
 
         // This test is redundant if you implement the other test, below.
-
-        PojoTestUtils.assertSerializedAsPojoWithoutKryo(VehicleEvent.class);
     }
 
     @Test
