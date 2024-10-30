@@ -29,5 +29,6 @@
         <module>S3ParquetSink</module>
         <module>S3Sink</module>
         <module>Windowing</module>
+        <module>Serialization/CustomTypeInfo</module>
     </modules>
 </project>
