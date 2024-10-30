@@ -17,21 +17,22 @@ the application state.
 
 #### Background
 
-Every object handed over between the operators of the application or stored in the application state is serialized using
-Flink serialization mechanism.
+Every object handed over between operators or stored in application state is serialized using
+Flink serialization mechanism. Flink is able to efficiently serialize most of Java simple types, and POJOs where fields are basic types.
 
-Flink is able to efficiently serialize most of Java simple types, and POJOs where fields are basic types.
-
-When Flink cannot natively serialize an object, it falls back to using [Kryo](https://github.com/EsotericSoftware/kryo).
-Unfortunately, Kryo serialization is less efficient and has a considerable impact on performance. In particular on CPU
+When Flink cannot natively serialize an object, it falls back to [Kryo](https://github.com/EsotericSoftware/kryo).
+Unfortunately, Kryo serialization is less efficient and has a considerable impact on performance, in particular on CPU
 utilization.
 
-One important case where Flink cannot natively serialize a field is with Collections. Due to Java type erasure, Flink 
-cannot discover the type of the elements of the collection, and falls back to Kryo to serialize it.
+One important case where Flink cannot natively serialize a field is with Collections. Due to Java type erasure, at runtime Flink 
+cannot discover the type collections' elements, forcing it to fall back to the less efficient Kryo serialization.
+
+You can easily prevent using Kryo for collections, adding a `TypeInfo` to the class and defining a custom TypeInfoFactory that 
+describe the content of the collection.
 
 #### Defining a TypeInfo
 
-To prevent this, you can explicitly define the type of the collection elements using the `@TypeInfo` annotation and 
+To prevent this, you can explicitly define the collection'a elements type using the `@TypeInfo` annotation and 
 defining a custom `TypeInfoFactory`.
 This is demonstrated in these two record classes: 
 [`VehicleEvent`](src/main/java/com/amazonaws/services/msf/domain/VehicleEvent.java)
@@ -40,9 +41,12 @@ and [`AgggregateVehicleEvent`](src/main/java/com/amazonaws/services/msf/domain/A
 ```java
 public class VehicleEvent {
     //...
+
     @TypeInfo(SensorDataTypeInfoFactory.class)
     private Map<String, Long> sensorData = new HashMap<>();
+
     //...
+
     public static class SensorDataTypeInfoFactory extends TypeInfoFactory<Map<String, Long>> {
         @Override
         public TypeInformation<Map<String, Long>> createTypeInfo(Type t, Map<String, TypeInformation<?>> genericParameters) {
@@ -52,8 +56,7 @@ public class VehicleEvent {
 }
 ```
 
-For more details about Flink serialization, see [Data Types & Serialization](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/dev/datastream/fault-tolerance/serialization/types_serialization/#data-types--serialization)
-in Flink documentation.
+For more details about Flink serialization, see [Data Types & Serialization](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/dev/datastream/fault-tolerance/serialization/types_serialization/#data-types--serialization) in Flink documentation.
 
 #### Testing serialization
 
