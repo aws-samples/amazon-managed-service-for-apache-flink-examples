@@ -53,9 +53,6 @@ public class RetriesFlinkJob {
                 String apiUrl = endpointProperties.getProperty("api.url", "");
                 String apiKey = endpointProperties.getProperty("api.key", "");
 
-                Preconditions.checkArgument(!apiUrl.isEmpty(), "API URL must not be empty");
-                Preconditions.checkArgument(!apiKey.isEmpty(), "API key must not be empty");
-
                 AsyncFunction<IncomingEvent, ProcessedEvent> processingFunction = new ProcessingFunction(apiUrl, apiKey);
 
                 DataStreamSource<IncomingEvent> source = env.fromSource(
