@@ -1,0 +1,16 @@
+[
+  {
+    "PropertyGroupId": "DataGen",
+    "PropertyMap": {
+      "events.per.sec": "100"
+    }
+  },
+  {
+    "PropertyGroupId": "PrometheusSink",
+    "PropertyMap": {
+      "endpoint.url": "https://aps-workspaces.<region>.amazonaws.com/workspaces/<workspace-id>/api/v1/remote_write",
+      "max.request.retry": "5",
+      "aws.region" : "us-east-1"
+    }
+  }
+]
