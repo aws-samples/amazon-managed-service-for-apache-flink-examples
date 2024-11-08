@@ -25,6 +25,7 @@
         <module>KafkaConfigProviders/Kafka-SASL_SSL-ConfigProviders</module>
         <module>KafkaConnectors</module>
         <module>KinesisConnectors</module>
+        <module>DynamoDBStreamSource</module>
         <module>KinesisFirehoseSink</module>
         <module>S3ParquetSink</module>
         <module>S3Sink</module>
