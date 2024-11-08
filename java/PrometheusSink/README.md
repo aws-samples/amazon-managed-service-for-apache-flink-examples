@@ -6,9 +6,16 @@ to write data to Prometheus.
 > The Flink Prometheus connector is used to write processed **data** to Prometheus, using Prometheus as a time-series database.
 > It cannot be used to export Flink **metrics**.
 
-The example application generates random data internally and write to [Amazon Managed Prometheus](https://aws.amazon.com/prometheus/).
+* Flink version: 1.20
+* Flink API: DataStream API
+* Language: Java (11)
+* Flink connectors: Prometheus sink
+
+The example application generates random data internally and write to [Amazon Managed Prometheus (AMP)](https://aws.amazon.com/prometheus/).
 
 ### Prerequisites
+
+The following resources are required to run the example:
 
 * An [Amazon Managed Prometheus (AMP)](https://aws.amazon.com/prometheus/) - default configuration
 * (optionally) A Grafana dashboard, connected to the AMP workspace, to visualize the time series.
