@@ -44,7 +44,7 @@ Runtime parameters:
 | `DataGen`       | `records.per.sec`   | (optional) Number of generated records per second. Default = 100.                                                                             
 | `PrometheusSink` | `endpoint.url`      | URL of the Remote-Write endpoint of the Prometheus workspace                                                                                  |
 | `PrometheusSink` | `aws.region`        | Region of AMP workspace. If not specified, it will use the application region or the default region of the AWS profile, when running locally. |
-| `PrometheusSink` | `max.request.retry` | Maximum retryes in case AMP respond with a retriable error (e.g. throttling).                                                                 |
+| `PrometheusSink` | `max.request.retry` | Maximum retries in case AMP respond with a retriable error (e.g. throttling).                                                                 |
 
 
 All parameters are case-sensitive.
