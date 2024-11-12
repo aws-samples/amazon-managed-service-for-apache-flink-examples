@@ -30,5 +30,6 @@
         <module>S3Sink</module>
         <module>Windowing</module>
         <module>Serialization/CustomTypeInfo</module>
+        <module>PrometheusSink</module>
     </modules>
 </project>
