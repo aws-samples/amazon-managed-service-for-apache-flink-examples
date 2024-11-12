@@ -16,12 +16,11 @@ class AvroGenericStockTradeGeneratorFunctionTest {
 
         GenericRecord record = generatorFunction.map(42L);
 
-        assertInstanceOf(String.class, record.get("tradeId"));
-        assertInstanceOf(String.class, record.get("accountNr"));
+
+        assertInstanceOf(String.class, record.get("timestamp"));
         assertInstanceOf(String.class, record.get("symbol"));
         assertInstanceOf(Float.class, record.get("price"));
-        assertInstanceOf(Integer.class, record.get("shares"));
-        assertInstanceOf(String.class, record.get("executionTime"));
+        assertInstanceOf(Integer.class, record.get("volumes"));
     }
 
 }
