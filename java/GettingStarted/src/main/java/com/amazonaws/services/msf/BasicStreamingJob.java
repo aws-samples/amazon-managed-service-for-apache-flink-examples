@@ -3,18 +3,16 @@ package com.amazonaws.services.msf;
 import com.amazonaws.services.kinesisanalytics.runtime.KinesisAnalyticsRuntime;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.connector.sink2.Sink;
-import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.kinesis.sink.KinesisStreamsSink;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.connectors.kinesis.FlinkKinesisConsumer;
-import org.apache.flink.streaming.connectors.kinesis.config.AWSConfigConstants;
-import org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -24,69 +22,55 @@ import java.util.Properties;
  */
 public class BasicStreamingJob {
 
-    private static final String APPLICATION_CONFIG_GROUP = "FlinkApplicationProperties";
-    private static final String DEFAULT_REGION = "us-east-1";
-    private static final String DEFAULT_INPUT_STREAM = "ExampleInputStream";
-    private static final String DEFAULT_OUTPUT_STREAM = "ExampleOutputStream";
+    private static final Logger LOGGER = LogManager.getLogger(BasicStreamingJob.class);
+
+    // Name of the local JSON resource with the application properties in the same format as they are received from the Amazon Managed Service for Apache Flink runtime
+    private static final String LOCAL_APPLICATION_PROPERTIES_RESOURCE = "flink-application-properties-dev.json";
 
     /**
-     * Get configuration properties from Amazon Managed Service for Apache Flink runtime properties
-     * GroupID "FlinkApplicationProperties", or from command line parameters when running locally
+     * Load application properties from Amazon Managed Service for Apache Flink runtime or from a local resource, when the environment is local
      */
-    private static ParameterTool loadApplicationParameters(String[] args, StreamExecutionEnvironment env) throws IOException {
+    private static Map<String, Properties> loadApplicationProperties(StreamExecutionEnvironment env) throws IOException {
         if (env instanceof LocalStreamEnvironment) {
-            return ParameterTool.fromArgs(args);
+            LOGGER.info("Loading application properties from '{}'", LOCAL_APPLICATION_PROPERTIES_RESOURCE);
+            return KinesisAnalyticsRuntime.getApplicationProperties(
+                    BasicStreamingJob.class.getClassLoader()
+                            .getResource(LOCAL_APPLICATION_PROPERTIES_RESOURCE).getPath());
         } else {
-            Map<String, Properties> applicationProperties = KinesisAnalyticsRuntime.getApplicationProperties();
-            Properties flinkProperties = applicationProperties.get(APPLICATION_CONFIG_GROUP);
-            if (flinkProperties == null) {
-                throw new RuntimeException("Unable to load FlinkApplicationProperties properties from the Kinesis Analytics Runtime.");
-            }
-            Map<String, String> map = new HashMap<>(flinkProperties.size());
-            flinkProperties.forEach((k, v) -> map.put((String) k, (String) v));
-            return ParameterTool.fromMap(map);
+            LOGGER.info("Loading application properties from Amazon Managed Service for Apache Flink");
+            return KinesisAnalyticsRuntime.getApplicationProperties();
         }
     }
 
-    private static FlinkKinesisConsumer<String> createSource(ParameterTool applicationProperties) {
-        Properties inputProperties = new Properties();
-        inputProperties.setProperty(ConsumerConfigConstants.AWS_REGION,
-                applicationProperties.get("InputStreamRegion", DEFAULT_REGION));
-        inputProperties.setProperty(ConsumerConfigConstants.STREAM_INITIAL_POSITION, "LATEST");
-
-        return new FlinkKinesisConsumer<>(
-                applicationProperties.get("InputStreamName", DEFAULT_INPUT_STREAM),
-                new SimpleStringSchema(),
-                inputProperties);
+    private static FlinkKinesisConsumer<String> createSource(Properties inputProperties) {
+        String inputStreamName = inputProperties.getProperty("stream.name");
+        return new FlinkKinesisConsumer<>(inputStreamName, new SimpleStringSchema(), inputProperties);
     }
 
-    private static KinesisStreamsSink<String> createSink(ParameterTool applicationProperties) {
-        Properties outputProperties = new Properties();
-        outputProperties.setProperty(AWSConfigConstants.AWS_REGION,
-                applicationProperties.get("OutputStreamRegion", DEFAULT_REGION));
-
+    private static KinesisStreamsSink<String> createSink(Properties outputProperties) {
+        String outputStreamName = outputProperties.getProperty("stream.name");
         return KinesisStreamsSink.<String>builder()
                 .setKinesisClientProperties(outputProperties)
                 .setSerializationSchema(new SimpleStringSchema())
-                .setStreamName(outputProperties.getProperty("OutputStreamName", "ExampleOutputStream"))
+                .setStreamName(outputStreamName)
                 .setPartitionKeyGenerator(element -> String.valueOf(element.hashCode()))
                 .build();
     }
-
 
     public static void main(String[] args) throws Exception {
         // Set up the streaming execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // Load application parameters
-        final ParameterTool applicationParameters = loadApplicationParameters(args, env);
+        final Map<String, Properties> applicationParameters = loadApplicationProperties(env);
 
-        SourceFunction<String> source = createSource(applicationParameters);
+        SourceFunction<String> source = createSource(applicationParameters.get("InputStream0"));
         DataStream<String> input = env.addSource(source, "Kinesis Source");
 
-        Sink<String> sink = createSink(applicationParameters);
+        Sink<String> sink = createSink(applicationParameters.get("OutputStream0"));
         input.sinkTo(sink);
 
         env.execute("Flink streaming Java API skeleton");
     }
+
 }

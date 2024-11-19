@@ -1,101 +1,53 @@
 # Flink Kinesis Source & Sink examples (standard and EFO)
 
-* Flink version: 1.15
+* Flink version: 1.20
 * Flink API: DataStream API
 * Language: Java (11)
+* Flink connectors: Kinesis Sink
 
 
-This example demonstrate how to use [Flink Kinesis Connector](https://nightlies.apache.org/flink/flink-docs-release-1.15/docs/connectors/datastream/kinesis/), source and sink.
+This example demonstrate how to use Flink Kinesis Connector source and sink.
 
 It also shows how to set up an **Enhanced Fan-Out (EFO)** source.
 
-This example uses [`FlinkKinesisConsumer` and `KinesisStreamsSink` connectors](https://nightlies.apache.org/flink/flink-docs-release-1.15/docs/connectors/datastream/kinesis/).
+This example uses `FlinkKinesisConsumer` and `KinesisStreamsSink` connectors.
 
 ![Flink Example](images/flink-kinesis-example.png)
+
 ### Runtime configuration
 
 The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for Apache Flink,
-or from command line parameters, when running locally.
+or, when running locally, from the [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json) file located in the resources folder.
 
-Runtime Properties are expected in the Group ID `FlinkApplicationProperties`.
-Command line parameters should be prepended by `--`.
+All parameters are case-sensitive.
 
-They are all case-sensitive.
+| Group ID        | Key           | Description               | 
+|-----------------|---------------|---------------------------|
+| `InputStream0`  | `stream.arn` | ARN of the input stream.  |
+| `InputStream0`  | `aws.region`  | Region of the input stream. |
+| `InputStream0`  | `kinesis.stream.init.position` | (optional) Starting position when the application starts with no state. Default is `LATEST`|
+| `InputStream0` | `kinesis.stream.reader.type` | (optional) Choose between standard (`POLLING`) and Enhanced Fan-Out (`EFO`) consumer. Default is `POLLING`. |
+| `InputStream0` | `kinesis.stream.efo.consumer.name` | (optional, for EFO consumer mode only) Name of the EFO consumer. Only used if `kinesis.stream.reader.type=EFO`. |
+| `InputStream0` | `kinesis.stream.efo.consumer.lifecycle` | (optional, for EFO consumer mode only) Lifecycle management mode of EFO consumer. Choose between `JOB_MANAGED` and `SELF_MANAGED`. Default is `JOB_MANAGED`. |
+| `OutputStream0` | `stream.arn` | ARN of the output stream. |
+| `OutputStream0`  | `aws.region`  | Region of the output stream. |
 
-Configuration parameters:
+Every parameter in the `InputStream0` group is passed to the Kinesis consumer, and every parameter in the `OutputStream0` is passed to the Kinesis client of the sink.
 
-* `kinesis.source.stream` Kinesis Data Stream to be used for source (default: `source`)
-* `kinesis.sink.stream` Kinesis Data Stream to be used for sink (default: `destination`)
-* `kinesis.region` AWS Region where Kinesis Data Streams are (default `eu-west-1`)
+See Flink Kinesis connector docs](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/connectors/datastream/kinesis/) for details about configuring the Kinesis conector.
 
-#### Enhanced Fan-Out (EFO) source
+To configure the applicaton on Managed Service for Apache Flink, set up these parameter in the *Runtime properties*.
 
-To use EFO for the Kinesis Data Stream source, set up two additional configuration parameters:
+To configure the application for running locally, edit the [json file](resources/flink-application-properties-dev.json).
 
-* `kinesis.source.type` Kinesis Data Stream publisher type, either `POLLING` or `EFO` (default: `POLLING`)
-* `kinesis.source.efoConsumer` Kinesis Data Stream EFO Consumer name; only used if `kinesis.source.type=EFO` (default: `sample-efo-flink-consumer`)
+### Running in IntelliJ
 
-### Running locally in IntelliJ
-To run this example locally -
-* Create source and sink Kinesis streams. 
-* Ensure that use profile is configured and user has required permission to read/write from Kinesis streams. 
-* To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*.
+You can run this example directly in IntelliJ, without any local Flink cluster or local Flink installation.
 
-```
---kinesis.source.stream stream-input --kinesis.sink.stream stream-output --kinesis.region ap-south-1 --kinesis.source.type POLLING
-```
+See [Running examples locally](../running-examples-locally.md) for details.
 
-Following is the screenshot of run configuration
-![Run Configuration](images/runConfiguration.png)
+### Generating data
 
-## Running locally through Maven command line
-To run this example locally -
-* Create source and sink Kinesis streams.
-* Ensure that use profile is configured and user has required permission to read/write from Kinesis streams.
-* Execute following command from the project home directory -
-
-```
- mvn clean compile exec:java  -Dexec.classpathScope="compile" \
- -Dexec.mainClass="com.amazonaws.services.msf.StreamingJob" \
- -Dexec.args="--kinesis.source.stream stream-input --kinesis.sink.stream stream-output --kinesis.region ap-south-1 --kinesis.source.type POLLING" 
-
-```
-
-## Deploying using CloudFormation to Amazon Managed Service for Apache Flink
-### Pre-requisite
-1. Source and sink stream.
-2. Create subnets and security groups for the Flink application. If you are using private subnets , ensure that VPC endpoint for Kinesis is created.
-3. AWS user credential using which you can create CloudFormation stack from console or CLI.
-
-### Build and deployment
-1. The steps below create stack using `./cloudformation/msf-kinesis-stream.yaml.yaml`.
-2. The script `deploy.sh` creates the stack using AWS CLI. Ensure that AWS CLI is configured and your user has permissions to create CloudFormation stack.
-3. Alternatively you can deploy from console using `./cloudformation/msf-kinesis-stream.yaml` and pass required parameters.
-4. Edit `deploy.sh` to modify  "Region and Network configuration" . Modify following configurations -
-* region= Deployment region
-* SecurityGroup= MSK Security Group.
-* SubnetOne= MSK Subnet one
-* SubnetTwo= MSK Subnet two
-* SubnetThree= MSK Subnet three
-
-5. Edit `deploy.sh` to modify "Kinesis configuration". Modify following configurations -
-* input_stream= Input Kinesis stream name.
-* output_stream= Output stream name
-Ensure that source and sink streams are created. The sample assumes POLLING consumer and not EFO consumer. 
-
-6. Build Code. Execute the script below which will build the jar and upload the jar to S3 at s3://BUCKET_NAME/flink/kinesis-connectors-1.0.jar.
-```shell
-./build.sh <BUCKET_NAME>
-```
-7. Run `deploy.sh` to deploy the CloudFormation template . Refer the sample CloudFormation template at `cloudformation/msf-kinesis-stream.yaml` .
-   The CloudFormation needs the jar to be there at s3://BUCKET_NAME/flink/kinesis-connectors-1.0.jar.
-
-```
-./deploy.sh <BUCKET_NAME> 
-```
-8. The template creates following resources -
-* Flink application with application name defined by application_name in deploy.sh.
-* CloudWatch log group with name - /aws/amazon-msf/${application_name}
-* CloudWatch log stream under the log group created above by name amazon-msf-log-stream.
-* IAM execution role for Flink application. 
-* IAM managed policy for permission.
+You can use [Kinesis Data Generator](https://github.com/awslabs/amazon-kinesis-data-generator), 
+also available in a [hosted version](https://awslabs.github.io/amazon-kinesis-data-generator/web/producer.html),
+to generate random data to Kinesis Data Stream and test the application.

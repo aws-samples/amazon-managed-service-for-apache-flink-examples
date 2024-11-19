@@ -10,3 +10,6 @@
 .venv
 env/
 venv/
+.java-version
+/pyflink/
+/.run/

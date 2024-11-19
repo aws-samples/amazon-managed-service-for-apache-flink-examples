@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.amazonaws</groupId>
+    <artifactId>amazon-msf-examples</artifactId>
+    <version>1.0</version>
+    <packaging>pom</packaging>
+
+    <name>Amazon Managed Service for Apache Flink - Java examples</name>
+
+    <!-- This parent pom does not define any common dependencies or configuration.
+    It's only used to simplify importing all Java examples in your IDE or building all of them.
+    You can still import each project independently, if you prefer. -->
+    <modules>
+        <module>AvroGlueSchemaRegistryKafka</module>
+        <module>AvroGlueSchemaRegistryKinesis</module>
+        <module>CustomMetrics</module>
+        <module>GettingStarted</module>
+        <module>GettingStartedTable</module>
+        <module>IcebergDatastreamSink</module>
+        <module>KafkaConfigProviders/Kafka-mTLS-Keystore-ConfigProviders</module>
+        <module>KafkaConfigProviders/Kafka-SASL_SSL-ConfigProviders</module>
+        <module>KafkaConnectors</module>
+        <module>KinesisConnectors</module>
+        <module>DynamoDBStreamSource</module>
+        <module>KinesisFirehoseSink</module>
+        <module>S3ParquetSink</module>
+        <module>S3Sink</module>
+        <module>Windowing</module>
+        <module>Serialization/CustomTypeInfo</module>
+        <module>PrometheusSink</module>
+    </modules>
+</project>

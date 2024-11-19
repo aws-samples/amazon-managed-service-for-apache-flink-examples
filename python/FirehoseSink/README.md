@@ -1,44 +1,161 @@
 ## Example of PyFlink application reading from Kinesis Data Stream and writing to Kinesis Data Firehose
 
-* Flink version: 1.15.2
-* Flink API: Table API/SQL
+Example showing how to send data to Amazon Data Firehose from a PyFlink application.
+
+* Flink version: 1.20
+* Flink API: Table API & SQL
+* Flink Connectors: Firehose Connector
 * Language: Python
 
-Simple application reading records from Kinesis Data Stream and publishing to Kinesis Data Firehose.
+The application uses the Firehose connector to send JSON data directly to an Amazon Data Firehose delivery stream.
+Random data are generated internally, by the application. 
 
-🚨 This example also shows how to package a PyFlink application with multiple jar dependencies (e.g. multiple connectors).
+---
 
-### Packaging Instructions for multiple connectors in Amazon Managed Service for Apache Flink
+### Requirements
 
-If you need to use multiple connectors in your streaming application, you will need to create a fat jar, bundle it with your application and reference it in your application configuration as described [here](https://docs.aws.amazon.com/managed-flink/latest/java/gs-python-createapp.html). This sample application shows how to bundle multiple connectors into a fat jar. 
+#### Development and build environment requirements
 
-Pre-requisites:
-1. Apache Maven
-2. A Kinesis Data Stream and Kinesis Data Firehose Stream
-3. (If running locally) Apache Flink installed and appropriate AWS credentials to access Kinesis and Firehose streams
+* Python 3.11
+* PyFlink library: `apache-flink==1.20.0`
+* Java JDK 11+ and Maven
 
-To get this sample application working locally:
-1. Run `mvn clean package` in the FirehoseSink folder
-2. Ensure the resulting jar is referenced correctly in the python script
-3. Ensure the `application_properties.json` parameters are configured correctly
-4. Set the environment variable `IS_LOCAL=True` 
-5. Run the python script `python streaming-firehose-sink.py`
+> ⚠️ As of 2024-06-27, the Flink Python library 1.19.x may fail installing on Python 3.12.
+> We recommend using Python 3.11 for development, the same Python version used by Amazon Managed Service for Apache Flink
+> runtime 1.20.
 
-To get this sample application working in Amazon Managed Service for Apache Flink:
-1. Run `mvn clean package` in the FirehoseSink folder
-2. Zip the python script and fat jar generated in the previous step
-3. Upload the zip to an in region S3 bucket
-4. Create the Amazon Managed Service for Apache Flink application
-5. Configure the application to use the zip uploaded to the S3 bucket and configure the application IAM role to be able to access both Kinesis and Firehose streams
-6. Run the application
 
-A sample script to produce appropriate Kinesis records, as well as detailed configuration instructions for Amazon Managed Service for Apache Flink can be found [here](https://docs.aws.amazon.com/managed-flink/latest/java/gs-python-createapp.html).
+> JDK and Maven are uses to download and package any required Flink dependencies, e.g. connectors, and
+  to package the application as `.zip` file, for deployment to Amazon Managed Service for Apache Flink.
+
+#### External dependencies
+
+The application expects an Amazon Data Firehose delivery stream with *Direct PUT* source.
+
+The delivery stream name is defined in the configuration (see [below](#runtime-configuration)).
+The application defines no default name and region. 
+The [configuration for local development](./application_properties.json) set them, by default:
+`ExampleOutputFirehoseDeliveryStream` in `us-east-1`.
+
+
+
+The Firehose destination where the delivery stream write data and the destination settings are not relevant. 
+You can send data to S3 without any transformation.
+
+#### IAM permissions
+
+The application must have sufficient permissions to publish data to the Firehose delivery stream.
+
+When running locally, you need active valid AWS credentials that allow publishing data to the delivery stream.
+
+
+---
 
 ### Runtime configuration
 
-* Local development: reads [application_properties.json](./application_properties.json)
-* Deployed on Amazon Managed Service for Apache Fink: set up Runtime Properties, using Groupd ID and property names based on the content of [application_properties.json](./application_properties.json)
+* **Local development**: uses the local file [application_properties.json](./application_properties.json)
+* **On Amazon Managed Service for Apache Fink**: define Runtime Properties, using Group ID and property names based on the content of [application_properties.json](./application_properties.json)
 
-### Sample data
+For this application, the configuration properties to specify are:
 
-Use the [Python script](../data-generator/) to generate sample stock data to Kinesis Data Stream.
+
+| Group ID                | Key           | Mandatory | Example Value (default for local)     | Notes                                  |
+|-------------------------|---------------|-----------|---------------------------------------|----------------------------------------|
+| `OutputDeliveryStream0` | `stream.name` | Y         | `ExampleOutputFirehoseDeliveryStream` | Output delivery stream .               |
+| `OutputDeliveryStream0` | `aws.region`  | Y         | `us-east-1`                           | Region for the output delivery stream. |
+
+In addition to these configuration properties, when running a PyFlink application in Managed Flink you need to set two
+[Additional configuring for PyFink application on Managed Flink](#additional-configuring-for-pyfink-application-on-managed-flink).
+
+---
+
+### How to run and build the application
+
+#### Local development - in the IDE
+
+1. Make sure you have created the Kinesis Streams and you have a valid AWS session that allows you to publish to the Streams (the way of doing it depends on your setup)
+2. Run `mvn package` once, from this directory. This step is required to download the jar dependencies - the Kinesis connector in this case
+3. Set the environment variable `IS_LOCAL=true`. You can do from the prompt or in the run profile of the IDE
+4. Run `main.py`
+
+You can also run the python script directly from the command line, like `python main.py`. This still require running `mvn package` before.
+
+If you are using Virtual Environments, make sure the to select the venv as a runtime in your IDE.
+
+If you forget the set the environment variable `IS_LOCAL=true` or forget to run `mvn package` the application fails on start.
+
+> 🚨 The application does not log or print anything. 
+> If you do not see any output in the console, it does not mean the application is not running.
+> The output is sent to the Kinesis streams. You can inspect the content of the streams using the Data Viewer in the Kinesis console
+
+Note: if you modify the Python code, you do not need to re-run `mvn package` before running the application locally.
+
+#### Deploy and run on Amazon Managed Service for Apache Flink
+
+1. Make sure you have the 4 required Kinesis Streams
+2. Create a Managed Flink application
+3. Modify the application IAM role to allow writing to all the 4 Kinesis Streams
+4. Package the application: run `mvn clean package` from this directory
+5. Upload to an S3 bucket the zip file that the previous command creates in the [`./target`](./target) subdirectory
+6. Configure the Managed Flink application: set Application Code Location to the bucket and zip file you just uploaded
+7. Configure the Runtime Properties of the application, creating the Group ID, Keys and Values as defined in the [application_properties.json](./application_properties.json)
+8. Start the application
+9. When the application transitions to "Ready" you can open the Flink Dashboard to verify the job is running, and you can 
+   inspect the data published to the destination of the delivery stream, e.g. an S3 bucket.
+
+#### Publishing code changes to Amazon Managed Service for Apache Flink
+
+Follow this process to make changes to the Python code
+
+1. Modify the code locally (test/run locally, as required)
+2. Re-run `mvn clean package` - **if you skip this step, the zipfile is not updated**, and contains the old Python script.
+3. Upload the new zip file to the same location on S3 (overwriting the previous zip file)
+4. In the Managed Flink application console, enter *Configure*, scroll down and press *Save Changes*
+   * If your application was running when you published the change, Managed Flink stops the application and restarts it with the new code
+   * If the application was not running (in Ready state) you need to click *Run* to restart it with the new code
+
+> 🚨 by design, Managed Flink does not detect the new zip file automatically.
+> You control when you want to restart the application with the code changes. This is done saving a new configuration from the 
+> console or using the [*UpdateApplication*](https://docs.aws.amazon.com/managed-flink/latest/apiv2/API_UpdateApplication.html)
+> API.
+
+
+---
+
+### Application structure
+
+The application generates synthetic data using the [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/table/datagen/) connector.
+No external data generator is required.
+
+Records are sent to a Firehose delivery stream, as JSON, without any transformations.
+
+---
+
+### Application packaging and dependencies
+
+This examples also demonstrate how to include jar dependencies - e.g. connectors - in a PyFlink application, and how to 
+package it, for deploying on Amazon Managed Service for Apache Flink.
+
+Any jar dependencies must be added to the `<dependencies>` block in the [pom.xml](pom.xml) file.
+In this case, you can see we have included `flink-connector-aws-kinesis-firehose`.
+
+Executing `mvn package` takes care of downloading any defined dependencies and create a single "fat-jar" containing all of them.
+This file, is generated in the `./target` subdirectory and is called `pyflink-dependencies.jar`
+
+> The `./target` directory and any generated files are not supposed to be committed to git.
+
+When running locally, for example in your IDE, PyFlink will look for this jar file in `./target`.
+
+When you are happy with your Python code and you are ready to deploy the application to Amazon Managed Service for Apache Flink,
+run `mvn package` **again**. The zip file you find in `./target` is the artifact to upload to S3, containing
+both jar dependencies and your Python code.
+
+#### Additional configuring for PyFink application on Managed Flink
+
+To tell Managed Flink what Python script to run and the fat-jar containing all dependencies, you need to specific some
+additional Runtime Properties, as part of the application configuration:
+
+| Group ID                              | Key       | Mandatory | Value                          | Notes                                                                     |
+|---------------------------------------|-----------|-----------|--------------------------------|---------------------------------------------------------------------------|
+| `kinesis.analytics.flink.run.options` | `python`  | Y         | `main.py`                      | The Python script containing the main() method to start the job.          |
+| `kinesis.analytics.flink.run.options` | `jarfile` | Y         | `lib/pyflink-dependencies.jar` | Location (inside the zip) of the fat-jar containing all jar dependencies. |
