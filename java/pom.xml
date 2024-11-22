@@ -15,6 +15,7 @@
     It's only used to simplify importing all Java examples in your IDE or building all of them.
     You can still import each project independently, if you prefer. -->
     <modules>
+        <module>AsyncIO</module>
         <module>AvroGlueSchemaRegistryKafka</module>
         <module>AvroGlueSchemaRegistryKinesis</module>
         <module>CustomMetrics</module>
@@ -31,6 +32,7 @@
         <module>S3Sink</module>
         <module>Windowing</module>
         <module>Serialization/CustomTypeInfo</module>
+        <module>SideOutputs</module>
         <module>PrometheusSink</module>
     </modules>
 </project>

@@ -17,7 +17,7 @@
         <maven.compiler.source>${target.java.version}</maven.compiler.source>
         <maven.compiler.target>${target.java.version}</maven.compiler.target>
         <flink.version>1.20.0</flink.version>
-        <aws.connector.version>4.3.0-1.19</aws.connector.version>
+        <aws.connector.version>5.0.0-1.20</aws.connector.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
         <log4j.version>2.23.1</log4j.version>
         <junit5.version>5.8.1</junit5.version>
@@ -74,7 +74,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-kinesis</artifactId>
+            <artifactId>flink-connector-aws-kinesis-streams</artifactId>
             <version>${aws.connector.version}</version>
         </dependency>
 
