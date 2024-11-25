@@ -25,6 +25,11 @@ The application is very simple, and uses _botocore_ and _boto3_ Python libraries
 These libraries are used to invoke Amazon Bedrock to get a fun fact about a random number.
 The output is sent to a Kinesis Data Stream.
 
+> ⚠️ **IMPORTANT**
+> Python dependencies specified using `requirements.txt` can only be imported and used in Python UDF or any function used
+> for data processing. These dependencies cannot be imported at top level or in the `main()`.
+> See [Flink documentations](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/dev/python/dependency_management/#requirementstxt)
+> for more details.
 
 ---
 
