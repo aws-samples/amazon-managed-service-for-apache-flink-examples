@@ -26,16 +26,16 @@ public class StreamingJob {
     private static final String DEFAULT_SOURCE_TOPIC = "source";
     private static final String DEFAULT_CONSUMER_GROUP = "flink-app";
 
-    public static final String KAFKA_SOURCE_TOPIC_KEY = "topic";
-    public static final String MSKBOOTSTRAP_SERVERS_KEY = "bootstrap.servers";
-    public static final String KAFKA_CONSUMER_GROUP_ID_KEY = "group.id";
-    public static final String S3_BUCKET_REGION_KEY = "bucket.region";
-    public static final String KEYSTORE_S3_BUCKET_KEY = "keystore.bucket";
-    public static final String KEYSTORE_S3_PATH_KEY = "keystore.path";
-    public static final String TRUSTSTORE_S3_BUCKET_KEY = "truststore.bucket";
-    public static final String TRUSTSTORE_S3_PATH_KEY = "truststore.path";
-    public static final String KEYSTORE_PASS_SECRET_KEY = "keystore.secret";
-    public static final String KEYSTORE_PASS_SECRET_FIELD_KEY = "keystore.secret.field";
+    private static final String KAFKA_SOURCE_TOPIC_KEY = "topic";
+    private static final String MSKBOOTSTRAP_SERVERS_KEY = "bootstrap.servers";
+    private static final String KAFKA_CONSUMER_GROUP_ID_KEY = "group.id";
+    private static final String S3_BUCKET_REGION_KEY = "bucket.region";
+    private static final String KEYSTORE_S3_BUCKET_KEY = "keystore.bucket";
+    private static final String KEYSTORE_S3_PATH_KEY = "keystore.path";
+    private static final String TRUSTSTORE_S3_BUCKET_KEY = "truststore.bucket";
+    private static final String TRUSTSTORE_S3_PATH_KEY = "truststore.path";
+    private static final String KEYSTORE_PASS_SECRET_KEY = "keystore.secret";
+    private static final String KEYSTORE_PASS_SECRET_FIELD_KEY = "keystore.secret.field";
 
     private static final String LOCAL_APPLICATION_PROPERTIES_RESOURCE = "flink-application-properties-dev.json";
 
