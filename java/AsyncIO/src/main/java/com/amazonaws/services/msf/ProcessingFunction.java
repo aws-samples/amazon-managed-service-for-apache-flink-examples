@@ -48,14 +48,15 @@ public class ProcessingFunction extends RichAsyncFunction<IncomingEvent, Process
     public void asyncInvoke(IncomingEvent incomingEvent, ResultFuture<ProcessedEvent> resultFuture) {
 
         // Create a new ProcessedEvent instance
-        ProcessedEvent processedEvent = new ProcessedEvent(incomingEvent.getMessage(), null);
+        ProcessedEvent processedEvent = new ProcessedEvent(incomingEvent.getMessage());
         LOG.debug("New request: {}", incomingEvent);
 
+        // Note: The Async Client used must return a Future object or equivalent
         Future<Response> future = client.prepareGet(apiUrl)
                 .setHeader("x-api-key", apiKey)
                 .execute();
 
-        // Asynchronously calling API and handling response via Completable Future
+        // Process the request via a Completable Future, in order to not block request synchronously
         CompletableFuture.supplyAsync(() -> {
             try {
                 LOG.debug("Trying to get response for {}", incomingEvent.getId());
@@ -65,18 +66,17 @@ public class ProcessingFunction extends RichAsyncFunction<IncomingEvent, Process
                 LOG.error("Error during async HTTP call: {}", e.getMessage());
                 return -1;
             }
+
+            // Process the response, handle the success, retryable error or non-retryable error
         }).thenAccept(statusCode -> {
             if (statusCode == 200) {
-                processedEvent.setProcessed("SUCCESS");
                 LOG.debug("Success! {}", incomingEvent.getId());
                 resultFuture.complete(Collections.singleton(processedEvent));
             } else if (statusCode == 500) { // Retryable error
                 LOG.error("Status code 500, retrying shortly...");
-                processedEvent.setProcessed("FAIL");
                 resultFuture.completeExceptionally(new Throwable(statusCode.toString()));
             } else {
                 LOG.error("Unexpected status code: {}", statusCode);
-                processedEvent.setProcessed("FAIL");
                 resultFuture.completeExceptionally(new Throwable(statusCode.toString()));
             }
         });

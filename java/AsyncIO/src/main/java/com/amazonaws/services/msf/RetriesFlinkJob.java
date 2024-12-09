@@ -80,7 +80,7 @@ public class RetriesFlinkJob {
                 Preconditions.checkArgument(!outputStreamArn.isEmpty(), "Output stream ARN must not be empty");
 
                 processedStream
-                        .map(value -> String.format("%s,%s", value.message, value.processed))
+                        .map(value -> String.format("%s", value.message))
                         .sinkTo(createSink(outputProperties));
 
                 LOGGER.debug("Starting flink job: {}", "Async I/O Retries");
