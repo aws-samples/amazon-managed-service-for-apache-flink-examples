@@ -1,0 +1,23 @@
+{
+  "type": "record",
+  "name": "Price",
+  "namespace": "com.amazonaws.services.msf.avro",
+  "fields": [
+    {
+      "name": "timestamp",
+      "type": "string"
+    },
+    {
+      "name": "symbol",
+      "type": "string"
+    },
+    {
+      "name": "price",
+      "type": "float"
+    },
+    {
+      "name": "volumes",
+      "type": "int"
+    }
+  ]
+}

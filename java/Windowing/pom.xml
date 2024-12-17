@@ -17,7 +17,7 @@
         <maven.compiler.source>${target.java.version}</maven.compiler.source>
         <maven.compiler.target>${target.java.version}</maven.compiler.target>
         <flink.version>1.20.0</flink.version>
-        <aws.connector.version>4.3.0-1.19</aws.connector.version>
+        <aws.connector.version>5.0.0-1.20</aws.connector.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
         <log4j.version>2.23.1</log4j.version>
         <jackson.version>2.17.0</jackson.version>
@@ -58,11 +58,12 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Amazon Managed Service for Apache Flink (formerly Amazon Kinesis Data Analytics) runtime -->
+        <!-- Library to retrieve runtime application properties in Managed Service for Apache Flink  -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-kinesisanalytics-runtime</artifactId>
             <version>${kda.runtime.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Connectors and Formats -->
@@ -79,7 +80,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-kinesis</artifactId>
+            <artifactId>flink-connector-aws-kinesis-streams</artifactId>
             <version>${aws.connector.version}</version>
         </dependency>
 
@@ -112,16 +113,6 @@
         <directory>${buildDirectory}</directory>
         <finalName>${jar.finalName}</finalName>
 
-        <resources>
-            <resource>
-                <filtering>true</filtering>
-                <directory>${project.basedir}/src/main/resources/</directory>
-                <targetPath>${project.build.directory}</targetPath>
-                <includes>
-                    <include>KDSTemplate.yml</include>
-                </includes>
-            </resource>
-        </resources>
         <plugins>
             <!-- Java Compiler -->
             <plugin>

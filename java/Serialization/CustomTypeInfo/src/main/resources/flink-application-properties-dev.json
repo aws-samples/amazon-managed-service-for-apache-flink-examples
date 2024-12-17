@@ -1,0 +1,15 @@
+[
+  {
+    "PropertyGroupId": "DataGen",
+    "PropertyMap": {
+      "records.per.sec": "10"
+    }
+  },
+  {
+    "PropertyGroupId": "OutputStream0",
+    "PropertyMap": {
+      "aws.region": "us-east-1",
+      "stream.arn": "arn:aws:kinesis:us-east-1:<account>:stream/<stream-name>"
+    }
+  }
+]
