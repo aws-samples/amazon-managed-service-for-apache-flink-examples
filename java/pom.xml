@@ -24,6 +24,7 @@
         <module>IcebergDatastreamSink</module>
         <module>KafkaConfigProviders/Kafka-mTLS-Keystore-ConfigProviders</module>
         <module>KafkaConfigProviders/Kafka-SASL_SSL-ConfigProviders</module>
+        <module>KafkaConfigProviders/Kafka-mTLS-Keystore-Sql-ConfigProviders</module>
         <module>KafkaConnectors</module>
         <module>KinesisConnectors</module>
         <module>DynamoDBStreamSource</module>
