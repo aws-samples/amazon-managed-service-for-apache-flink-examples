@@ -21,8 +21,6 @@ public class ProcessingFunction extends RichAsyncFunction<IncomingEvent, Process
 
     private final String apiUrl;
     private final String apiKey;
-    private static ExecutorService executorService;
-
 
     private transient AsyncHttpClient client;
 
@@ -44,16 +42,12 @@ public class ProcessingFunction extends RichAsyncFunction<IncomingEvent, Process
         DefaultAsyncHttpClientConfig.Builder clientBuilder = Dsl.config().setConnectTimeout(Duration.ofSeconds(10));
         client = Dsl.asyncHttpClient(clientBuilder);
 
-        int numCores = Runtime.getRuntime().availableProcessors(); // get num cores on node for thread count
-        executorService = Executors.newFixedThreadPool(numCores);
-
     }
 
     @Override
     public void close() throws Exception
     {
         client.close();
-        executorService.shutdown();
     }
 
     @Override
@@ -80,7 +74,7 @@ public class ProcessingFunction extends RichAsyncFunction<IncomingEvent, Process
                     LOG.error("Error during async HTTP call: {}", e.getMessage());
                     return -1;
                 }
-            }, executorService).thenAccept(statusCode -> {
+            }, org.apache.flink.util.concurrent.Executors.directExecutor()).thenAccept(statusCode -> {
             if (statusCode == 200) {
                 LOG.debug("Success! {}", incomingEvent.getId());
                 resultFuture.complete(Collections.singleton(processedEvent));
