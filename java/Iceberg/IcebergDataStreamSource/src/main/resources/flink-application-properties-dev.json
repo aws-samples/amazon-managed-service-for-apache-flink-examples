@@ -8,12 +8,12 @@
   {
     "PropertyGroupId": "Iceberg",
     "PropertyMap": {
-      "bucket.prefix": "s3://<my-bucket>/iceberg",
-      "catalog.db": "default",
+      "bucket.prefix": "s3://my-iceberg-bucket-jeremy/iceberg-example",
+      "catalog.db": "iceberg",
       "catalog.table": "prices_iceberg",
       "partition.fields": "symbol",
       "sort.field": "timestamp",
-      "operation": "upsert",
+      "operation": "append",
       "upsert.equality.fields": "symbol"
     }
   }

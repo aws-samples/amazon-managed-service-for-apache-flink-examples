@@ -1,25 +1,34 @@
 package com.amazonaws.services.msf;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;
-import org.apache.flink.connector.datagen.source.DataGeneratorSource;
 import org.apache.flink.formats.avro.typeutils.GenericRecordAvroTypeInfo;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.table.data.RowData;
 import org.apache.flink.util.Preconditions;
 
 import com.amazonaws.services.kinesisanalytics.runtime.KinesisAnalyticsRuntime;
 import com.amazonaws.services.msf.avro.AvroSchemaUtils;
-import com.amazonaws.services.msf.datagen.AvroGenericStockTradeGeneratorFunction;
-import com.amazonaws.services.msf.iceberg.IcebergSinkBuilder;
 import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.iceberg.flink.sink.FlinkSink;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.iceberg.Table;
+import org.apache.iceberg.catalog.TableIdentifier;
+import org.apache.iceberg.flink.CatalogLoader;
+import org.apache.iceberg.flink.TableLoader;
+import org.apache.iceberg.flink.source.FlinkSource;
+import org.apache.iceberg.flink.source.IcebergSource;
+import org.apache.iceberg.flink.source.StreamingStartingStrategy;
+import org.apache.iceberg.flink.source.assigner.SimpleSplitAssignerFactory;
+import org.apache.iceberg.flink.source.reader.AvroGenericRecordReaderFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
@@ -48,22 +57,6 @@ public class StreamingJob {
         }
     }
 
-
-    // Data Generator source generating random trades as AVRO GenericRecords
-    private static DataGeneratorSource<GenericRecord> createDataGenerator(Properties generatorProperties, Schema avroSchema) {
-        double recordsPerSecond = Double.parseDouble(generatorProperties.getProperty("records.per.sec", "10.0"));
-        Preconditions.checkArgument(recordsPerSecond > 0, "Generator records per sec must be > 0");
-
-        LOG.info("Data generator: {} record/sec", recordsPerSecond);
-        return new DataGeneratorSource<>(
-                new AvroGenericStockTradeGeneratorFunction(avroSchema),
-                Long.MAX_VALUE,
-                RateLimiterStrategy.perSecond(recordsPerSecond),
-                new GenericRecordAvroTypeInfo(avroSchema)
-        );
-    }
-
-
     public static void main(String[] args) throws Exception {
         // Set up the streaming execution environment
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -78,32 +71,76 @@ public class StreamingJob {
         // changes are not propagated to the Iceberg table.
         Schema avroSchema = AvroSchemaUtils.loadSchema();
 
-        // Create Generic Record TypeInfo from schema.
-        GenericRecordAvroTypeInfo avroTypeInfo = new GenericRecordAvroTypeInfo(avroSchema);
+
 
         // Local dev specific settings
         if (isLocal(env)) {
+            org.apache.flink.configuration.Configuration conf = new org.apache.flink.configuration.Configuration();
+            env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
+            env.disableOperatorChaining();
+
             // Checkpointing and parallelism are set by Amazon Managed Service for Apache Flink when running on AWS
-            env.enableCheckpointing(10000);
+            env.enableCheckpointing(60000);
             env.setParallelism(2);
+
+
         }
 
-        // Data Generator Source.
-        // Simulates an external source that receives AVRO Generic Records
-        Properties dataGeneratorProperties = applicationProperties.get("DataGen");
-        DataStream<GenericRecord> genericRecordDataStream = env.fromSource(
-                createDataGenerator(dataGeneratorProperties, avroSchema),
-                WatermarkStrategy.noWatermarks(),
-                "DataGen");
-
-        // Flink Sink Builder
         Properties icebergProperties = applicationProperties.get("Iceberg");
-        FlinkSink.Builder icebergSinkBuilder = IcebergSinkBuilder.createBuilder(
-                icebergProperties,
-                genericRecordDataStream, avroSchema);
-        // Sink to Iceberg Table
-        icebergSinkBuilder.append();
 
-        env.execute("Flink DataStream Sink");
+        // TODO: Call Iceberg Data Source
+        // Creates an Iceberg Data Source
+
+        String s3BucketPrefix = Preconditions.checkNotNull(icebergProperties.getProperty("bucket.prefix"), "Iceberg S3 bucket prefix not defined");
+
+
+        // Catalog properties for using Glue Data Catalog
+        Map<String, String> catalogProperties = new HashMap<>();
+        catalogProperties.put("type", "iceberg");
+        catalogProperties.put("io-impl", "org.apache.iceberg.aws.s3.S3FileIO");
+        catalogProperties.put("warehouse", s3BucketPrefix);
+
+        CatalogLoader glueCatalogLoader =
+                CatalogLoader.custom(
+                        "glue",
+                        catalogProperties,
+                        new Configuration(),
+                        "org.apache.iceberg.aws.glue.GlueCatalog");
+
+        String DEFAULT_GLUE_DB = "iceberg";
+        String DEFAULT_ICEBERG_TABLE_NAME = "prices_iceberg";
+
+        String glueDatabase = icebergProperties.getProperty("catalog.db", DEFAULT_GLUE_DB);
+        String glueTable = icebergProperties.getProperty("catalog.table", DEFAULT_ICEBERG_TABLE_NAME);
+        TableIdentifier inputTable = TableIdentifier.of(glueDatabase, glueTable);
+
+        TableLoader tableLoader = TableLoader.fromCatalog(glueCatalogLoader, inputTable);
+        Table table;
+        try(TableLoader loader = tableLoader) {
+            loader.open();
+            table = loader.loadTable();
+        }
+
+        AvroGenericRecordReaderFunction readerFunction = AvroGenericRecordReaderFunction.fromTable(table);
+
+
+
+        IcebergSource<GenericRecord> source =
+                IcebergSource.<GenericRecord>builder()
+                        .tableLoader(tableLoader)
+                        .readerFunction(readerFunction)
+                        .assignerFactory(new SimpleSplitAssignerFactory())
+                        .monitorInterval(Duration.ofSeconds(60))
+                        .streaming(true)
+        .build();
+
+
+        DataStreamSource<GenericRecord> stream = env.fromSource(source, WatermarkStrategy.noWatermarks(),
+                "Iceberg Source as Avro GenericRecord", new GenericRecordAvroTypeInfo(avroSchema));
+
+
+        stream.print();
+
+        env.execute("Flink DataStream Source");
     }
 }
