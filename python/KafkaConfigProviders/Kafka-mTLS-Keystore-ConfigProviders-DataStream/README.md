@@ -11,9 +11,9 @@ TBD
 
 The application should have the following permissions:
 * Read from the S3 bucket containing the keystore and truststore
-* Read the secret containing the password of the keystore and truststre
+* Read the secret containing the password of the keystore and truststore
 
-Example policy
+Example policy to be added to the Managed Flink application
 
 ```json
 {
@@ -44,3 +44,4 @@ Example policy
     ]
 }
 ```
+
