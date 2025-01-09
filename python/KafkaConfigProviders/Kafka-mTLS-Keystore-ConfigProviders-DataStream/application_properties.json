@@ -1,0 +1,17 @@
+[
+  {
+    "PropertyGroupId": "InputKafka0",
+    "PropertyMap": {
+      "topic": "abc",
+      "bootstrap.servers": "localhost:9094",
+      "group.id": "abc"
+    }
+  },
+  {
+    "PropertyGroupId": "OutputKafka0",
+    "PropertyMap": {
+      "topic": "def",
+      "bootstrap.servers": "localhost:9094"
+    }
+  }
+]
