@@ -13,3 +13,4 @@ venv/
 .java-version
 /pyflink/
 /.run/
+*-dev.json
