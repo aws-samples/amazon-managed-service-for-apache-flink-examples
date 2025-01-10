@@ -121,6 +121,10 @@ logging.info(f"Bedrock model: {model_id}, region: {model_region}")
 
 @udf(input_types=[DataTypes.INT()], result_type=DataTypes.STRING())
 def ask_bedrock_for_fun_fact(a_number):
+    # IMPORTANT
+    # The Python libraries defined in requirements.txt can only be imported inside a UDF or any function
+    # invoked by the application during data processing (on the Task Managers).
+    # These libraries cannot be imported at top level or in the main().
     import boto3
     import botocore
 
