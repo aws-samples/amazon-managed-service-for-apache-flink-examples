@@ -1,16 +1,16 @@
 ## Sample illustrating how to use MSK config providers in Flink Kafka connectors, for mTLS authentication
 
-* Flink version: 1.19
+* Flink version: 1.20
 * Flink API: DataStream API
 * Language: Java (11)
 * Flink connectors: Kafka (mTLS authentication)
 
 This sample illustrates how to configure the Flink Kafka connectors (KafkaSource and KafkaSink) 
-retrieving custom KeyStore and TrustStore at runtime, using Config Providers.
+retrieving custom KeyStore at runtime, using Config Providers.
 More details on the MSK Config Providers in [this repo](https://github.com/aws-samples/msk-config-providers).
 
-* KeyStore and TrustStore are fetched from S3, when the job starts.
-* The passwords to open both KeyStore and TrustStore are also fetched when the job starts, from AWS Secret Manager.
+* KeyStore is fetched from S3, when the job starts.
+* The password to open KeyStore is also fetched when the job starts, from AWS Secret Manager.
 * No secret is packaged with the application.
 
 ### High level approach
@@ -45,8 +45,6 @@ builder.setProperty("config.providers.s3import.class", "com.amazonaws.kafka.conf
 String region = appProperties.get("S3BucketRegion");
 String keystoreS3Bucket = appProperties.get("KeystoreS3Bucket");
 String keystoreS3Path = appProperties.get("KeystoreS3Path");
-String truststoreS3Bucket = appProperties.get("TruststoreS3Bucket");
-String truststoreS3Path = appProperties.get("TruststoreS3Path");
 String keystorePassSecret = appProperties.get("KeystorePassSecret");
 String keystorePassSecretField = appProperties.get("KeystorePassSecretField");
 
@@ -54,7 +52,6 @@ String keystorePassSecretField = appProperties.get("KeystorePassSecretField");
 builder.setProperty("config.providers.s3import.param.region", region);
 
 // properties
-builder.setProperty("ssl.truststore.location", "${s3import:" + region + ":" + truststoreS3Bucket + "/" + truststoreS3Path + "}");
 builder.setProperty("ssl.keystore.type", "PKCS12");
 builder.setProperty("ssl.keystore.location", "${s3import:" + region + ":" + keystoreS3Bucket + "/" + keystoreS3Path + "}");
 builder.setProperty("ssl.keystore.password", "${secretsmanager:" + keystorePassSecret + ":" + keystorePassSecretField + "}");
@@ -73,7 +70,7 @@ Access Policy/Role associated with the application that is running a config prov
 
 When running on Amazon Managed Service for Apache Flink the runtime configuration is read from *Runtime Properties*.
 
-When running locally, the configuration is read from the [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json) file located in the resources folder.
+When running locally, the configuration is read from the [`resources/flink-application-properties-dev.json`](src/main/resources/flink-application-properties-dev.json) file located in the resources folder.
 
 Runtime parameters:
 
@@ -82,11 +79,9 @@ Runtime parameters:
 | `Input0` | `bootstrap.servers`     |             | kafka cluster boostrap servers                                     |
 | `Input0` | `topic`                 | `source`    | source topic name                                                  |
 | `Input0` | `group.id`              | `flink-app` | kafka consumer group id                                            |
-| `Input0` | `bucket.region`         |             | region of the S3 bucket(s) containing the keystore and truststore  |
+| `Input0` | `bucket.region`         |             | region of the S3 bucket(s) containing the keystore  |
 | `Input0` | `keystore.bucket`       |             | name of the S3 bucket containing the keystore                      |
 | `Input0` | `keystore.path`         |             | path to the keystore object, omitting any trailing `/`             |
-| `Input0` | `truststore.bucket`     |             | name of the S3 bucket containing the truststore                    |
-| `Input0` | `truststore.path`       |             | path to the truststore object, omitting any trailing `/`           |
 | `Input0` | `keystore.secret`       |             | SecretManager secret ID  containing the password of the keystore   |
 | `Input0` | `keystore.secret.field` |             | SecretManager secret key containing the password of the keystore   |
 
@@ -99,4 +94,4 @@ All parameters are case-sensitive.
 
 You can run this example directly in IntelliJ, without any local Flink cluster or local Flink installation.
 
-See [Running examples locally](../running-examples-locally.md) for details.
+See [Running examples locally](../../running-examples-locally.md) for details.

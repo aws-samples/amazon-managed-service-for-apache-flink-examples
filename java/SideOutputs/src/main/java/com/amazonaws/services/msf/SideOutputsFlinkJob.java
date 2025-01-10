@@ -68,20 +68,20 @@ public class SideOutputsFlinkJob {
                 .setParallelism(1);
 
         // Validate stream for invalid messages
-        SingleOutputStreamOperator<Tuple2<IncomingEvent, Boolean>> validatedStream = source
+        SingleOutputStreamOperator<Tuple2<IncomingEvent, ProcessingOutcome>> validatedStream = source
                 .map(incomingEvent -> {
-                    boolean isPoisoned = "Poison".equals(incomingEvent.message);
-                    return Tuple2.of(incomingEvent, isPoisoned);
-                }, TypeInformation.of(new TypeHint<Tuple2<IncomingEvent, Boolean>>() {
+                    ProcessingOutcome result = "Poison".equals(incomingEvent.message)?ProcessingOutcome.ERROR: ProcessingOutcome.SUCCESS;
+                    return Tuple2.of(incomingEvent, result);
+                }, TypeInformation.of(new TypeHint<Tuple2<IncomingEvent, ProcessingOutcome>>() {
                 }));
 
         // Split the stream based on validation
         SingleOutputStreamOperator<IncomingEvent> mainStream = validatedStream
-                .process(new ProcessFunction<Tuple2<IncomingEvent, Boolean>, IncomingEvent>() {
+                .process(new ProcessFunction<Tuple2<IncomingEvent, ProcessingOutcome>, IncomingEvent>() {
                     @Override
-                    public void processElement(Tuple2<IncomingEvent, Boolean> value, Context ctx,
+                    public void processElement(Tuple2<IncomingEvent, ProcessingOutcome> value, Context ctx,
                             Collector<IncomingEvent> out) throws Exception {
-                        if (value.f1) {
+                        if (value.f1.equals(ProcessingOutcome.ERROR)) {
                             // Invalid event (true), send to DLQ sink
                             ctx.output(invalidEventsTag, value.f0);
                         } else {

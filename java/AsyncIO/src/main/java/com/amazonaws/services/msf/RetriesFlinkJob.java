@@ -1,7 +1,6 @@
 package com.amazonaws.services.msf;
 
 import com.amazonaws.services.kinesisanalytics.runtime.KinesisAnalyticsRuntime;
-import com.google.common.base.Preconditions;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -17,6 +16,8 @@ import org.apache.flink.streaming.api.functions.async.AsyncFunction;
 import org.apache.flink.streaming.api.functions.async.AsyncRetryStrategy;
 import org.apache.flink.streaming.util.retryable.AsyncRetryStrategies;
 import org.apache.flink.streaming.util.retryable.RetryPredicates;
+import org.apache.flink.util.Preconditions;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -80,7 +81,7 @@ public class RetriesFlinkJob {
                 Preconditions.checkArgument(!outputStreamArn.isEmpty(), "Output stream ARN must not be empty");
 
                 processedStream
-                        .map(value -> String.format("%s,%s", value.message, value.processed))
+                        .map(value -> String.format("%s", value.message))
                         .sinkTo(createSink(outputProperties));
 
                 LOGGER.debug("Starting flink job: {}", "Async I/O Retries");
