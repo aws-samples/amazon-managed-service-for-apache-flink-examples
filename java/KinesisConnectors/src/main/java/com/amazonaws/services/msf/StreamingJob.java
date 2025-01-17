@@ -67,14 +67,14 @@ public class StreamingJob {
                 .build();
     }
 
-    private static <T> void createApplication(Class<T> classLiteral, final StreamExecutionEnvironment env, final Map<String, Properties> applicationProperties, final DeserializationSchema<T> deserializationSchema, final SerializationSchema<T> serializationSchema) {
+    private static <T> void createApplication(TypeInformation<T> typeInformation, final StreamExecutionEnvironment env, final Map<String, Properties> applicationProperties, final DeserializationSchema<T> deserializationSchema, final SerializationSchema<T> serializationSchema) {
         KinesisStreamsSource<T> source = createKinesisSource(applicationProperties.get("InputStream0"), deserializationSchema);
         KinesisStreamsSink<T> sink = createKinesisSink(applicationProperties.get("OutputStream0"), serializationSchema);
 
         DataStream<T> input = env.fromSource(source,
                 WatermarkStrategy.noWatermarks(),
                 "Kinesis source",
-                TypeInformation.of(classLiteral));
+                typeInformation);
 
         input.sinkTo(sink);
     }
@@ -85,11 +85,11 @@ public class StreamingJob {
         final Map<String, Properties> applicationProperties = loadApplicationProperties(env);
         LOG.warn("Application properties: {}", applicationProperties);
 
-        if (applicationProperties.get("SerializationType").getProperty("type").equals("JSON")) {
-            createApplication(Stock.class, env, applicationProperties, new JsonDeserializationSchema<>(Stock.class), new JsonSerializationSchema<>());
+        if (applicationProperties.containsKey("SerializationType") && applicationProperties.get("SerializationType").getProperty("type").equals("JSON")) {
+            createApplication(TypeInformation.of(Stock.class), env, applicationProperties, new JsonDeserializationSchema<>(Stock.class), new JsonSerializationSchema<>());
         } else {
             // Fall back to using string instead of JSON with the Stock schema
-            createApplication(String.class, env, applicationProperties, new SimpleStringSchema(), new SimpleStringSchema());
+            createApplication(TypeInformation.of(String.class), env, applicationProperties, new SimpleStringSchema(), new SimpleStringSchema());
         }
 
         env.execute("Flink Kinesis Source and Sink examples");
