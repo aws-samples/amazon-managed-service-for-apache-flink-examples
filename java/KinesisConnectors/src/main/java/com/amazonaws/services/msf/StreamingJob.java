@@ -6,6 +6,7 @@ import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.connector.sink.Sink;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.connector.kinesis.sink.KinesisStreamsSink;
 import org.apache.flink.connector.kinesis.source.KinesisStreamsSource;
@@ -67,16 +68,11 @@ public class StreamingJob {
                 .build();
     }
 
-    private static <T> void createApplication(TypeInformation<T> typeInformation, final StreamExecutionEnvironment env, final Map<String, Properties> applicationProperties, final DeserializationSchema<T> deserializationSchema, final SerializationSchema<T> serializationSchema) {
-        KinesisStreamsSource<T> source = createKinesisSource(applicationProperties.get("InputStream0"), deserializationSchema);
-        KinesisStreamsSink<T> sink = createKinesisSink(applicationProperties.get("OutputStream0"), serializationSchema);
-
-        DataStream<T> input = env.fromSource(source,
+    private static <T> DataStream<T> createDataStream(final StreamExecutionEnvironment env, TypeInformation<T> typeInformation, KinesisStreamsSource<T> source) {
+        return env.fromSource(source,
                 WatermarkStrategy.noWatermarks(),
                 "Kinesis source",
                 typeInformation);
-
-        input.sinkTo(sink);
     }
 
     public static void main(String[] args) throws Exception {
@@ -86,10 +82,20 @@ public class StreamingJob {
         LOG.warn("Application properties: {}", applicationProperties);
 
         if (applicationProperties.containsKey("SerializationType") && applicationProperties.get("SerializationType").getProperty("type").equals("JSON")) {
-            createApplication(TypeInformation.of(Stock.class), env, applicationProperties, new JsonDeserializationSchema<>(Stock.class), new JsonSerializationSchema<>());
+            KinesisStreamsSource<Stock> source = createKinesisSource(applicationProperties.get("InputStream0"), new JsonDeserializationSchema<>(Stock.class));
+            KinesisStreamsSink<Stock> sink = createKinesisSink(applicationProperties.get("OutputStream0"), new JsonSerializationSchema<>());
+
+            DataStream<Stock> input = createDataStream(env, TypeInformation.of(Stock.class), source);
+            input.map(stock -> stock.mutateTicker("AMZN")).sinkTo(sink);
+
         } else {
             // Fall back to using string instead of JSON with the Stock schema
-            createApplication(TypeInformation.of(String.class), env, applicationProperties, new SimpleStringSchema(), new SimpleStringSchema());
+            KinesisStreamsSource<String> source = createKinesisSource(applicationProperties.get("InputStream0"), new SimpleStringSchema());
+            KinesisStreamsSink<String> sink = createKinesisSink(applicationProperties.get("OutputStream0"), new SimpleStringSchema());
+
+            DataStream<String> input = createDataStream(env, TypeInformation.of(String.class), source);
+
+            input.sinkTo(sink);
         }
 
         env.execute("Flink Kinesis Source and Sink examples");
