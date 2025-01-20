@@ -4,7 +4,6 @@ import com.amazonaws.services.kinesisanalytics.runtime.KinesisAnalyticsRuntime;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.common.serialization.SerializationSchema;
-import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.connector.kinesis.sink.KinesisStreamsSink;
@@ -80,23 +79,15 @@ public class StreamingJob {
         final Map<String, Properties> applicationProperties = loadApplicationProperties(env);
         LOG.warn("Application properties: {}", applicationProperties);
 
-        if (applicationProperties.containsKey("SerializationType") && applicationProperties.get("SerializationType").getProperty("type").equals("JSON")) {
-            KinesisStreamsSource<Stock> source = createKinesisSource(applicationProperties.get("InputStream0"), new JsonDeserializationSchema<>(Stock.class));
-            KinesisStreamsSink<Stock> sink = createKinesisSink(applicationProperties.get("OutputStream0"), new JsonSerializationSchema<>());
+        KinesisStreamsSource<Stock> source = createKinesisSource(applicationProperties.get("InputStream0"), new JsonDeserializationSchema<>(Stock.class));
+        KinesisStreamsSink<Stock> sink = createKinesisSink(applicationProperties.get("OutputStream0"), new JsonSerializationSchema<>());
 
-            DataStream<Stock> input = createDataStream(env, TypeInformation.of(Stock.class), source);
-            input.map(stock -> stock.mutateTicker("AMZN")).sinkTo(sink);
+        DataStream<Stock> input = env.fromSource(source,
+                WatermarkStrategy.noWatermarks(),
+                "Kinesis source",
+                TypeInformation.of(Stock.class));
 
-        } else {
-            // Fall back to using string instead of JSON with the Stock schema
-            KinesisStreamsSource<String> source = createKinesisSource(applicationProperties.get("InputStream0"), new SimpleStringSchema());
-            KinesisStreamsSink<String> sink = createKinesisSink(applicationProperties.get("OutputStream0"), new SimpleStringSchema());
-
-            DataStream<String> input = createDataStream(env, TypeInformation.of(String.class), source);
-
-            input.sinkTo(sink);
-        }
-
+        input.map(stock -> stock.mutateTicker("AMZN")).sinkTo(sink);
         env.execute("Flink Kinesis Source and Sink examples");
     }
 }

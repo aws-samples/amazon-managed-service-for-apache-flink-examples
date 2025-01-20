@@ -13,11 +13,5 @@
       "stream.arn": "arn:aws:kinesis:us-east-1:012345678900:stream/ExampleOutputStream",
       "aws.region": "us-east-1"
     }
-  },
-  {
-    "PropertyGroupId": "SerializationType",
-    "PropertyMap": {
-      "type": "JSON"
-    }
   }
 ]
