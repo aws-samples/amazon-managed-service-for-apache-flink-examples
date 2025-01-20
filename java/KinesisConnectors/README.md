@@ -12,6 +12,10 @@ It also shows how to set up an **Enhanced Fan-Out (EFO)** source.
 
 This example uses `FlinkKinesisConsumer` and `KinesisStreamsSink` connectors.
 
+This example expects a JSON payload as input and outputs a corresponding JSON output. 
+The JSON input follows the structure set in `Stock.java` and can be automatically generated with
+`stock.py` under the python directory.
+
 ![Flink Example](images/flink-kinesis-example.png)
 
 ### Runtime configuration
