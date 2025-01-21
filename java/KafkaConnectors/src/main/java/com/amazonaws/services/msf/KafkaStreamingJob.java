@@ -2,12 +2,15 @@ package com.amazonaws.services.msf;
 
 import com.amazonaws.services.kinesisanalytics.runtime.KinesisAnalyticsRuntime;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.common.serialization.SimpleStringSchema;
+import org.apache.flink.api.common.serialization.DeserializationSchema;
+import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.connector.base.DeliveryGuarantee;
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
+import org.apache.flink.formats.json.JsonDeserializationSchema;
+import org.apache.flink.formats.json.JsonSerializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -53,29 +56,29 @@ public class KafkaStreamingJob {
     }
 
 
-    private static KafkaSource<String> createKafkaSource(Properties inputProperties) {
+    private static <T> KafkaSource<T> createKafkaSource(Properties inputProperties, final DeserializationSchema<T> valueDeserializationSchema) {
         OffsetsInitializer startingOffsetsInitializer = inputProperties.containsKey("startTimestamp") ? OffsetsInitializer.timestamp(
                 Long.parseLong(inputProperties.getProperty("startTimestamp"))) : DEFAULT_OFFSETS_INITIALIZER;
 
-        return KafkaSource.<String>builder()
+        return KafkaSource.<T>builder()
                 .setBootstrapServers(inputProperties.getProperty("bootstrap.servers"))
                 .setTopics(inputProperties.getProperty("topic", DEFAULT_SOURCE_TOPIC))
                 .setGroupId(inputProperties.getProperty("group.id", DEFAULT_GROUP_ID))
                 .setStartingOffsets(startingOffsetsInitializer) // Used when the application starts with no state
-                .setValueOnlyDeserializer(new SimpleStringSchema())
+                .setValueOnlyDeserializer(valueDeserializationSchema)
                 .setProperties(inputProperties)
                 .build();
     }
 
 
-    private static KafkaSink<String> createKafkaSink(Properties outputProperties) {
-        return KafkaSink.<String>builder()
+    private static <T> KafkaSink<T> createKafkaSink(Properties outputProperties, final SerializationSchema<T> keySerializationSchema, final SerializationSchema<T> valueSerializationSchema) {
+        return KafkaSink.<T>builder()
                 .setBootstrapServers(outputProperties.getProperty("bootstrap.servers"))
                 .setKafkaProducerConfig(outputProperties)
                 .setRecordSerializer(KafkaRecordSerializationSchema.builder()
                         .setTopic(outputProperties.getProperty("topic", DEFAULT_SINK_TOPIC))
-                        .setKeySerializationSchema(new SimpleStringSchema())
-                        .setValueSerializationSchema(new SimpleStringSchema())
+                        .setKeySerializationSchema(keySerializationSchema)
+                        .setValueSerializationSchema(valueSerializationSchema)
                         .build()
                 )
                 .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
@@ -91,6 +94,7 @@ public class KafkaStreamingJob {
     public static void main(String[] args) throws Exception {
         // Set up the streaming execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        env.enableCheckpointing(1000);
 
         // Load the application properties
         final Map<String, Properties> applicationProperties = loadApplicationProperties(env);
@@ -105,11 +109,11 @@ public class KafkaStreamingJob {
         Properties outputProperties = mergeProperties(applicationProperties.get("Output0"), authProperties);
 
         // Create and add the Source
-        KafkaSource<String> source = createKafkaSource(inputProperties);
-        DataStream<String> input = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka source");
+        KafkaSource<Stock> source = createKafkaSource(inputProperties, new JsonDeserializationSchema<>(Stock.class));
+        DataStream<Stock> input = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka source");
 
         // Create and add the Sink
-        KafkaSink<String> sink = createKafkaSink(outputProperties);
+        KafkaSink<Stock> sink = createKafkaSink(outputProperties, o -> o.getTicker().getBytes(), new JsonSerializationSchema<>());
         input.sinkTo(sink);
 
         env.execute("Flink Kafka Source and Sink examples");

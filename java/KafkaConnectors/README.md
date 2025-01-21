@@ -11,6 +11,10 @@ source and sink.
 
 This example uses KafkaSource and KafkaSink.
 
+This example expects a JSON payload as input and outputs a corresponding JSON output. 
+The JSON input follows the structure set in `Stock.java` and can be automatically generated with
+`stock_kafka.py` under the python directory.
+
 ![Flink Example](images/flink-example.png),
 
 > In this example, the Kafka Sink uses *exactly-once* delivery guarantees. This leverages Kafka transaction under the hood, improving guarantees but 

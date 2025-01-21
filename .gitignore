@@ -12,5 +12,6 @@ env/
 venv/
 .java-version
 /pyflink/
+__pycache__/
 
 /.run/
