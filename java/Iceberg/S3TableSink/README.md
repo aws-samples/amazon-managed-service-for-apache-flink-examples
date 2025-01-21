@@ -26,6 +26,14 @@ aws s3tables create-table-bucket --name flink-example
 }
 ```
 
+If you already did this, you can query to get the ARN like this:
+
+```bash
+aws s3tables list-table-buckets
+```
+
+This will show you the list of table buckets. Select the one you wish to write to and paste it into the config file in this project.
+
 
 #### IAM Permissions
 
