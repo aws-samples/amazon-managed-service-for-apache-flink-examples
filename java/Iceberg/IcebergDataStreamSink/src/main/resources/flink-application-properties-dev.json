@@ -8,8 +8,8 @@
   {
     "PropertyGroupId": "Iceberg",
     "PropertyMap": {
-      "bucket.prefix": "arn:aws:s3tables:us-east-1:143479883528:bucket/my-table-bucket",
-      "catalog.db": "iceberg",
+      "bucket.prefix": "s3://<my-bucket>/iceberg",
+      "catalog.db": "default",
       "catalog.table": "prices_iceberg",
       "partition.fields": "symbol",
       "sort.field": "timestamp",

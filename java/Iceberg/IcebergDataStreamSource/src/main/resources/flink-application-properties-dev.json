@@ -8,7 +8,7 @@
   {
     "PropertyGroupId": "Iceberg",
     "PropertyMap": {
-      "bucket.prefix": "s3://my-iceberg-bucket-jeremy/iceberg-example",
+      "bucket.prefix": "s3://<my-bucket>/iceberg",
       "catalog.db": "iceberg",
       "catalog.table": "prices_iceberg",
       "partition.fields": "symbol",
