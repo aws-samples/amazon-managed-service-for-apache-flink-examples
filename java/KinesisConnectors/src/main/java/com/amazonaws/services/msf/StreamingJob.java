@@ -66,13 +66,6 @@ public class StreamingJob {
                 .build();
     }
 
-    private static <T> DataStream<T> createDataStream(final StreamExecutionEnvironment env, TypeInformation<T> typeInformation, KinesisStreamsSource<T> source) {
-        return env.fromSource(source,
-                WatermarkStrategy.noWatermarks(),
-                "Kinesis source",
-                typeInformation);
-    }
-
     public static void main(String[] args) throws Exception {
         // set up the streaming execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -87,7 +80,7 @@ public class StreamingJob {
                 "Kinesis source",
                 TypeInformation.of(Stock.class));
 
-        input.map(stock -> stock.mutateTicker("AMZN")).sinkTo(sink);
+        input.sinkTo(sink);
         env.execute("Flink Kinesis Source and Sink examples");
     }
 }
