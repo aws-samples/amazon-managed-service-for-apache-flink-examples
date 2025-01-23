@@ -9,7 +9,7 @@
     "PropertyGroupId": "Iceberg",
     "PropertyMap": {
 
-      "table.bucket.arn": "arn1:aws:s3tables:us-east-1:143479883528:bucket/flink-example",
+      "table.bucket.arn": "<<ARN>>",
       "catalog.db": "test_from_flink",
       "catalog.table": "test_table",
       "partition.fields": "symbol",

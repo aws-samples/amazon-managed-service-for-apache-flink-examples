@@ -19,10 +19,10 @@ import org.apache.iceberg.flink.util.FlinkCompatibilityUtil;
 import java.util.*;
 
 /**
- * Wraps the code to initialize an Iceberg sink that uses Glue Data Catalog as catalog
- */
+ * Wraps the code to initialize an Iceberg sink that uses S3 Tables Internal catalog
+ * */
 public class IcebergSinkBuilder {
-    private static final String DEFAULT_GLUE_DB = "default";
+    private static final String DEFAULT_S3_CATALOG_DB = "default";
     private static final String DEFAULT_ICEBERG_TABLE_NAME = "prices_iceberg";
     private static final String DEFAULT_ICEBERG_SORT_ORDER_FIELD = "accountNr";
     private static final String DEFAULT_ICEBERG_PARTITION_FIELDS = "symbol";
@@ -60,12 +60,15 @@ public class IcebergSinkBuilder {
         return partitionBuilder.build();
     }
 
-    // Iceberg Flink Sink Builder
+    /**
+     * S3 Table Sink Builder - It is unique in that it leverages the S3 Table Catalog as opposed to an external catalog like Glue or Hive.
+     * catalog-impl = software.amazon.s3tables.iceberg.S3TablesCatalog
+     */
     public static FlinkSink.Builder createBuilder(Properties icebergProperties, DataStream<GenericRecord> dataStream, org.apache.avro.Schema avroSchema) {
         // Retrieve configuration from application parameters
         String s3BucketPrefix = Preconditions.checkNotNull(icebergProperties.getProperty("table.bucket.arn"), "Iceberg S3 bucket prefix not defined");
 
-        String s3_table_db = icebergProperties.getProperty("catalog.db", DEFAULT_GLUE_DB);
+        String s3_table_db = icebergProperties.getProperty("catalog.db", DEFAULT_S3_CATALOG_DB);
         String s3_table_name = icebergProperties.getProperty("catalog.table", DEFAULT_ICEBERG_TABLE_NAME);
 
         String partitionFields = icebergProperties.getProperty("partition.fields", DEFAULT_ICEBERG_PARTITION_FIELDS);
@@ -88,7 +91,7 @@ public class IcebergSinkBuilder {
         // Avro Generic Record to Row Data Mapper
         MapFunction<GenericRecord, RowData> avroGenericRecordToRowDataMapper = AvroGenericRecordToRowDataMapper.forAvroSchema(avroSchema);
 
-        // Catalog properties for using Glue Data Catalog
+        // Catalog properties for using S3 Tables
         Map<String, String> catalogProperties = new HashMap<>();
         catalogProperties.put("type", "iceberg");
         catalogProperties.put("io-impl", "org.apache.iceberg.aws.s3.S3FileIO");
@@ -101,7 +104,7 @@ public class IcebergSinkBuilder {
                 catalogProperties,
                 new org.apache.hadoop.conf.Configuration(),
                 "software.amazon.s3tables.iceberg.S3TablesCatalog");
-        // Table Object that represents the table in the Glue Data Catalog
+        // Table Object that represents the table in S3 Tables
         TableIdentifier outputTable = TableIdentifier.of(s3_table_db, s3_table_name);
         // Load created Iceberg Catalog to perform table operations
         Catalog catalog = icebergCatalogLoader.loadCatalog();
