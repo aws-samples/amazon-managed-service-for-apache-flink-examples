@@ -88,9 +88,6 @@ public class StreamingJob {
 
         Properties icebergProperties = applicationProperties.get("Iceberg");
 
-        // TODO: Call Iceberg Data Source
-        // Creates an Iceberg Data Source
-
         String s3BucketPrefix = Preconditions.checkNotNull(icebergProperties.getProperty("bucket.prefix"), "Iceberg S3 bucket prefix not defined");
 
 

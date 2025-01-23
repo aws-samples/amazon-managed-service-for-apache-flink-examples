@@ -1,4 +1,4 @@
-# Flink Iceberg Sink using DataStream API
+# Flink Iceberg Source using DataStream API
 
 * Flink version: 1.20.0
 * Flink API: DataStream API
@@ -8,7 +8,7 @@
    and [Iceberg](https://iceberg.apache.org/docs/latest/flink/)
 
 This example demonstrate how to use
-[Flink Iceberg Sink Connector](https://iceberg.apache.org/docs/latest/flink-writes/) with the Glue Data Catalog.
+[Flink Iceberg Source Connector](https://iceberg.apache.org/docs/latest/flink-writes/) with the Glue Data Catalog.
 
 For simplicity, the application generates synthetic data, random stock prices, internally. 
 Data is generated as AVRO Generic Record, simulating a real source, for example a Kafka Source, that receives records 
