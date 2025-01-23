@@ -70,7 +70,8 @@ When deployed to Managed Service for Apache Flink, checkpointing is controlled b
 
 ### Known limitations
 
-At the moment there are current limitations concerning Flink Iceberg integration:
+At the moment there are current limitations concerning Flink Iceberg integration with S3 Tables:
+* * Currently, this example needs to be in Flink v1.19, v1.20 isn't supported with the S3 Table Sink yet.
 * Doesn't support Iceberg Table with hidden partitioning
 * Doesn't support adding columns, removing columns, renaming columns or changing columns.
 

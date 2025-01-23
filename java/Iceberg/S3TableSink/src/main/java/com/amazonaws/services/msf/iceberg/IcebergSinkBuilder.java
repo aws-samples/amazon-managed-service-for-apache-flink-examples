@@ -66,7 +66,11 @@ public class IcebergSinkBuilder {
      */
     public static FlinkSink.Builder createBuilder(Properties icebergProperties, DataStream<GenericRecord> dataStream, org.apache.avro.Schema avroSchema) {
         // Retrieve configuration from application parameters
-        String s3BucketPrefix = Preconditions.checkNotNull(icebergProperties.getProperty("table.bucket.arn"), "Iceberg S3 bucket prefix not defined");
+
+        /**
+         * This table bucket ARN will be used as the Table Catalog for Iceberg, this is unique compared to the standard Iceberg table.
+         */
+        String s3TableBucketARN = Preconditions.checkNotNull(icebergProperties.getProperty("table.bucket.arn"), "Iceberg S3 table bucket ARN not defined");
 
         String s3_table_db = icebergProperties.getProperty("catalog.db", DEFAULT_S3_CATALOG_DB);
         String s3_table_name = icebergProperties.getProperty("catalog.table", DEFAULT_ICEBERG_TABLE_NAME);
@@ -95,7 +99,7 @@ public class IcebergSinkBuilder {
         Map<String, String> catalogProperties = new HashMap<>();
         catalogProperties.put("type", "iceberg");
         catalogProperties.put("io-impl", "org.apache.iceberg.aws.s3.S3FileIO");
-        catalogProperties.put("warehouse", s3BucketPrefix);
+        catalogProperties.put("warehouse", s3TableBucketARN);
         catalogProperties.put("catalog-impl", "software.amazon.s3tables.iceberg.S3TablesCatalog");
 
         // Load S3 Table Data Catalog
