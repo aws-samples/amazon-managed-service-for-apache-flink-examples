@@ -71,16 +71,11 @@ public class KafkaStreamingJob {
     }
 
 
-    private static <T> KafkaSink<T> createKafkaSink(Properties outputProperties, final SerializationSchema<T> keySerializationSchema, final SerializationSchema<T> valueSerializationSchema) {
+    private static <T> KafkaSink<T> createKafkaSink(Properties outputProperties, KafkaRecordSerializationSchema<T> recordSerializationSchema) {
         return KafkaSink.<T>builder()
                 .setBootstrapServers(outputProperties.getProperty("bootstrap.servers"))
                 .setKafkaProducerConfig(outputProperties)
-                .setRecordSerializer(KafkaRecordSerializationSchema.builder()
-                        .setTopic(outputProperties.getProperty("topic", DEFAULT_SINK_TOPIC))
-                        .setKeySerializationSchema(keySerializationSchema)
-                        .setValueSerializationSchema(valueSerializationSchema)
-                        .build()
-                )
+                .setRecordSerializer(recordSerializationSchema)
                 .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
                 .build();
     }
@@ -112,8 +107,18 @@ public class KafkaStreamingJob {
         KafkaSource<Stock> source = createKafkaSource(inputProperties, new JsonDeserializationSchema<>(Stock.class));
         DataStream<Stock> input = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka source");
 
+        KafkaRecordSerializationSchema<Stock> recordSerializationSchema = KafkaRecordSerializationSchema.<Stock>builder()
+                .setTopic(outputProperties.getProperty("topic", DEFAULT_SINK_TOPIC))
+                // Use a field as kafka record key
+                // Define no keySerializationSchema to publish kafka records with no key
+                .setKeySerializationSchema(stock -> stock.getTicker().getBytes())
+                // Serialize the Kafka record value (payload) as JSON
+                .setValueSerializationSchema(new JsonSerializationSchema<>())
+                .build();
+
+
         // Create and add the Sink
-        KafkaSink<Stock> sink = createKafkaSink(outputProperties, o -> o.getTicker().getBytes(), new JsonSerializationSchema<>());
+        KafkaSink<Stock> sink = createKafkaSink(outputProperties, recordSerializationSchema);
         input.sinkTo(sink);
 
         env.execute("Flink Kafka Source and Sink examples");

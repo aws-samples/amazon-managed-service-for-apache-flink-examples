@@ -38,6 +38,9 @@ if __name__ == '__main__':
     bootstrap_servers = DEFAULT_BOOTSTRAP_SERVERS
     if len(sys.argv) == 2:
         topic_name = sys.argv[1]
+    elif len(sys.argv) == 3:
+        topic_name = sys.argv[1]
+        bootstrap_servers = [sys.argv[2]]
 
     print(f"Sending data to '{topic_name}'")
     generate_kafka_data(topic_name, bootstrap_servers)
