@@ -13,7 +13,7 @@ This example uses KafkaSource and KafkaSink.
 
 This example expects a JSON payload as input and outputs a corresponding JSON output. 
 The JSON input follows the structure set in `Stock.java` and can be automatically generated with
-[`stock_kafka.py`](../../python/data-generator/stock_kafka.py) under the python directory.
+[`stock_kafka.py`](../../python/data-generator/stock_kafka.py) under the `python/data_generator` directory.
 
 ![Flink Example](images/flink-example.png),
 
