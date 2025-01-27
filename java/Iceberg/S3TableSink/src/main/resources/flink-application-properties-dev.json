@@ -1,0 +1,21 @@
+[
+  {
+    "PropertyGroupId": "DataGen",
+    "PropertyMap": {
+      "records.per.sec": 100.0
+    }
+  },
+  {
+    "PropertyGroupId": "Iceberg",
+    "PropertyMap": {
+
+      "table.bucket.arn": "<<ARN>>",
+      "catalog.db": "test_from_flink",
+      "catalog.table": "test_table",
+      "partition.fields": "symbol",
+      "sort.field": "timestamp",
+      "operation": "upsert",
+      "upsert.equality.fields": "symbol"
+    }
+  }
+]
