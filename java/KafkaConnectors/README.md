@@ -1,129 +1,68 @@
 # Flink Kafka Source & Sink Examples
 
-* Flink version: 1.15
+* Flink version: 1.20
 * Flink API: DataStream API
 * Language: Java (11)
 
 
 This example demonstrate how to use
-[Flink Kafka Connector](https://nightlies.apache.org/flink/flink-docs-release-1.15/docs/connectors/datastream/kafka/),
+[Flink Kafka Connector](https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/connectors/datastream/kafka/),
 source and sink.
 
-This example uses on `KafkaSource` and `KafkaSink`.
+This example uses KafkaSource and KafkaSink.
 
 ![Flink Example](images/flink-example.png),
 
+> In this example, the Kafka Sink uses *exactly-once* delivery guarantees. This leverages Kafka transaction under the hood, improving guarantees but 
+> adding some overhead and increasing the effective latency of the output to the consumers of the destination Kafka topic. 
+> 
+> Moreover, there are failure scenarios were the Kafka Sink may still cause duplicates, even when set for exactly-once guarantees.
+> See [FLIP-319](https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=255071710) for more details.
+>
+> We recommend not to consider Kafka Sink *exactly-once* guarantees as a default setting for all sinks to Kafka. 
+> Make sure you understand the implications before enabling it. Refer to the [Flink Kafka sink documentation](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/connectors/datastream/kafka/#fault-tolerance) for details.
+
 Note that the old 
-[`FlinkKafkaConsumer`](https://nightlies.apache.org/flink/flink-docs-release-1.13/docs/connectors/datastream/kafka/#kafka-sourcefunction) 
-and [`FlinkKafkaProducers`](https://nightlies.apache.org/flink/flink-docs-release-1.13/docs/connectors/datastream/kafka/#kafka-producer)
-are deprecated since Flink 1.15
+[`FlinkKafkaConsumer`](https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/connectors/datastream/kafka/#kafka-sourcefunction)
+and [`FlinkKafkaProducer`](https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/connectors/datastream/kafka/#kafka-producer)
+were removed in Flink 1.17 and 1.15, respectively.
 
 ## Runtime configuration
 
-The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for Apache Flink,
-or from command line parameters, when running locally.
+When running on Amazon Managed Service for Apache Flink the runtime configuration is read from *Runtime Properties*.
 
-Runtime Properties are expected in the Group ID `FlinkApplicationProperties`.
-Command line parameters should be prepended by `--`.
+When running locally, the configuration is read from the [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json) file located in the resources folder.
 
-They are all case-sensitive.
+Runtime parameters:
 
-Configuration parameters:
-
-* `source.bootstrap.servers` source cluster boostrap servers
-* `source.topic` source topic (default: `source`)
-* `sink.bootstrap.servers` sink cluster bootstrap servers
-* `sink.topic` sink topic (default: `destination`)
-* `sink.transaction.timeout.ms` Sink transaction timeout 
+| Group ID  | Key                 | Description                       | 
+|-----------|---------------------|-----------------------------------|
+| `Input0`  | `bootstrap.servers` | Source cluster boostrap servers.  |
+| `Input0`  | `topic`             | Source topic (default: `source`). |
+| `Input0`  | `group.id`          | Source group id (default: `my-group`) |
+| `Output0` | `bootstrap.servers` | Destination cluster bootstrap servers. |
+| `Output0` | `topic`             | Destination topic (default: `destination`). |
+| `Output0` | `transaction.timeout.ms` | Sink transaction timeout (default: `1000`) |
 
 If you are connecting with no-auth and no SSL, above will work. Else you need additional configuration for both source and sink.
+
 ### For IAM Auth
 
-
-* `source.sasl.mechanism` AWS_MSK_IAM
-* `source.sasl.client.callback.handler.class` software.amazon.msk.auth.iam.IAMClientCallbackHandler
-* `source.sasl.jaas.config` "software.amazon.msk.auth.iam.IAMLoginModule required;"
-* `source.security.protocol` SASL_SSL
-* `source.ssl.truststore.location` /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts
-* `source.ssl.truststore.password` changeit
-* `sink.sasl.mechanism` AWS_MSK_IAM
-* `sink.sasl.client.callback.handler.class` software.amazon.msk.auth.iam.IAMClientCallbackHandler
-* `sink.sasl.jaas.config` "software.amazon.msk.auth.iam.IAMLoginModule required;"
-* `sink.security.protocol` SASL_SSL
-* `sink.ssl.truststore.location` /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts
-* `sink.ssl.truststore.password` changeit
+When using IAM Auth, the following Runtime Properties are expected at the Group ID `AuthProperties`:
+* `sasl.mechanism` AWS_MSK_IAM
+* `sasl.client.callback.handler.class` software.amazon.msk.auth.iam.IAMClientCallbackHandler
+* `sasl.jaas.config` "software.amazon.msk.auth.iam.IAMLoginModule required;"
+* `security.protocol` SASL_SSL
+* `ssl.truststore.location` /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts
+* `ssl.truststore.password` changeit
 
 
 ## Running locally in IntelliJ
 
-To run this example locally - 
-* Run a Kafka cluster locally. You can refer https://kafka.apache.org/quickstart to download and start Kafka locally.
-* Create `source` and `sink` topics. 
-* To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to the classpath'*.
+> Due to MSK VPC networking, to run this example on your machine you need to set up network connectivity to the VPC where MSK is deployed, for example with a VPN.
+> Alternatively, you can use a local Kafka installation, for example in a container.
+> Setting up the connectivity or a local containerized Kafka depends on your set up and is out of scope for this example.
 
-Provide arguments like following -
-```
---source.bootstrap.servers localhost:9092 --source.topic source --sink.bootstrap.servers localhost:9092 --sink.topic sink --sink.transaction.timeout.ms 1000
-```
+You can run this example directly in IntelliJ, without any local Flink cluster or local Flink installation.
 
-Following is the screenshot of run configuration
-![Run Configuration](images/runConfiguration.png)
-
-## Running locally through Maven command line
-To run this example locally -
-* Run a Kafka cluster locally. You can refer https://kafka.apache.org/quickstart to download and start Kafka locally.
-* Create `source` and `sink` topics.
-* Execute following command from the project home directory -
-```
- mvn clean compile exec:java -Dexec.classpathScope="compile" \
- -Dexec.mainClass="com.amazonaws.services.msf.KafkaStreamingJob" \
- -Dexec.args="--source.bootstrap.servers localhost:9092 --source.topic source --sink.bootstrap.servers localhost:9092 --sink.topic sink --sink.transaction.timeout.ms 1000" 
-
-```
-
-## Deploying using CloudFormation to Amazon Managed Service for Apache Flink
-This sample assumes that MSK Serverless cluster is created. The flink application routes data ingested in source topic to sink topic without any transformation. 
-
-![Amazon Managed Service for Apache Flink , MSK Serverless example](images/flink-msk-serverless-example.png),
-### Pre-requisite
-1. Create MSK serverless cluster while choosing 3 subnets. Refer https://docs.aws.amazon.com/msk/latest/developerguide/serverless-getting-started.html . 
-2. Once the cluster is created note down subnets ids of the cluster and security group.
-3. Ensure that security group has self referencing ingress rule that allows connection on port 9098. 
-4. You have a user credential using which you can create CloudFormation stack from console or CLI. 
-
-
-### Build and deployment
-
-1. The steps below create stack with [CloudFormation Template](./cloudformation/msf-msk-iam-auth.yaml).
-2. The script `deploy.sh` creates the stack using AWS CLI. Ensure that AWS CLI is configured and your user has permissions to create CloudFormation stack.
-3. Alternatively you can deploy using  [CloudFormation Template](./cloudformation/msf-msk-iam-auth.yaml) from Console and pass required parameters.
-4. Edit `deploy.sh` to modify  "Region and Network configuration" . Modify following configurations -  
-* region= Deployment region
-* SecurityGroup= MSK Security Group. 
-* SubnetOne= MSK Subnet one
-* SubnetTwo= MSK Subnet two
-* SubnetThree= MSK Subnet three
-
-5. Edit `deploy.sh` to modify "MSK configuration". Modify following configurations -
-* kafka_bootstrap_server= MSK Serverless bootstrap server. 
-* source_topic= Source topic. 
-* sink_topic= Sink topic. 
-Ensure that source and sink topics are created. 
-
-6. Build Code. Execute the script below which will build the jar and upload the jar to S3 at s3://<bucket-name>/flink/kafka-connectors-1.0.jar.
-```shell
-./build.sh <bucket-name-to-upload>
-```
-
-7. Run `deploy.sh` to deploy the CloudFormation template . Refer the sample CloudFormation template at `cloudformation/msf-msk-iam-auth.yaml` . 
-The CloudFormation needs the jar to be there at s3://<bucket-name>/flink/kafka-connectors-1.0.jar. 
-
-```
-./deploy.sh <bucket-name-to-upload> 
-```
-8. The template creates following resources -
-* Flink application with application name defined by application_name in deploy.sh. 
-* CloudWatch log group with name - /aws/amazon-msf/${application_name}
-* CloudWatch log stream under the log group created above by name amazon-msf-log-stream. 
-* IAM execution role for Flink application. The role permission on MSK cluster.
-* IAM managed policy. 
+See [Running examples locally](../running-examples-locally.md) for details.

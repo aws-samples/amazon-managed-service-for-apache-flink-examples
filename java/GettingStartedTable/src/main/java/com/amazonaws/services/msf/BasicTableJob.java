@@ -1,223 +1,123 @@
 package com.amazonaws.services.msf;
 
 import com.amazonaws.services.kinesisanalytics.runtime.KinesisAnalyticsRuntime;
-import com.google.gson.*;
-import com.google.gson.internal.Streams;
-import com.google.gson.stream.JsonReader;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.common.serialization.AbstractDeserializationSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.api.java.typeutils.TypeExtractor;
-import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.connector.kafka.source.KafkaSource;
-import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
+import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;
+import org.apache.flink.connector.datagen.source.DataGeneratorSource;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import static org.apache.flink.table.api.Expressions.*;
+import static org.apache.flink.table.api.Expressions.$;
+import static org.apache.flink.table.api.Expressions.dateFormat;
 
 public class BasicTableJob {
-    private static final Logger LOG = LoggerFactory.getLogger(BasicTableJob.class);
+
+    private static final Logger LOGGER = LogManager.getLogger(BasicTableJob.class);
+
+    // Name of the local JSON resource with the application properties in the same format as they are received from the Amazon Managed Service for Apache Flink runtime
+    private static final String LOCAL_APPLICATION_PROPERTIES_RESOURCE = "flink-application-properties-dev.json";
 
     /**
-     * Get configuration properties from Amazon Managed Service for Apache Flink runtime properties
-     * GroupID "FlinkApplicationProperties", or from command line parameters when running locally
+     * Load application properties from Amazon Managed Service for Apache Flink runtime or from a local resource, when the environment is local
      */
-    private static ParameterTool loadApplicationParameters(String[] args, StreamExecutionEnvironment env) throws IOException {
+    private static Map<String, Properties> loadApplicationProperties(StreamExecutionEnvironment env) throws IOException {
         if (env instanceof LocalStreamEnvironment) {
-            return ParameterTool.fromArgs(args);
+            LOGGER.info("Loading application properties from '{}'", LOCAL_APPLICATION_PROPERTIES_RESOURCE);
+            return KinesisAnalyticsRuntime.getApplicationProperties(
+                    BasicTableJob.class.getClassLoader()
+                            .getResource(LOCAL_APPLICATION_PROPERTIES_RESOURCE).getPath());
         } else {
-            Map<String, Properties> applicationProperties = KinesisAnalyticsRuntime.getApplicationProperties();
-            Properties flinkProperties = applicationProperties.get("FlinkApplicationProperties");
-            if (flinkProperties == null) {
-                throw new RuntimeException("Unable to load FlinkApplicationProperties properties from the Kinesis Analytics Runtime.");
-            }
-            Map<String, String> map = new HashMap<>(flinkProperties.size());
-            flinkProperties.forEach((k, v) -> map.put((String) k, (String) v));
-            return ParameterTool.fromMap(map);
+            LOGGER.info("Loading application properties from Amazon Managed Service for Apache Flink");
+            return KinesisAnalyticsRuntime.getApplicationProperties();
         }
     }
 
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, EnvironmentSettings.newInstance().build());
 
-        ParameterTool applicationParameters = loadApplicationParameters(args, env);
+        Map<String, Properties> applicationParameters = loadApplicationProperties(env);
 
-        String kafkaTopic = applicationParameters.get("kafka-topic", "TableTestTopic");
-        String brokers = applicationParameters.get("brokers", "");
-        String s3Path = applicationParameters.get("s3Path", "");
+        Properties s3Properties = applicationParameters.get("bucket");
+        String s3Path = s3Properties.getProperty("name") + '/' + s3Properties.getProperty("path", "output");
 
-        LOG.info("kafkaTopic is {}", kafkaTopic);
-        LOG.info("brokers is {}", brokers);
-        LOG.info("s3Path is {}", s3Path);
+        LOGGER.info("s3Path is {}", s3Path);
 
-        // Create Kafka consumer properties
-        Properties kafkaProps = new Properties();
-        kafkaProps.setProperty("bootstrap.servers", brokers);
+        // When running locally, enable checkpointing, as filesystem sink rolls files on checkpointing
+        // When running on Managed Flink checkpointing is controlled by the application configuration
+        if (env instanceof LocalStreamEnvironment) {
+            env.enableCheckpointing(5000);
+        }
 
-        // Process stream using table API
-        processTable(env, kafkaTopic, s3Path + "/tableapi", kafkaProps);
+        // Set up the data generator as a dummy source
+        long recordPerSecond = 100;
+        DataGeneratorSource<StockPrice> source = new DataGeneratorSource<>(
+                new StockPriceGeneratorFunction(),
+                Long.MAX_VALUE,
+                RateLimiterStrategy.perSecond(recordPerSecond),
+                TypeInformation.of(StockPrice.class));
+        DataStream<StockPrice> stockPrices = env.fromSource(source, WatermarkStrategy.noWatermarks(), "data-generator").setParallelism(1);
 
-        // Process stream using sql API
-        processSql(env, kafkaTopic, s3Path + "/sqlapi", kafkaProps);
-    }
+        // Convert the DataStream into a Table
+        Table stockPricesTable = tableEnv.fromDataStream(stockPrices);
 
-    public static void processTable(StreamExecutionEnvironment env, String kafkaTopic, String s3Path, Properties kafkaProperties) {
-        StreamTableEnvironment streamTableEnvironment = StreamTableEnvironment.create(
-                env, EnvironmentSettings.newInstance().build());
+        // Print the schema for purpose of demonstration only. This will only be printed when the application starts
+        // and only visible when you are running locally
+        stockPricesTable.printSchema();
 
-        KafkaSource<StockRecord> source = KafkaSource.<StockRecord>builder()
-                .setProperties(kafkaProperties)
-                .setTopics(kafkaTopic)
-                .setGroupId("my-group")
-                .setStartingOffsets(OffsetsInitializer.earliest())
-                .setValueOnlyDeserializer(new KafkaEventDeserializationSchema())
-                .build();
 
-        // Obtain stream
-        DataStream<StockRecord> events = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source");
 
-        // Create the table
-        Table table = streamTableEnvironment.fromDataStream(events);
-
-        final Table filteredTable = table.
+        // Filter prices > 50
+        // Add the additional columns that will be used for partitioning
+        Table filteredStockPricesTable = stockPricesTable.
                 select(
-                        $("event_time"), $("ticker"), $("price"),
-                        dateFormat($("event_time"), "yyyy-MM-dd").as("dt"),
-                        dateFormat($("event_time"), "HH").as("hr")
+                        $("eventTime").as("event_time"),
+                        $("ticker"),
+                        $("price"),
+                        dateFormat($("eventTime"), "yyyy-MM-dd").as("dt"),
+                        dateFormat($("eventTime"), "HH").as("hr")
                 ).
                 where($("price").isGreater(50));
 
-        final String s3Sink = "CREATE TABLE sink_table (" +
-                "event_time TIMESTAMP," +
-                "ticker STRING," +
-                "price DOUBLE," +
-                "dt STRING," +
-                "hr STRING" +
-                ")" +
-                " PARTITIONED BY (ticker,dt,hr)" +
-                " WITH" +
-                "(" +
-                " 'connector' = 'filesystem'," +
-                " 'path' = 's3a://" + s3Path + "'," +
-                " 'format' = 'json'" +
-                ") ";
+        // Create the sink to S3 table
+        tableEnv.createTemporaryView("filtered_stock_prices", filteredStockPricesTable);
+        tableEnv.executeSql("CREATE TABLE s3_sink (" +
+                 "eventTime TIMESTAMP(3)," +
+                 "ticker STRING," +
+                 "price DOUBLE," +
+                 "dt STRING," +
+                 "hr STRING" +
+                ") PARTITIONED BY ( dt, hr ) WITH (" +
+                "'connector' = 'filesystem'," +
+                "'format' = 'json'," +
+                "'path' = 's3a://"  + s3Path + "'" +
+                ")");
 
-        // Send to s3
-        streamTableEnvironment.executeSql(s3Sink);
-        filteredTable.executeInsert("sink_table");
-    }
+        // Insert the content of the filtered stock prices into the S3 sink table
+        filteredStockPricesTable.executeInsert("s3_sink");
 
 
-    public static void processSql(StreamExecutionEnvironment env, String kafkaTopic, String s3Path, Properties kafkaProperties) {
-        StreamTableEnvironment streamTableEnvironment = StreamTableEnvironment.create(
-                env, EnvironmentSettings.newInstance().build());
-
-        final String createTableStmt = "CREATE TABLE StockRecord " +
-                "(" +
-                "event_time TIMESTAMP," +
-                "ticker STRING," +
-                "price DOUBLE" +
-                ")" +
-                " WITH (" +
-                " 'connector' = 'kafka'," +
-                " 'topic' = '" + kafkaTopic + "'," +
-                " 'properties.bootstrap.servers' = '" + kafkaProperties.get("bootstrap.servers")
-                + "'," +
-                " 'properties.group.id' = 'testGroup'," +
-                " 'format' = 'json'," +
-                " 'scan.startup.mode' = 'earliest-offset'" +
-                ")";
-
-
-        final String s3Sink = "CREATE TABLE sink_table (" +
-                "event_time TIMESTAMP," +
-                "ticker STRING," +
-                "price DOUBLE," +
-                "dt STRING," +
-                "hr STRING" +
-                ")" +
-                " PARTITIONED BY (ticker,dt,hr)" +
-                " WITH" +
-                "(" +
-                " 'connector' = 'filesystem'," +
-                " 'path' = '" + s3Path + "'," +
-                " 'format' = 'json'" +
-                ") ";
-
-
-        streamTableEnvironment.executeSql(createTableStmt);
-        streamTableEnvironment.executeSql(s3Sink);
-
-        final String insertSql = "INSERT INTO sink_table SELECT event_time,ticker,price,DATE_FORMAT(event_time, 'yyyy-MM-dd') as dt, " +
-                "DATE_FORMAT(event_time, 'HH') as hh FROM StockRecord WHERE price > 50";
-        streamTableEnvironment.executeSql(insertSql);
-    }
-
-
-    @Getter
-    @Setter
-    @ToString
-    public static class StockRecord extends Event {
-        private Timestamp event_time;
-        private String ticker;
-        private Double price;
-    }
-
-    public static class Event {
-        private static final Gson gson = new GsonBuilder()
-                .setDateFormat("yyyy-MM-dd hh:mm:ss")
-                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-                .registerTypeAdapter(Instant.class, (JsonDeserializer<Instant>) (json, typeOfT, context) -> Instant.parse(json.getAsString()))
-                .create();
-
-        public static Event parseEvent(byte[] event) {
-
-            JsonReader jsonReader = new JsonReader(new InputStreamReader(new ByteArrayInputStream(event)));
-            JsonElement jsonElement = Streams.parse(jsonReader);
-
-            // Convert json to POJO, based on the type attribute
-            return gson.fromJson(jsonElement, StockRecord.class);
-        }
-    }
-
-    public static class KafkaEventDeserializationSchema extends AbstractDeserializationSchema<StockRecord> {
-        @Override
-        public StockRecord deserialize(byte[] bytes) {
-            try {
-                return (StockRecord) Event.parseEvent(bytes);
-            } catch (Exception e) {
-                LOG.error("Exception deserializing a record", e);
-                return null;
-            }
-        }
-
-        @Override
-        public boolean isEndOfStream(StockRecord event) {
-            return false;
-        }
-
-        @Override
-        public TypeInformation<StockRecord> getProducedType() {
-            return TypeExtractor.getForClass(StockRecord.class);
-        }
+        // If you want to print the filtered stock prices, uncomment the following line
+        // ATTENTION: only print when developing locally. If you print from an application deployed to Amazon Managed
+        // Service for Apache Flink, the output does not appear, but generates overhead for the application to generate it.
+//        tableEnv.executeSql("CREATE TABLE print_sink  (" +
+//                "eventTime TIMESTAMP," +
+//                    "ticker STRING," +
+//                    "price DOUBLE," +
+//                    "dt STRING," +
+//                    "hr STRING" +
+//                ") WITH ( 'connector' = 'print')");
+//        filteredStockPricesTable.executeInsert("print_sink");
     }
 }

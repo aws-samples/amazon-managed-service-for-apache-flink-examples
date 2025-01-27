@@ -2,35 +2,37 @@
 
 Skeleton project for a basic Flink Java application to run on Amazon Managed Service for Apache Flink.
 
-* Flink version: 1.15
+* Flink version: 1.20
 * Flink API: DataStream API
 * Language: Java (11)
+* Flink connectors: Kinesis Consumer, Kinesis Sink
 
 The project can run both on Amazon Managed Service for Apache Flink, and locally for development.
 
-The application shows how to get runtime configuration, and sets up a Kinesis Data Stream source and a sink.
+The application shows how to get runtime configuration, and set up a Kinesis Data Stream source and a sink.
 
 ### Runtime configuration
 
-The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for 
-Apache Flink, or from command line parameters, when running locally.
+When running on Amazon Managed Service for Apache Flink the runtime configuration is read from *Runtime Properties*.
 
-Runtime Properties are expected in the Group ID `FlinkApplicationProperties`. 
-Command line parameters should be prepended by `--`.
+When running locally, the configuration is read from the [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json) file located in the resources folder.
 
-They are all case-sensitive.
+Runtime parameters:
 
-Configuration parameters:
+| Group ID        | Key           | Description               | 
+|-----------------|---------------|---------------------------|
+| `InputStream0`  | `stream.name` | Name of the input stream  |
+| `InputStream0`  | `aws.region`  | (optional) Region of the input stream. If not specified, it will use the application region or the default region of the AWS profile, when running locally. |
+| `OutputStream0` | `stream.name` | Name of the output stream |
+| `OutputStream0`  | `aws.region`  | (optional) Region of the output stream. If not specified, it will use the application region or the default region of the AWS profile, when running locally. |
 
-* `InputStreamRegion` region of the input stream (default: `us-east-1`)
-* `InputStreamName` name of the input Kinesis Data Stream (default: `ExampleInputStream`)
-* `OutputStreamRegion` region of the input stream (default: `us-east-1`)
-* `OutputStreamName` name of the input Kinesis Data Stream (default: `ExampleOutputStream`)
+All parameters are case-sensitive.
 
 ### Running in IntelliJ
 
-To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to 
-the classpath'*.
+You can run this example directly in IntelliJ, without any local Flink cluster or local Flink installation.
+
+See [Running examples locally](../running-examples-locally.md) for details.
 
 ### Generating data
 

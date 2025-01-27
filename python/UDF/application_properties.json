@@ -1,24 +1,16 @@
 [
   {
-          "PropertyGroupId": "kinesis.analytics.flink.run.options",
-          "PropertyMap": {
-            "python": "SlidingWindows/sliding-windows.py",
-            "jarfile": "SlidingWindows/lib/flink-sql-connector-kinesis-1.15.2.jar"
-          }
-        },
-        {
-          "PropertyGroupId": "consumer.config.0",
-          "PropertyMap": {
-            "input.stream.name": "KinesisAnalyticsPenTestInputStream",
-            "scan.stream.initpos": "LATEST",
-            "aws.region": "us-east-1"
-          }
-        },
-  {
-    "PropertyGroupId": "producer.config.0",
+    "PropertyGroupId": "kinesis.analytics.flink.run.options",
     "PropertyMap": {
-      "output.stream.name": "KinesisAnalyticsPenTestOutputStream",
-      "shard.count": "1",
+    "python": "main.py",
+    "jarfile": "lib/pyflink-dependencies.jar"
+    }
+  },
+  {
+    "PropertyGroupId": "OutputStream0",
+    "PropertyMap": {
+      "stream.name": "ExampleOutputStream",
       "aws.region": "us-east-1"
     }
-  }]
+  }
+]

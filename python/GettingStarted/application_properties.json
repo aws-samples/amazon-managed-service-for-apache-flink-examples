@@ -2,23 +2,22 @@
   {
   "PropertyGroupId": "kinesis.analytics.flink.run.options",
   "PropertyMap": {
-    "python": "GettingStarted/getting-started.py",
-    "jarfile": "GettingStarted/lib/flink-sql-connector-kinesis-1.15.2.jar"
+    "python": "main.py",
+    "jarfile": "lib/pyflink-dependencies.jar"
    }
   },
   {
-    "PropertyGroupId": "consumer.config.0",
+    "PropertyGroupId": "InputStream0",
     "PropertyMap": {
-      "input.stream.name": "input-stream",
+      "stream.name": "ExampleInputStream",
       "flink.stream.initpos": "LATEST",
       "aws.region": "us-east-1"
     }
   },
   {
-    "PropertyGroupId": "producer.config.0",
+    "PropertyGroupId": "OutputStream0",
     "PropertyMap": {
-      "output.stream.name": "output-stream",
-      "shard.count": "1",
+      "stream.name": "ExampleOutputStream",
       "aws.region": "us-east-1"
     }
   }

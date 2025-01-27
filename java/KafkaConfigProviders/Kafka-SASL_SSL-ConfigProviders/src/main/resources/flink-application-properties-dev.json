@@ -1,0 +1,15 @@
+[
+  {
+    "PropertyGroupId": "Output0",
+    "PropertyMap": {
+      "bootstrap.servers": "<BootstrapServers>",
+      "topic": "<Topic>",
+      "bucket.region": "<S3BucketRegion>",
+      "truststore.bucket": "<TruststoreS3Bucket>",
+      "truststore.path": "<TruststoreS3Path>",
+      "credentials.secret": "<SecretsManager-SecretName>",
+      "credentials.secret.username.field": "username",
+      "credentials.secret.password.field": "password"
+    }
+  }
+]

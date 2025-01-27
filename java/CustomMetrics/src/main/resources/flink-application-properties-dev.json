@@ -1,0 +1,10 @@
+[
+  {
+    "PropertyGroupId": "OutputStream0",
+    "PropertyMap": {
+      "aws.region": "us-east-1",
+      "stream.name": "ExampleOutputStream",
+      "flink.stream.initpos": "LATEST"
+    }
+  }
+]

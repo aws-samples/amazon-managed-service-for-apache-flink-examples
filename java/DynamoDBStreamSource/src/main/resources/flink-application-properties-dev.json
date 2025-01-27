@@ -1,0 +1,17 @@
+[
+  {
+    "PropertyGroupId": "InputStream0",
+    "PropertyMap": {
+      "stream.arn": "arn:aws:dynamodb:us-east-1:012345678901:table/my-ddb-table/stream/2024-11-07T17:14:13.766",
+      "flink.stream.initpos": "TRIM_HORIZON"
+    }
+  },
+  {
+    "PropertyGroupId": "OutputStream0",
+    "PropertyMap": {
+      "stream.arn": "arn:aws:kinesis:us-east-1:012345678900:stream/ExampleOutputStream",
+      "aws.region": "us-east-1"
+    }
+  }
+
+]

@@ -1,39 +1,37 @@
 ## Getting Started Flink Java project - Table API & SQL
 
-Example of project for a basic Flink Java application using the TableAPI or SQL.
+Example of project for a basic Flink Java application using the Table API & SQL in combination with the DataStream API.
 
-* Flink version: 1.15
-* Flink API: Table API or SQL
+* Flink version: 1.20
+* Flink API: Table API & SQL, and DataStream API
 * Language: Java (11)
+* Flink connectors: Kinesis Sink
 
 The project can run both on Amazon Managed Service for Apache Flink, and locally for development.
 
-The application reads from a Kafka topic and writes to S3, showing how to implement a combination of DataStream API and
-Table API, or SQL.
+The application generates random data using the DataStream [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/connectors/datastream/datagen/)
+connector, Table API & SQL to filter and transform the data, and then write to S3 as JSON files.
+
+The DataStream API DataGen connector is used instead of the Table API DataGen connector, because it allows fine-grained
+control of the generated data. In this example we implemented a `GeneratorFunction` to generate plausible random stock prices.
 
 ### Runtime configuration
 
-The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for
-Apache Flink, or from command line parameters, when running locally.
+When running on Amazon Managed Service for Apache Flink the runtime configuration is read from *Runtime Properties*.
 
-Runtime Properties are expected in the Group ID `FlinkApplicationProperties`.
-Command line parameters should be prepended by `--`.
+When running locally, the configuration is read from the [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json) file located in the resources folder.
 
-They are all case-sensitive.
+Runtime parameters:
 
-Configuration parameters:
+| Group ID        | Key           | Description               | 
+|-----------------|---------------|---------------------------|
+| `bucket`        | `name`        | Name of the destination bucket, **without** the prefix "s3://" |
+| `bucket`        | `path`        | Path withing the bucket the output will be written to, without the trailing "/" |
 
-* `kafka-topic` source topic
-* `brokers` source Kafka cluster boostrap servers 
-* `s3Path` <s3-bucket>/<path> of the S3 destination , **without prepending `s3://`** 
+All parameters are case-sensitive.
 
 ### Running in IntelliJ
 
-To start the Flink job in IntelliJ edit the Run/Debug configuration enabling *'Add dependencies with "provided" scope to
-the classpath'*.
+You can run this example directly in IntelliJ, without any local Flink cluster or local Flink installation.
 
-### Data generator
-
-The project includes a [simple Python script](./data-generator/generator.py) that generates data and publishes
-to Kafka. 
-Edit the script to change the boostrap brokers and topic name.
+See [Running examples locally](../running-examples-locally.md) for details.

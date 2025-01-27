@@ -11,13 +11,15 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <buildDirectory>${project.basedir}/target</buildDirectory>
+        <jar.finalName>${project.name}-${project.version}</jar.finalName>
         <target.java.version>11</target.java.version>
         <maven.compiler.source>${target.java.version}</maven.compiler.source>
         <maven.compiler.target>${target.java.version}</maven.compiler.target>
-        <flink.version>1.15.4</flink.version>
+        <flink.version>1.20.0</flink.version>
+        <kafka.connector.version>3.2.0-1.19</kafka.connector.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
         <log4j.version>2.17.2</log4j.version>
-        <slf4j.version>1.7.32</slf4j.version>
     </properties>
 
     <dependencies>
@@ -34,19 +36,34 @@
             <version>${flink.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-runtime-web</artifactId>
+            <version>${flink.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
-        <!-- Amazon Managed Service for Apache Flink (formerly Amazon Kinesis Data Analytics) runtime-->
+        <!-- Library to retrieve runtime application properties in Managed Service for Apache Flink  -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-kinesisanalytics-runtime</artifactId>
             <version>${kda.runtime.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Flink Kafka connector -->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-kafka</artifactId>
+            <version>${kafka.connector.version}</version>
+        </dependency>
+
+        <!-- Flink Connector base -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-base</artifactId>
             <version>${flink.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Logging framework, to produce console output when running in the IDE. -->
@@ -66,6 +83,7 @@
             <artifactId>log4j-core</artifactId>
             <version>${log4j.version}</version>
         </dependency>
+
         <!-- MSK IAM Authentication -->
         <dependency>
             <groupId>software.amazon.msk</groupId>
@@ -75,6 +93,9 @@
     </dependencies>
 
     <build>
+        <directory>${buildDirectory}</directory>
+        <finalName>${jar.finalName}</finalName>
+
         <plugins>
             <!-- Java Compiler -->
             <plugin>
