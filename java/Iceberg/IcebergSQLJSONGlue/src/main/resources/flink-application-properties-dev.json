@@ -1,0 +1,20 @@
+[
+  {
+    "PropertyGroupId": "DataGen",
+    "PropertyMap": {
+      "records.per.sec": 100.0
+    }
+  },
+  {
+    "PropertyGroupId": "Iceberg",
+    "PropertyMap": {
+      "catalog.db": "iceberg",
+      "catalog.table": "stock_data",
+      "bucket.prefix": "s3://<<bucket-name>>/glue-example/",
+      "partition.fields": "symbol",
+      "sort.field": "timestamp",
+      "operation": "upsert",
+      "upsert.equality.fields": "symbol"
+    }
+  }
+]
