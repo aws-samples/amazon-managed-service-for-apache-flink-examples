@@ -5,13 +5,13 @@ import java.sql.Timestamp;
 public class StockPrice {
     private Timestamp eventTime;
     private String ticker;
-    private Double price;
+    private double price;
 
 
     public StockPrice() {
     }
 
-    public StockPrice(Timestamp eventTime, String ticker, Double price) {
+    public StockPrice(Timestamp eventTime, String ticker, double price) {
         this.eventTime = eventTime;
         this.ticker = ticker;
         this.price = price;
@@ -33,11 +33,11 @@ public class StockPrice {
         this.ticker = ticker;
     }
 
-    public Double getPrice() {
+    public double getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(double price) {
         this.price = price;
     }
 
