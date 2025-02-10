@@ -12,6 +12,7 @@ import org.apache.flink.connector.sqs.sink.SqsSinkElementConverter;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.formats.json.JsonSerializationSchema;
 
 import java.io.IOException;
 import java.util.Map;
@@ -22,9 +23,6 @@ public class SQSStreamingJob {
 
     // Name of the local JSON resource with the application properties in the same format as they are received from the Amazon Managed Service for Apache Flink runtime
     private static final String LOCAL_APPLICATION_PROPERTIES_RESOURCE = "flink-application-properties-dev.json";
-
-    // Create ObjectMapper instance to serialise POJOs into JSONs
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private static boolean isLocal(StreamExecutionEnvironment env) {
         return env instanceof LocalStreamEnvironment;
@@ -52,11 +50,13 @@ public class SQSStreamingJob {
                 TypeInformation.of(StockPrice.class));
     }
 
-    private static SqsSink<String> createSQSSink(
-            Properties sinkProperties) {
-        return SqsSink.<String>builder()
-                .setSqsSinkElementConverter(SqsSinkElementConverter.<String>builder().build())
-                .setSqsUrl("https://sqs.us-east-1.amazonaws.com/012345678901/MyTestQueue")
+    private static <T> SqsSink<T> createSQSSink(
+            Properties sinkProperties,
+            SqsSinkElementConverter<T> elementConverter) {
+        final String sqsUrl = sinkProperties.getProperty("sqs-url");
+        return SqsSink.<T>builder()
+                .setSqsSinkElementConverter(elementConverter)
+                .setSqsUrl(sqsUrl)
                 .setSqsClientProperties(sinkProperties)
                 .build();
     }
@@ -74,10 +74,18 @@ public class SQSStreamingJob {
         DataStream<StockPrice> input = env.fromSource(
                 source, WatermarkStrategy.noWatermarks(), "data-generator").setParallelism(1);
 
-        SqsSink<String> sink = createSQSSink(applicationProperties.get("OutputStream0"));
+        SqsSinkElementConverter<StockPrice> elementConverter =
+                SqsSinkElementConverter.<StockPrice>builder()
+                        .setSerializationSchema(new JsonSerializationSchema<>())
+                        .build();
 
-        input.map(StockPrice::toString).uid("object-to-string-map")
-                .sinkTo(sink);
+        // Sink
+        SqsSink<StockPrice> sink = createSQSSink(
+                applicationProperties.get("OutputQueue0"),
+                elementConverter
+        );
+
+        input.sinkTo(sink);
 
         env.execute("Flink SQS Sink examples");
     }

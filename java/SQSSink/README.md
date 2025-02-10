@@ -16,10 +16,10 @@ or, when running locally, from the [`resources/flink-application-properties-dev.
 
 All parameters are case-sensitive.
 
-| Group ID        | Key           | Description                                                                                                                                                  | 
-|-----------------|---------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `OutputStream0` | `stream.name` | Name of the SQS sink output stream                                                                                                                           |
-| `OutputStream0`  | `aws.region`  | (optional) Region of the output stream. If not specified, it will use the application region or the default region of the AWS profile, when running locally. |
+| Group ID       | Key          | Description                                                                                                                                                  | 
+|----------------|--------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `OutputQueue0` | `sqs-url`    | URL to SQS sink output queue                                                                                                                                 |
+| `OutputQueue0` | `aws.region` | (optional) Region of the output stream. If not specified, it will use the application region or the default region of the AWS profile, when running locally. |
 
 
 To configure the applicaton on Managed Service for Apache Flink, set up these parameter in the *Runtime properties*.
