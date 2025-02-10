@@ -31,7 +31,6 @@ import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.catalog.CatalogDatabaseImpl;
 import org.apache.flink.table.catalog.CatalogDescriptor;
-import org.apache.flink.table.catalog.ObjectPath;
 import org.apache.flink.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +67,7 @@ public class GlueTableSQLJSONExample {
         }
 
         // 3. Setup S3 configuration
-        setupS3TableProperties(icebergProperties);
+        setupGlueTableProperties(icebergProperties);
         Catalog glueCatalog = createGlueCatalog(tableEnv);
 
         // 4. Create data generator source
@@ -113,7 +112,7 @@ public class GlueTableSQLJSONExample {
 //        glueCatalog.dropDatabase(glueDatabase, false);
     }
 
-    private static void setupS3TableProperties(Properties icebergProperties) {
+    private static void setupGlueTableProperties(Properties icebergProperties) {
         s3BucketPrefix = icebergProperties.getProperty("bucket.prefix");
         glueDatabase = icebergProperties.getProperty("catalog.db");
         glueTable = icebergProperties.getProperty("catalog.table");

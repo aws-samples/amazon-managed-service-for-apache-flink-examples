@@ -10,7 +10,7 @@
     "PropertyMap": {
       "catalog.db": "iceberg",
       "catalog.table": "stock_data",
-      "bucket.prefix": "s3://<<bucket-name>>/glue-example/",
+      "bucket.prefix": "s3://my-iceberg-bucket-jeremy/glue-example/",
       "partition.fields": "symbol",
       "sort.field": "timestamp",
       "operation": "upsert",
