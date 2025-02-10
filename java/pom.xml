@@ -35,5 +35,6 @@
         <module>Serialization/CustomTypeInfo</module>
         <module>SideOutputs</module>
         <module>PrometheusSink</module>
+        <module>SQSSink</module>
     </modules>
 </project>
