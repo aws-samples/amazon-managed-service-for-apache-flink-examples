@@ -19,6 +19,7 @@
         <module>AvroGlueSchemaRegistryKafka</module>
         <module>AvroGlueSchemaRegistryKinesis</module>
         <module>CustomMetrics</module>
+        <module>FileCache</module>
         <module>GettingStarted</module>
         <module>GettingStartedTable</module>
         <module>IcebergDatastreamSink</module>
