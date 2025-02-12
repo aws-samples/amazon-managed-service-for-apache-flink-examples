@@ -72,18 +72,16 @@ public class StreamingJob {
         Schema avroSchema = AvroSchemaUtils.loadSchema();
 
 
-
         // Local dev specific settings
         if (isLocal(env)) {
-            org.apache.flink.configuration.Configuration conf = new org.apache.flink.configuration.Configuration();
-            env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
+            // We are disabling operator chaining when running locally, to allow observing every single operator in the
+            // Flink UI, for demonstration purposes.
+            // Disabling operator chaining can harm performance and is not recommended.
             env.disableOperatorChaining();
 
             // Checkpointing and parallelism are set by Amazon Managed Service for Apache Flink when running on AWS
             env.enableCheckpointing(60000);
             env.setParallelism(2);
-
-
         }
 
         Properties icebergProperties = applicationProperties.get("Iceberg");
@@ -119,8 +117,6 @@ public class StreamingJob {
         }
 
         AvroGenericRecordReaderFunction readerFunction = AvroGenericRecordReaderFunction.fromTable(table);
-
-
 
         IcebergSource<GenericRecord> source =
                 IcebergSource.<GenericRecord>builder()

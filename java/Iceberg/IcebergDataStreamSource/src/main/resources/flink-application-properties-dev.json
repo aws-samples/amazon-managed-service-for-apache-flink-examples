@@ -1,20 +1,10 @@
 [
   {
-    "PropertyGroupId": "DataGen",
-    "PropertyMap": {
-      "records.per.sec": 10.0
-    }
-  },
-  {
     "PropertyGroupId": "Iceberg",
     "PropertyMap": {
       "bucket.prefix": "s3://<my-bucket>/iceberg",
       "catalog.db": "iceberg",
-      "catalog.table": "prices_iceberg",
-      "partition.fields": "symbol",
-      "sort.field": "timestamp",
-      "operation": "append",
-      "upsert.equality.fields": "symbol"
+      "catalog.table": "prices_iceberg"
     }
   }
 ]
