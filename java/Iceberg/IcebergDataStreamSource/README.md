@@ -4,15 +4,13 @@
 * Flink API: DataStream API
 * Iceberg 1.6.1
 * Language: Java (11)
-* Flink connectors: [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/datastream/datagen/) 
-   and [Iceberg](https://iceberg.apache.org/docs/latest/flink/)
+* Flink connectors: [Iceberg](https://iceberg.apache.org/docs/latest/flink/)
 
 This example demonstrate how to use
 [Flink Iceberg Source Connector](https://iceberg.apache.org/docs/latest/flink-writes/) with the Glue Data Catalog.
 
-For simplicity, the application generates synthetic data, random stock prices, internally. 
-Data is generated as AVRO Generic Record, simulating a real source, for example a Kafka Source, that receives records 
-serialized with AVRO.
+For simplicity, the application reads from the Iceberg table as AVRO Generic Records, and just print every record.
+(note that, when running in Managed Flink, the output will not be visible).
 
 ### Prerequisites
 
@@ -43,18 +41,6 @@ Runtime parameters:
 | `Iceberg` | `bucket.prefix`          | (mandatory)       | S3 bucket prefix, for example `s3://my-bucket/iceberg`.                                                             |
 | `Iceberg` | `catalog.db`             | `default`         | Name of the Glue Data Catalog database.                                                                             |
 | `Iceberg` | `catalog.table`          | `prices_iceberg`  | Name of the Glue Data Catalog table.                                                                                |
-| `Iceberg` | `partition.fields`       | `symbol`          | Comma separated list of partition fields.                                                                           |
-| `Iceberg` | `sort.field`             | `timestamp`       | Sort field.                                                                                                         |
-| `Iceberg` | `operation`              | `updsert`         | Iceberg operation. One of `upsert`, `append` or `overwrite`.                                                        |
-| `Iceberg` | `upsert.equality.fields` | `symbol`          | Comma separated list of fields used for upsert. It must match partition fields. Required if `operation` = `upsert`. |
-
-
-### Checkpoints
-
-Checkpointing must be enabled. Iceberg commits writes on checkpoint.
-
-When running locally, the application enables checkpoints programmatically, every 10 seconds.
-When deployed to Managed Service for Apache Flink, checkpointing is controlled by the application configuration.
 
 
 ### Known limitations
