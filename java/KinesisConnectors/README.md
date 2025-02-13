@@ -40,7 +40,7 @@ Every parameter in the `InputStream0` group is passed to the Kinesis consumer, a
 
 See Flink Kinesis connector docs](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/connectors/datastream/kinesis/) for details about configuring the Kinesis conector.
 
-To configure the applicaton on Managed Service for Apache Flink, set up these parameter in the *Runtime properties*.
+To configure the application on Managed Service for Apache Flink, set up these parameter in the *Runtime properties*.
 
 To configure the application for running locally, edit the [json file](resources/flink-application-properties-dev.json).
 
@@ -55,3 +55,68 @@ See [Running examples locally](../running-examples-locally.md) for details.
 You can use [Kinesis Data Generator](https://github.com/awslabs/amazon-kinesis-data-generator), 
 also available in a [hosted version](https://awslabs.github.io/amazon-kinesis-data-generator/web/producer.html),
 to generate random data to Kinesis Data Stream and test the application.
+
+---
+
+## Cross-account access to Kinesis
+
+You can use the Kinesis source and sink to read and write to a Kinesis Stream in a different account, 
+by configuring the connector to assume an IAM Role in the stream account.
+
+This requires:
+1. An IAM Role in the stream account with sufficient permissions to read or write the Kinesis stream, and allow the Managed Flink application account to assume this role.
+2. Add to the Managed Flink application IAM role permissions to assume the previous role.
+3. Configure the Kinesis source or sink to assume the role.
+
+> Note: this approach also works with the legacy `FlinkKinesisConsumer`.
+
+### IAM Role in the stream account
+
+In the stream account, create a role with permissions to read or write the stream. 
+See [Kinesis Data Streams documentation](https://docs.aws.amazon.com/streams/latest/dev/controlling-access.html#kinesis-using-iam-examples) for details.
+
+Add a Trust Relationship to this role, allowing the application account to assume it:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::<application-account-id>:root"
+            },
+            "Action": "sts:AssumeRole",
+            "Condition": {}
+        }
+    ]
+}
+```
+
+### Application IAM Role
+
+Add the following policy to the Managed Flink application role, allowing the application to assume the role in the stream account:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "Statement1",
+            "Effect": "Allow",
+            "Action": "sts:AssumeRole",
+            "Resource": "arn:aws:iam::<stream-account-ID>:role/<role-in-stream-account-to-assume>"
+        }
+    ]
+}
+```
+
+### Connector configuration
+
+Pass the following configuration parameters to the Kinesis source or sink:
+
+| Configuration                               | Value                                                                       | 
+|---------------------------------------------|-----------------------------------------------------------------------------|
+| `aws.credentials.provider`                  | `ASSUME_ROLE`                                                               |
+| `aws.credentials.provider.role.arn`         | ARN of the role in the stream account                                       |
+| `aws.credentials.provider.role.sessionName` | Any string used as name for the STS session. Must be unique in the account. |
