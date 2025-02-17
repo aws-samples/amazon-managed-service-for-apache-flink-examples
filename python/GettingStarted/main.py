@@ -103,16 +103,16 @@ def main():
 
     # Input stream configuration
     input_stream_properties = property_map(props, "InputStream0")
-    input_stream_name = input_stream_properties["stream.name"]
+    input_stream_arn = input_stream_properties["stream.arn"]
     input_stream_region = input_stream_properties["aws.region"]
-    input_stream_initpos = input_stream_properties["flink.stream.initpos"] if "flink.stream.initpos" in input_stream_properties else None
-    input_stream_initpos_timestamp = input_stream_properties["flink.stream.initpos.timestamp"] if "flink.stream.initpos.timestamp" in input_stream_properties else None
-    if input_stream_initpos == AT_TIMESTAMP and input_stream_initpos_timestamp == None:
-            raise ValueError(f"A timestamp must be supplied for stream_initpos {AT_TIMESTAMP}")
+    input_stream_init_position = input_stream_properties["flink.source.init.position"] if "flink.source.init.position" in input_stream_properties else None
+    input_stream_init_timestamp = input_stream_properties["flink.source.init.timestamp"] if "flink.source.init.timestamp" in input_stream_properties else None
+    if input_stream_init_position == AT_TIMESTAMP and input_stream_init_timestamp == None:
+            raise ValueError(f"A timestamp must be supplied for flink.source.init.position = {AT_TIMESTAMP}")
 
     # Output stream configuration
     output_stream_properties = property_map(props, "OutputStream0")
-    output_stream_name = output_stream_properties["stream.name"]
+    output_stream_arn = output_stream_properties["stream.arn"]
     output_stream_region = output_stream_properties["aws.region"]
 
     #################################################
@@ -122,8 +122,10 @@ def main():
     # Some trick is required to generate the string defining the initial position, depending on the configuration
     # See Flink documentation for further details about configuring a Kinesis source table
     # https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/table/kinesis/
-    init_pos = "\n'scan.stream.initpos' = '{0}',".format(input_stream_initpos) if input_stream_initpos is not None else ''
-    init_pos_timestamp = "\n'scan.stream.initpos-timestamp' = '{0}',".format(input_stream_initpos_timestamp) if input_stream_initpos_timestamp is not None else ''
+    source_init_pos = "\n'source.init.position' = '{0}',".format(
+        input_stream_init_position) if input_stream_init_position is not None else ''
+    source_init_timestamp = "\n'source.init.timestamp' = '{0}',".format(
+        input_stream_init_timestamp) if input_stream_init_timestamp is not None else ''
 
     table_env.execute_sql(f"""
         CREATE TABLE prices (
@@ -135,9 +137,9 @@ def main():
               PARTITIONED BY (ticker)
               WITH (
                 'connector' = 'kinesis',
-                'stream' = '{input_stream_name}',
+                'stream.arn' = '{input_stream_arn}',
                 'aws.region' = '{input_stream_region}',
-                {init_pos}{init_pos_timestamp}
+                {source_init_pos}{source_init_timestamp}
                 'format' = 'json',
                 'json.timestamp-format.standard' = 'ISO-8601'
               ) """)
@@ -156,7 +158,7 @@ def main():
               PARTITIONED BY (ticker)
               WITH (
                 'connector' = 'kinesis',
-                'stream' = '{output_stream_name}',
+                'stream.arn' = '{output_stream_arn}',
                 'aws.region' = '{output_stream_region}',
                 'sink.partitioner-field-delimiter' = ';',
                 'sink.batch.max-size' = '100',

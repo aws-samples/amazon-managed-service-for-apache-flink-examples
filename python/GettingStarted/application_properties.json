@@ -1,23 +1,16 @@
 [
   {
-  "PropertyGroupId": "kinesis.analytics.flink.run.options",
-  "PropertyMap": {
-    "python": "main.py",
-    "jarfile": "lib/pyflink-dependencies.jar"
-   }
-  },
-  {
     "PropertyGroupId": "InputStream0",
     "PropertyMap": {
-      "stream.name": "ExampleInputStream",
-      "flink.stream.initpos": "LATEST",
-      "aws.region": "us-east-1"
+      "stream.arn": "arn:aws:kinesis:us-east-1:<account-id>:stream/ExampleInputStream",
+      "aws.region": "us-east-1",
+      "flink.source.init.position": "LATEST"
     }
   },
   {
     "PropertyGroupId": "OutputStream0",
     "PropertyMap": {
-      "stream.name": "ExampleOutputStream",
+      "stream.arn": "arn:aws:kinesis:us-east-1:<account-id>:stream/ExampleOutputStream",
       "aws.region": "us-east-1"
     }
   }
