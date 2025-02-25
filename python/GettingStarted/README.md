@@ -56,14 +56,14 @@ When running locally, the configuration is read from the [`application_propertie
 
 Runtime parameters:
 
-| Group ID        | Key                            | Mandatory | Example Value             | Notes                                                                         |
-|-----------------|--------------------------------|-----------|---------------------------|-------------------------------------------------------------------------------|
-| `InputStream0`  | `stream.arn`                   | Y         | `ExampleInputStream`      | Input stream ARN.                                                             |
-| `InputStream0`  | `aws.region`                   | Y         | `us-east-1`               | Region for the input stream.                                                  |
-| `InputStream0`  | `flink.source.init.position`   | N         | `LATEST`                  | Stream initial position in the input stream. `LATEST` by default              |
-| `InputStream0`  | `flink.source.init.timestamp`  | N         | `2025-02-17T21:45:42.123` | Initial position timestamp. Ignored unless initial position is `AT_TIMESTAMP` |                    
-| `OutputStream0` | `stream.arn`                   | Y         | `ExampleOutpiutStream`    | Output stream ARN.                                                            |
-| `OutputStream0` | `aws.region`                   | Y         | `us-east-1`               | Region for the output stream.                                                 |
+| Group ID        | Key                            | Mandatory | Example Value                                                     | Notes                                                                         |
+|-----------------|--------------------------------|-----------|-------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| `InputStream0`  | `stream.arn`                   | Y         | `arn:aws:kinesis:<region>:<accountId>:stream/ExampleInputStream`  | Input stream ARN.                                                             |
+| `InputStream0`  | `aws.region`                   | Y         | `us-east-1`                                                       | Region for the input stream.                                                  |
+| `InputStream0`  | `flink.source.init.position`   | N         | `LATEST`                                                          | Stream initial position in the input stream. `LATEST` by default              |
+| `InputStream0`  | `flink.source.init.timestamp`  | N         | `2025-02-17T21:45:42.123`                                         | Initial position timestamp. Ignored unless initial position is `AT_TIMESTAMP` |
+| `OutputStream0` | `stream.arn`                   | Y         | `arn:aws:kinesis:<region>:<accountId>:stream/ExampleOutputStream` | Output stream ARN.                                                            |
+| `OutputStream0` | `aws.region`                   | Y         | `us-east-1`                                                       | Region for the output stream.                                                 |
 
 
 In addition to these configuration properties, when running a PyFlink application in Managed Flink you need to set two
