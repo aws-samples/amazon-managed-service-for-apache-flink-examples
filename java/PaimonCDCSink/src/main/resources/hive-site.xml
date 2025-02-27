@@ -1,0 +1,273 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Licensed to the Apache Software Foundation (ASF) under one or more       -->
+<!-- contributor license agreements.  See the NOTICE file distributed with    -->
+<!-- this work for additional information regarding copyright ownership.      -->
+<!-- The ASF licenses this file to You under the Apache License, Version 2.0  -->
+<!-- (the "License"); you may not use this file except in compliance with     -->
+<!-- the License.  You may obtain a copy of the License at                    -->
+<!--                                                                          -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                           -->
+<!--                                                                          -->
+<!-- Unless required by applicable law or agreed to in writing, software      -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,        -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. -->
+<!-- See the License for the specific language governing permissions and      -->
+<!-- limitations under the License.                                           -->
+
+<configuration>
+
+<!-- Hive Configuration can either be stored in this file or in the hadoop configuration files  -->
+<!-- that are implied by Hadoop setup variables.                                                -->
+<!-- Aside from Hadoop setup variables - this file is provided as a convenience so that Hive    -->
+<!-- users do not have to edit hadoop configuration files (that may be managed as a centralized -->
+<!-- resource).                                                                                 -->
+
+<!-- Hive Execution Parameters -->
+
+<property>
+  <name>hbase.master</name>
+  <value></value>
+  <description>http://wiki.apache.org/hadoop/Hive/HBaseIntegration</description>
+</property>
+
+<property>
+  <name>hive.zookeeper.quorum</name>
+  <value>ip-xx-xx-xx-xx.us-west-2.compute.internal:2181</value>
+</property>
+
+<property>
+  <name>hive.llap.zk.sm.connectionString</name>
+  <value>ip-xx-xx-xx-xx.us-west-2.compute.internal:2181</value>
+</property>
+
+<property>
+  <name>hbase.zookeeper.quorum</name>
+  <value>ip-xx-xx-xx-xx.us-west-2.compute.internal</value>
+  <description>http://wiki.apache.org/hadoop/Hive/HBaseIntegration</description>
+</property>
+
+<property>
+  <name>hive.execution.engine</name>
+  <value>tez</value>
+</property>
+
+  <property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://ip-xx-xx-xx-xx.us-west-2.compute.internal:8020</value>
+  </property>
+
+
+  <property>
+    <name>hive.metastore.uris</name>
+    <value>thrift://ip-xx-xx-xx-xx.us-west-2.compute.internal:9083</value>
+    <description>JDBC connect string for a JDBC metastore</description>
+  </property>
+
+  <property>
+    <name>javax.jdo.option.ConnectionURL</name>
+    <value>jdbc:mysql://ip-xx-xx-xx-xx.us-west-2.compute.internal:3306/hive?createDatabaseIfNotExist=true</value>
+    <description>username to use against metastore database</description>
+  </property>
+
+  <property>
+    <name>javax.jdo.option.ConnectionDriverName</name>
+    <value>org.mariadb.jdbc.Driver</value>
+    <description>username to use against metastore database</description>
+  </property>
+
+  <property>
+    <name>javax.jdo.option.ConnectionUserName</name>
+    <value>hive</value>
+    <description>username to use against metastore database</description>
+  </property>
+
+  <property>
+    <name>javax.jdo.option.ConnectionPassword</name>
+    <value>kWs5sQ8HnZaEC2kj</value>
+    <description>password to use against metastore database</description>
+  </property>
+
+<property>
+   <name>hive.server2.allow.user.substitution</name>
+   <value>true</value>
+</property>
+
+<property>
+   <name>hive.server2.enable.doAs</name>
+   <value>true</value>
+</property>
+
+<property>
+   <name>hive.server2.thrift.port</name>
+   <value>10000</value>
+</property>
+
+<property>
+   <name>hive.server2.thrift.http.port</name>
+   <value>10001</value>
+</property>
+
+
+
+<property>
+  <name>hive.optimize.ppd.input.formats</name>
+  <value>com.amazonaws.emr.s3select.hive.S3SelectableTextInputFormat</value>
+</property>
+
+<property>
+  <name>s3select.filter</name>
+  <value>false</value>
+</property>
+
+<property>
+    <name>hive.server2.in.place.progress</name>
+    <value>false</value>
+</property>
+
+<property>
+    <name>hive.llap.zk.registry.user</name>
+    <value>hadoop</value>
+</property>
+
+<property>
+    <name>hive.security.metastore.authorization.manager</name>
+    <value>org.apache.hadoop.hive.ql.security.authorization.StorageBasedAuthorizationProvider</value>
+</property>
+
+<property>
+    <name>hive.log.explain.output</name>
+    <value>false</value>
+</property>
+
+  <property>
+    <name>datanucleus.fixedDatastore</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>mapred.reduce.tasks</name>
+    <value>-1</value>
+  </property>
+
+  <property>
+    <name>mapred.max.split.size</name>
+    <value>256000000</value>
+  </property>
+
+  <property>
+    <name>hive.mapjoin.hybridgrace.hashtable</name>
+    <value>false</value>
+  </property>
+
+  <property>
+    <name>hive.merge.nway.joins</name>
+    <value>false</value>
+  </property>
+
+  <property>
+    <name>hive.metastore.connect.retries</name>
+    <value>15</value>
+  </property>
+
+  <property>
+    <name>hive.optimize.joinreducededuplication</name>
+    <value>false</value>
+  </property>
+
+  <property>
+    <name>hive.optimize.sort.dynamic.partition.threshold</name>
+    <value>1</value>
+  </property>
+
+  <property>
+    <name>hive.server2.materializedviews.registry.impl</name>
+    <value>DUMMY</value>
+  </property>
+
+  <property>
+    <name>hive.tez.auto.reducer.parallelism</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>hive.vectorized.execution.mapjoin.minmax.enabled</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>hive.vectorized.execution.mapjoin.native.fast.hashtable.enabled</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>hive.optimize.dynamic.partition.hashjoin</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>hive.compactor.initiator.on</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>hive.blobstore.use.output-committer</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>hive.llap.daemon.service.hosts</name>
+    <value>@llap0</value>
+  </property>
+
+  <property>
+    <name>hive.llap.execution.mode</name>
+    <value>only</value>
+  </property>
+
+  <property>
+    <name>hive.optimize.metadataonly</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>hive.tez.bucket.pruning</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>hive.exec.mode.local.auto</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>hive.exec.mode.local.auto.inputbytes.max</name>
+    <value>50000000</value>
+  </property>
+
+  <property>
+    <name>hive.query.reexecution.stats.persist.scope</name>
+    <value>hiveserver</value>
+  </property>
+
+  <property>
+    <name>hive.metastore.client.factory.class</name>
+    <value>com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory</value>
+  </property>
+
+  <property>
+    <name>hive.auto.convert.join.noconditionaltask.size</name>
+    <value>1073741824</value>
+  </property>
+
+  <property>
+    <name>hive.compactor.worker.threads</name>
+    <value>1</value>
+  </property>
+
+
+
+
+
+</configuration>

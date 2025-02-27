@@ -1,0 +1,39 @@
+[
+  {
+    "PropertyGroupId": "ActionConf",
+    "PropertyMap": {
+      "action": "kafka_sync_database",
+      "warehouse": "s3://bucket/data/prefix",
+      "database": "paimon_flink",
+      "primary_keys": "ID",
+      "table_prefix": "ods_"
+    }
+  },
+  {
+    "PropertyGroupId": "KafkaConf",
+    "PropertyMap": {
+      "kafka_conf@_properties.bootstrap.servers": "b-2.mycluster.bzvtby.c8.kafka.us-west-2.amazonaws.com:9092,b-1.mycluster.bzvtby.c8.kafka.us-west-2.amazonaws.com:9092",
+      "kafka_conf@_topic": "kafka_topic",
+      "kafka_conf@_properties.group.id": 1234546,
+      "kafka_conf@_properties.auto.offset.reset": "earliest"
+    }
+  },
+  {
+    "PropertyGroupId": "CatalogConf",
+    "PropertyMap": {
+      "catalog_conf@_metastore": "hive",
+      "catalog_conf@_hive-conf-dir": "/etc/hive/conf.dist",
+      "catalog_conf@_lock.enabled": "false",
+      "catalog_conf@_metastore.client.class": "com.amazonaws.glue.catalog.metastore.AWSCatalogMetastoreClient",
+      "catalog_conf@_warehouse": "s3://bucket/data/prefix"
+    }
+  },
+  {
+    "PropertyGroupId": "TableConf",
+    "PropertyMap": {
+      "table_conf@_bucket": "4",
+      "table_conf@_changelog-producer": "input",
+      "table_conf@_sink.parallelism": "4"
+    }
+  }
+]
