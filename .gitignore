@@ -15,3 +15,6 @@ venv/
 __pycache__/
 
 /.run/
+
+clean.sh
+smudge.sh

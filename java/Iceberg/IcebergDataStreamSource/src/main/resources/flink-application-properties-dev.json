@@ -1,0 +1,10 @@
+[
+  {
+    "PropertyGroupId": "Iceberg",
+    "PropertyMap": {
+      "bucket.prefix": "s3://<my-bucket>/iceberg",
+      "catalog.db": "iceberg",
+      "catalog.table": "prices_iceberg"
+    }
+  }
+]

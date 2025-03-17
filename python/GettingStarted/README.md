@@ -23,55 +23,63 @@ The job can run both on Amazon Managed Service for Apache Flink, and locally for
 
 * Python 3.11
 * PyFlink library: `apache-flink==1.20.0`
-* Java JDK 11+ and Maven
+* Java JDK 11 and Maven
 
 
-> ⚠️ As of 2024-06-27, the Flink Python library 1.19.x may fail installing on Python 3.12.
+> ⚠️ As of 2024-06-27, the Flink Python library 1.20.x may fail installing on Python 3.12.
 > We recommend using Python 3.11 for development, the same Python version used by Amazon Managed Service for Apache Flink
 > runtime 1.20.
 
 > JDK and Maven are used to download and package any required Flink dependencies, e.g. connectors, and
   to package the application as `.zip` file, for deployment to Amazon Managed Service for Apache Flink.
 
+
 #### External dependencies
 
-The application expects 2 Kinesis Data Streams.
+The application expects two Kinesis Data Streams, one for input and one for output.
+Single-shard Streams in Provisioned mode will be sufficient.
 
-The stream names are defined in the configuration (see [below](#runtime-configuration)).
-The application defines no default name and region. 
-The [configuration for local development](./application_properties.json) set them, by default, to: 
-
-* `ExampleInputStream`, `us-east-1`.
-* `ExampleOutputStream`, `us-east-1`.
-
-
-Single-shard Streams in Provisioned mode will be sufficient for the emitted throughput.
+The stream ARN and regions are passed to the application as runtime configuration parameters (see [below](#runtime-configuration)).
+The application defines no default stream ARN and region.
 
 #### IAM permissions
 
-The application must have sufficient permissions to publish data to the Kinesis Data Streams.
+The application must have sufficient permissions to read from the input Kinesis Stream, and write to the output Kinesis Stream.
 
-When running locally, you need active valid AWS credentials that allow publishing data to the Streams.
+When running locally, you need valid AWS credentials/profile that allows reading and writing from the streams.
 
 ### Runtime configuration
 
- When running on Amazon Managed Service for Apache Flink the runtime configuration is read from *Runtime Properties*.
+When running on Amazon Managed Service for Apache Flink the runtime configuration comes from *Runtime Properties*.
 
- When running locally, the configuration is read from the [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json) file located in the resources folder.
+When running locally, the configuration is read from the [`application_properties.json`](./application_properties.json) file located in the project folder.
 
 Runtime parameters:
 
-| Group ID        | Key                    | Mandatory | Example Value (default for local)    | Notes                         |
-|-----------------|------------------------|-----------|--------------------------------------|-------------------------------|
-| `InputStream0`  | `stream.name`          | Y         | `ExampleInputStream`                 | Input stream.                 |
-| `InputStream0`  | `aws.region`           | Y         | `us-east-1`                          | Region for the input stream.  |
-| `InputStream0`  | `flink.stream.initpos` | N         | `LATEST`                             | Start position in the input stream. `LATEST` by default |
-| `OutputStream0` | `stream.name`          | Y         | `TumblingWindowProcessingTimeOutput` | Output stream .               |
-| `OutputStream0` | `aws.region`           | Y         | `us-east-1`                          | Region for the output stream.        |
+| Group ID        | Key                            | Mandatory | Example Value             | Notes                                                                         |
+|-----------------|--------------------------------|-----------|---------------------------|-------------------------------------------------------------------------------|
+| `InputStream0`  | `stream.arn`                   | Y         | `ExampleInputStream`      | Input stream ARN.                                                             |
+| `InputStream0`  | `aws.region`                   | Y         | `us-east-1`               | Region for the input stream.                                                  |
+| `InputStream0`  | `flink.source.init.position`   | N         | `LATEST`                  | Stream initial position in the input stream. `LATEST` by default              |
+| `InputStream0`  | `flink.source.init.timestamp`  | N         | `2025-02-17T21:45:42.123` | Initial position timestamp. Ignored unless initial position is `AT_TIMESTAMP` |                    
+| `OutputStream0` | `stream.arn`                   | Y         | `ExampleOutpiutStream`    | Output stream ARN.                                                            |
+| `OutputStream0` | `aws.region`                   | Y         | `us-east-1`               | Region for the output stream.                                                 |
 
 
 In addition to these configuration properties, when running a PyFlink application in Managed Flink you need to set two
 [Additional configuring for PyFink application on Managed Flink](#additional-configuring-for-pyfink-application-on-managed-flink).
+
+#### Additional configuring for PyFink application on Managed Flink
+
+To tell Managed Flink what Python script to run and the fat-jar containing all dependencies, you need to specific some
+additional Runtime Properties, as part of the application configuration:
+
+| Group ID                              | Key       | Mandatory | Value                          | Notes                                                                     |
+|---------------------------------------|-----------|-----------|--------------------------------|---------------------------------------------------------------------------|
+| `kinesis.analytics.flink.run.options` | `python`  | Y         | `main.py`                      | The Python script containing the main() method to start the job.          |
+| `kinesis.analytics.flink.run.options` | `jarfile` | Y         | `lib/pyflink-dependencies.jar` | Location (inside the zip) of the fat-jar containing all jar dependencies. |
+
+> ⚠️ If you forget adding these parameters to the Runtime properties, the application will not start.
 
 ---
 
@@ -81,8 +89,9 @@ In addition to these configuration properties, when running a PyFlink applicatio
 
 1. Make sure you have created the Kinesis Streams and you have a valid AWS session that allows you to publish to the Streams (the way of doing it depends on your setup)
 2. Run `mvn package` once, from this directory. This step is required to download the jar dependencies - the Kinesis connector in this case
-3. Set the environment variable `IS_LOCAL=true`. You can do from the prompt or in the run profile of the IDE
-4. Run `main.py`
+3. Edit the local configuration [application_properties.json](./application_properties.json) file to match the streams you have created.
+4. Set the environment variable `IS_LOCAL=true`. You can do from the prompt or in the run profile of the IDE
+5. Run `main.py`
 
 You can also run the python script directly from the command line, like `python main.py`. This still require running `mvn package` before.
 
@@ -90,7 +99,7 @@ If you are using Virtual Environments, make sure the to select the venv as a run
 
 If you forget the set the environment variable `IS_LOCAL=true` or forget to run `mvn package` the application fails on start.
 
-> 🚨 The application does not log or print anything. 
+> ⚠️ The application does not log or print anything. 
 > If you do not see any output in the console, it does not mean the application is not running.
 > The output is sent to the Kinesis streams. You can inspect the content of the streams using the Data Viewer in the Kinesis console
 
@@ -113,15 +122,17 @@ $ python -c "import pyflink;import os;print(os.path.dirname(os.path.abspath(pyfl
 
 #### Deploy and run on Amazon Managed Service for Apache Flink
 
-1. Make sure you have the 4 required Kinesis Streams
+1. Make sure you have the required input and output Kinesis Streams
 2. Create a Managed Flink application
-3. Modify the application IAM role to allow writing to all the 4 Kinesis Streams
+3. Modify the application IAM role to allow reading from the input and writing to the output Kinesis Stream
 4. Package the application: run `mvn clean package` from this directory
 5. Upload to an S3 bucket the zip file that the previous creates in the [`./target`](./target) subdirectory
 6. Configure the Managed Flink application: set Application Code Location to the bucket and zip file you just uploaded
 7. Configure the Runtime Properties of the application, creating the Group ID, Keys and Values as defined in the [application_properties.json](./application_properties.json)
-8. Start the application
-9. When the application transitions to "Ready" you can open the Flink Dashboard to verify the job is running, and you can inspect the data published to the Kinesis Streams, using the Data Viewer in the Kinesis console.
+8. Do not forget to add the [Additional configuring for PyFink application on Managed Flink](#additional-configuring-for-pyfink-application-on-managed-flink) 
+9. Start the [data generator](#generating-sample-data) script
+10. Start the application 
+11. When the application transitions to "Ready" you can open the Flink Dashboard to verify the job is running, and you can inspect the data published to the output Kinesis Streams, using the Data Viewer in the Kinesis console.
 
 ##### Troubleshooting Python errors when the application runs on Amazon Managed Service for Apache Flink
 
@@ -142,7 +153,7 @@ fields @timestamp, message
 | limit 1000
 ```
 
-> 🚨 If the Flink jobs fails to start due to an error reported by Python, for example a missing expected configuration 
+> ⚠️ If the Flink jobs fails to start due to an error reported by Python, for example a missing expected configuration 
 > parameters, the Amazon Managed Service for Apache Flink may report as *Running* but the job fails to start.
 > You can check whether the job is actually running using the Apache Flink Dashboard. If the job is not listed in the 
 > Running Job List, it means it probably failed to start due to an error.
@@ -163,7 +174,7 @@ Follow this process to make changes to the Python code
    * If your application was running when you published the change, Managed Flink stops the application and restarts it with the new code
    * If the application was not running (in Ready state) you need to click *Run* to restart it with the new code
 
-> 🚨 by design, Managed Flink does not detect the new zip file automatically.
+> ⚠️ by design, Managed Flink does not detect the new zip file automatically.
 > You control when you want to restart the application with the code changes. This is done saving a new configuration from the 
 > console or using the [*UpdateApplication*](https://docs.aws.amazon.com/managed-flink/latest/apiv2/API_UpdateApplication.html)
 > API.
@@ -188,12 +199,16 @@ This examples also demonstrate how to include jar dependencies - e.g. connectors
 package it, for deploying on Amazon Managed Service for Apache Flink.
 
 Any jar dependencies must be added to the `<dependencies>` block in the [pom.xml](pom.xml) file.
-In this case, you can see we have included `flink-sql-connector-kinesis`
+In this case, we have included `flink-connector-aws-kinesis-streams`.
 
 Executing `mvn package` takes care of downloading any defined dependencies and create a single "fat-jar" containing all of them.
 This file, is generated in the `./target` subdirectory and is called `pyflink-dependencies.jar`
 
 > The `./target` directory and any generated files are not supposed to be committed to git.
+
+> Note: because we are using Maven to build a "fat-jar", we should not use the "SQL" dependencies, named "*-sql-*".
+> In fact, we are including `flink-connector-aws-kinesis-streams` instead of `flink-sql-connector-aws-kinesis-streams`.
+> Using "SQL" dependencies may increase the size of the jar.
 
 When running locally, for example in your IDE, PyFlink will look for this jar file in `./target`.
 
@@ -201,12 +216,3 @@ When you are happy with your Python code and you are ready to deploy the applica
 run `mvn package` **again**. The zip file you find in `./target` is the artifact to upload to S3, containing
 both jar dependencies and your Python code.
 
-#### Additional configuring for PyFink application on Managed Flink
-
-To tell Managed Flink what Python script to run and the fat-jar containing all dependencies, you need to specific some
-additional Runtime Properties, as part of the application configuration:
-
-| Group ID                              | Key       | Mandatory | Value                          | Notes                                                                     |
-|---------------------------------------|-----------|-----------|--------------------------------|---------------------------------------------------------------------------|
-| `kinesis.analytics.flink.run.options` | `python`  | Y         | `main.py`                      | The Python script containing the main() method to start the job.          |
-| `kinesis.analytics.flink.run.options` | `jarfile` | Y         | `lib/pyflink-dependencies.jar` | Location (inside the zip) of the fat-jar containing all jar dependencies. |
