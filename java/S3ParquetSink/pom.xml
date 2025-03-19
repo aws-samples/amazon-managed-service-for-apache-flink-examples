@@ -5,26 +5,25 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.amazonaws</groupId>
-    <artifactId>flink-kds-s3-parquet</artifactId>
+    <artifactId>s3-parquet-sink</artifactId>
     <version>1.0</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <buildDirectory>${project.basedir}/target</buildDirectory>
-        <jar.finalName>${project.name}</jar.finalName>
+        <jar.finalName>${project.name}-${project.version}</jar.finalName>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <target.java.version>11</target.java.version>
         <maven.compiler.source>${target.java.version}</maven.compiler.source>
-        <main.class>com.amazonaws.services.msf.StreamingJob</main.class>
+        <maven.compiler.target>${target.java.version}</maven.compiler.target>
 
-        <scala.binary.version>2.12</scala.binary.version>
-        <avro.version>1.10.2</avro.version>
-
-        <flink.version>1.15.4</flink.version>
-        <kda.connectors.version>2.1.0</kda.connectors.version>
+        <flink.version>1.20.0</flink.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
-        <slf4j.version>1.7.32</slf4j.version>
-        <log4j.version>2.17.2</log4j.version>
-        <junit.version>5.9.1</junit.version>
+        <avro.version>1.11.3</avro.version>
+        <parquet.avro.version>1.15.1</parquet.avro.version>
+
+        <log4j.version>2.23.1</log4j.version>
+        <junit5.version>5.8.1</junit5.version>
     </properties>
 
     <dependencyManagement>
@@ -33,19 +32,9 @@
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-bom</artifactId>
                 <!-- Get the latest SDK version from https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
-                <version>1.12.281</version>
+                <version>1.12.782</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.avro</groupId>
-                <artifactId>avro</artifactId>
-                <version>1.9.2</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.parquet</groupId>
-                <artifactId>parquet-hadoop</artifactId>
-                <version>1.11.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -53,12 +42,6 @@
     <dependencies>
         <!-- Apache Flink dependencies -->
         <!-- These dependencies are provided, because they should not be packaged into the JAR file. -->
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-java</artifactId>
-            <version>${flink.version}</version>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-streaming-java</artifactId>
@@ -71,20 +54,18 @@
             <version>${flink.version}</version>
             <scope>provided</scope>
         </dependency>
-
-        <!-- Kinesis Data Analytics -->
         <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-kinesisanalytics-runtime</artifactId>
-            <version>${kda.runtime.version}</version>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-runtime-web</artifactId>
+            <version>${flink.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <!-- Library to retrieve runtime application properties in Managed Service for Apache Flink  -->
         <dependency>
             <groupId>com.amazonaws</groupId>
-            <artifactId>aws-kinesisanalytics-flink</artifactId>
-            <version>${kda.connectors.version}</version>
+            <artifactId>aws-kinesisanalytics-runtime</artifactId>
+            <version>${kda.runtime.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -95,28 +76,12 @@
             <version>${flink.version}</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-s3-fs-hadoop</artifactId>
             <version>${flink.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-base</artifactId>
-            <version>${flink.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-kinesis</artifactId>
-            <version>${flink.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-aws-kinesis-streams</artifactId>
-            <version>${flink.version}</version>
-        </dependency>
+
 
         <!-- Parquet -->
         <dependency>
@@ -124,11 +89,15 @@
             <artifactId>flink-parquet</artifactId>
             <version>${flink.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.parquet</groupId>
             <artifactId>parquet-avro</artifactId>
-            <version>1.12.3</version>
+            <version>${parquet.avro.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.parquet</groupId>
+            <artifactId>parquet-hadoop</artifactId>
+            <version>${parquet.avro.version}</version>
         </dependency>
 
         <!-- AVRO -->
@@ -143,7 +112,15 @@
             <version>${avro.version}</version>
         </dependency>
 
-        <!-- Add logging framework, to produce console output when running in the IDE. -->
+        <!-- Tests -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit5.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Logging framework, to produce console output when running in the IDE. -->
         <!-- These dependencies are excluded from the application JAR by default. -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -159,26 +136,11 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>${log4j.version}</version>
-        </dependency>
-
-        <!-- Test -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 
     <build>
-        <directory>${buildDirectory}</directory>
-        <finalName>${jar.finalName}</finalName>
 
         <plugins>
             <!-- AVRO source generator -->
@@ -202,6 +164,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <!-- Java Compiler -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -218,7 +181,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>3.2.1</version>
                 <executions>
                     <!-- Run shade goal on package phase -->
                     <execution>
@@ -252,7 +215,7 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>${main.class}</mainClass>
+                                    <mainClass>com.amazonaws.services.msf.StreamingJob</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

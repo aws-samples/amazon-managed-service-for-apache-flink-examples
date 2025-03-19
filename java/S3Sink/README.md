@@ -47,7 +47,7 @@ All parameters are case-sensitive.
 |-----------------|---------------|---------------------------|
 | `bucket`        | `name`        | Name of the destination S3 bucket. |
 
-To configure the applicaton on Managed Service for Apache Flink, set up these parameter in the *Runtime properties*.
+To configure the application on Managed Service for Apache Flink, set up these parameter in the *Runtime properties*.
 
 To configure the application for running locally, edit the [json file](resources/flink-application-properties-dev.json).
 

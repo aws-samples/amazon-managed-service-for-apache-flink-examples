@@ -1,10 +1,9 @@
 [
   {
-    "PropertyGroupId": "FlinkApplicationProperties",
+    "PropertyGroupId": "OutputBucket",
     "PropertyMap": {
-      "input.stream": "<StreamName>",
-      "stream.region": "<AWSRegion>",
-      "s3.path": "<S3Path>"
+      "bucket.name": "msf-examples-output",
+      "bucket.path": "parquetstockprices"
     }
   }
 ]
