@@ -3,26 +3,22 @@ package com.amazonaws.services.msf;
 import com.amazonaws.services.kinesisanalytics.runtime.KinesisAnalyticsRuntime;
 import com.amazonaws.services.msf.avro.StockPrice;
 import com.amazonaws.services.msf.datagen.StockPriceGeneratorFunction;
-import org.apache.flink.api.common.RuntimeExecutionMode;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;
 import org.apache.flink.connector.datagen.source.DataGeneratorSource;
 import org.apache.flink.connector.file.sink.FileSink;
+import org.apache.flink.core.fs.Path;
 import org.apache.flink.formats.parquet.avro.AvroParquetWriters;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.filesystem.OutputFileConfig;
-import org.apache.flink.streaming.api.functions.sink.filesystem.bucketassigners.BasePathBucketAssigner;
 import org.apache.flink.streaming.api.functions.sink.filesystem.bucketassigners.DateTimeBucketAssigner;
-import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.DefaultRollingPolicy;
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.OnCheckpointRollingPolicy;
 import org.apache.flink.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.flink.core.fs.Path;
-import org.apache.flink.configuration.Configuration;
 
 import java.io.IOException;
 import java.util.Map;
@@ -82,7 +78,7 @@ public class StreamingJob {
         // Local dev specific settings
         if (isLocal(env)) {
             // Checkpointing and parallelism are set by Amazon Managed Service for Apache Flink when running on AWS
-            env.enableCheckpointing(60000);
+            env.enableCheckpointing(30000);
             env.setParallelism(2);
         }
 
