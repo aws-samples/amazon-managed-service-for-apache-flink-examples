@@ -1,0 +1,9 @@
+[
+  {
+    "PropertyGroupId": "InputBucket",
+    "PropertyMap": {
+      "bucket.name": "msf-examples-output",
+      "bucket.path": "parquetstockprices"
+    }
+  }
+]

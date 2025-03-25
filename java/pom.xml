@@ -32,6 +32,7 @@
         <module>DynamoDBStreamSource</module>
         <module>KinesisFirehoseSink</module>
         <module>S3ParquetSink</module>
+        <module>S3ParquetSource</module>
         <module>S3Sink</module>
         <module>Windowing</module>
         <module>Serialization/CustomTypeInfo</module>
