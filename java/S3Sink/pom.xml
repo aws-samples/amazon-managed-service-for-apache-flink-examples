@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.amazonaws</groupId>
-    <artifactId>flink-kds-s3</artifactId>
+    <artifactId>s3-sink</artifactId>
     <version>1.0</version>
 
     <properties>
@@ -27,7 +27,7 @@
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-bom</artifactId>
                 <!-- Get the latest SDK version from https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
-                <version>1.12.677</version>
+                <version>1.12.782</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

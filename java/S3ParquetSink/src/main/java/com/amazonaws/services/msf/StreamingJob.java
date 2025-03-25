@@ -1,26 +1,21 @@
 package com.amazonaws.services.msf;
 
 import com.amazonaws.services.kinesisanalytics.runtime.KinesisAnalyticsRuntime;
-import com.amazonaws.services.msf.gsr.avro.TradeCount;
-import org.apache.flink.api.common.RuntimeExecutionMode;
-import org.apache.flink.api.common.serialization.SimpleStringSchema;
-import org.apache.flink.api.common.typeinfo.Types;
-import org.apache.flink.api.java.tuple.Tuple2;
+import com.amazonaws.services.msf.avro.StockPrice;
+import com.amazonaws.services.msf.datagen.StockPriceGeneratorFunction;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;
+import org.apache.flink.connector.datagen.source.DataGeneratorSource;
 import org.apache.flink.connector.file.sink.FileSink;
+import org.apache.flink.core.fs.Path;
 import org.apache.flink.formats.parquet.avro.AvroParquetWriters;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.filesystem.OutputFileConfig;
 import org.apache.flink.streaming.api.functions.sink.filesystem.bucketassigners.DateTimeBucketAssigner;
-import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
-import org.apache.flink.streaming.connectors.kinesis.FlinkKinesisConsumer;
-import org.apache.flink.streaming.connectors.kinesis.config.AWSConfigConstants;
-import org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants;
-import org.apache.flink.core.fs.Path;
+import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.OnCheckpointRollingPolicy;
 import org.apache.flink.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +24,11 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 
-public class StreamingJob { private static final Logger LOGGER = LoggerFactory.getLogger(StreamingJob.class);
+public class StreamingJob {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StreamingJob.class);
 
     // Name of the local JSON resource with the application properties in the same format as they are received from the Amazon Managed Service for Apache Flink runtime
     private static final String LOCAL_APPLICATION_PROPERTIES_RESOURCE = "flink-application-properties-dev.json";
-
-    // Names of the configuration group containing the application properties
-    private static final String APPLICATION_CONFIG_GROUP = "FlinkApplicationProperties";
 
     private static boolean isLocal(StreamExecutionEnvironment env) {
         return env instanceof LocalStreamEnvironment;
@@ -56,85 +49,66 @@ public class StreamingJob { private static final Logger LOGGER = LoggerFactory.g
         }
     }
 
-    /**
-     *
-     * @param inputStream: Name of Kinesis Data Stream
-     * @param streamRegion: Region where Kinesis Data Stream
-     * @return FlinkKinesisConsumer
-     */
-    private static  FlinkKinesisConsumer kinesisSource(
-            String inputStream,
-            String streamRegion) {
-
-        // Properties for Amazon Kinesis Data Streams Source, we need to specify from where we want to consume the data.
-        // STREAM_INITIAL_POSITION: LATEST: consume messages that have arrived from the moment application has been deployed
-        // STREAM_INITIAL_POSITION: TRIM_HORIZON: consume messages starting from first available in the Kinesis Stream
-        Properties kinesisConsumerConfig = new Properties();
-        kinesisConsumerConfig.put(AWSConfigConstants.AWS_REGION, streamRegion);
-        kinesisConsumerConfig.put(ConsumerConfigConstants.STREAM_INITIAL_POSITION, "LATEST");
-
-        // If EFO consumer is needed, uncomment the following block.
-        /*
-        kinesisConsumerConfig.put(ConsumerConfigConstants.RECORD_PUBLISHER_TYPE,
-                ConsumerConfigConstants.RecordPublisherType.EFO.name());
-        kinesisConsumerConfig.put(ConsumerConfigConstants.EFO_CONSUMER_NAME,"my-efo-consumer");
-         */
-
-        return new FlinkKinesisConsumer<>(inputStream, new SimpleStringSchema(), kinesisConsumerConfig);
+    private static DataGeneratorSource<StockPrice> getStockPriceDataGeneratorSource() {
+        long recordPerSecond = 100;
+        return new DataGeneratorSource<>(
+                new StockPriceGeneratorFunction(),
+                Long.MAX_VALUE,
+                RateLimiterStrategy.perSecond(recordPerSecond),
+                TypeInformation.of(StockPrice.class));
     }
 
-    private static FileSink<TradeCount> S3Sink(
-            String s3SinkPath
-    ) {
+    private static FileSink<com.amazonaws.services.msf.avro.StockPrice> getParquetS3Sink(String s3UrlPath) {
         return FileSink
-                .forBulkFormat(new Path(s3SinkPath), AvroParquetWriters.forSpecificRecord(TradeCount.class))
+                .forBulkFormat(new Path(s3UrlPath), AvroParquetWriters.forSpecificRecord(StockPrice.class))
+                // Bucketing
                 .withBucketAssigner(new DateTimeBucketAssigner<>("'year='yyyy'/month='MM'/day='dd'/hour='HH/"))
+                // Part file rolling - this is actually the default, rolling on checkpoint
+                .withRollingPolicy(OnCheckpointRollingPolicy.build())
                 .withOutputFileConfig(OutputFileConfig.builder()
                         .withPartSuffix(".parquet")
                         .build())
                 .build();
     }
 
-        public static void main(String[] args) throws Exception {
-            // set up the streaming execution environment
-            StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-            env.setRuntimeMode(RuntimeExecutionMode.STREAMING);
+    public static void main(String[] args) throws Exception {
+        // set up the streaming execution environment
+         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-            // Local dev specific settings
-            if (isLocal(env)) {
-                // Checkpointing and parallelism are set by Amazon Managed Service for Apache Flink when running on AWS
-                env.enableCheckpointing(60000);
-                env.setParallelism(2);
-            }
+        // Local dev specific settings
+        if (isLocal(env)) {
+            // Checkpointing and parallelism are set by Amazon Managed Service for Apache Flink when running on AWS
+            env.enableCheckpointing(30000);
+            env.setParallelism(2);
+        }
 
-            // Application configuration
-            Properties applicationProperties = loadApplicationProperties(env).get(APPLICATION_CONFIG_GROUP);
-            String inputStream = Preconditions.checkNotNull(applicationProperties.getProperty("input.stream"), "Input Kinesis Stream not defined");
-            String streamRegion = Preconditions.checkNotNull(applicationProperties.getProperty("stream.region"), "Region of Kinesis Streams not Defined");
-            String s3SyncPath = Preconditions.checkNotNull(applicationProperties.getProperty("s3.path"), "Path for S3 not defined");
+        // Application configuration
+        Properties applicationProperties = loadApplicationProperties(env).get("OutputBucket");
+        String bucketName = Preconditions.checkNotNull(applicationProperties.getProperty("bucket.name"), "Bucket for S3 not defined");
+        String bucketPath = Preconditions.checkNotNull(applicationProperties.getProperty("bucket.path"), "Path in S3 not defined");
 
-            //Source
-            FlinkKinesisConsumer<String> source = kinesisSource(inputStream,streamRegion);
+        // Build S3 URL. Strip any initial fwd slash from bucket path
+        String s3UrlPath =  String.format("s3a://%s/%s", bucketName.trim(),  bucketPath.trim().replaceFirst("^/+", "") );
+        LOGGER.info("Output URL: {}", s3UrlPath);
 
-            //Sink
-            FileSink<TradeCount> sink = S3Sink(s3SyncPath);
+        // Source (data generator)
+        DataGeneratorSource<StockPrice> source = getStockPriceDataGeneratorSource();
 
-            DataStream<String> kinesis = env.addSource(source).uid("kinesis-source");
+        // DataStream from source
+        DataStream<StockPrice> stockPrices = env.fromSource(
+                source, WatermarkStrategy.noWatermarks(), "data-generator").setParallelism(1);
 
-            //Mapper to be used for parsing String to JSON
-            ObjectMapper jsonParser = new ObjectMapper();
+        // Sink (Parquet files to S3)
+        FileSink<StockPrice> sink = getParquetS3Sink(s3UrlPath);
 
-            kinesis.map(value -> { // Parse the JSON
-                        JsonNode jsonNode = jsonParser.readValue(value, JsonNode.class);
-                        return new Tuple2<>(jsonNode.get("symbol").toString(), 1);
-                    }).returns(Types.TUPLE(Types.STRING, Types.INT)).uid("string-to-tuple-map")
-                    .keyBy(v -> v.f0) // Logically partition the stream for each word
-                    .window(TumblingProcessingTimeWindows.of(Time.minutes(1)))
-                    .sum(1) // Count the appearances by product per partition
-                    .map(t -> new TradeCount(t.f0, t.f1))
-                    .sinkTo(S3Sink(s3SyncPath))
-                    .uid("s3-parquet-sink");
+        stockPrices.map( (price) -> {
+            LOGGER.debug(price.toString());
+            return price;
+        }).sinkTo(sink).name("parquet-s3-sink");
 
-        env.execute("Flink S3 Streaming Sink Job");
+//        stockPrices.print();
+
+
+        env.execute("Sink Parquet to S3");
     }
 }
