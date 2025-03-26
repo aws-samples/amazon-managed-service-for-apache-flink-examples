@@ -21,8 +21,8 @@
         <kda.runtime.version>1.2.0</kda.runtime.version>
         <avro.version>1.11.3</avro.version>
         <parquet.avro.version>1.12.3</parquet.avro.version>
-        <hadoop.version>3.3.6</hadoop.version>
-
+<!--        <hadoop.version>3.3.6</hadoop.version>-->
+        <hadoop.version>2.10.2</hadoop.version><!-- this is the version Flink 1.20.0 uses -->
         <aws.connector.version>5.0.0-1.20</aws.connector.version>
         <log4j.version>2.23.1</log4j.version>
         <junit5.version>5.8.1</junit5.version>
@@ -82,6 +82,7 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-s3-fs-hadoop</artifactId>
             <version>${flink.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
@@ -99,15 +100,17 @@
             <!-- If not excluded, these dependencies cause clashing SLF4J bindings -->
             <exclusions>
                 <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-reload4j</artifactId>
-                </exclusion>
-                <exclusion>
                     <groupId>ch.qos.reload4j</groupId>
                     <artifactId>reload4j</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
+
+
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-hadoop-compatibility_2.12</artifactId>
