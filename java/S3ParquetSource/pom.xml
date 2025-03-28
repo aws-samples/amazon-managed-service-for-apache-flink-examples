@@ -21,8 +21,8 @@
         <kda.runtime.version>1.2.0</kda.runtime.version>
         <avro.version>1.11.3</avro.version>
         <parquet.avro.version>1.12.3</parquet.avro.version>
-<!--        <hadoop.version>3.3.6</hadoop.version>-->
-        <hadoop.version>2.10.2</hadoop.version><!-- this is the version Flink 1.20.0 uses -->
+        <hadoop.version>3.3.6</hadoop.version>
+        <!-- <hadoop.version>2.10.2</hadoop.version> --> <!-- this is the version Flink 1.20.0 uses -->
         <aws.connector.version>5.0.0-1.20</aws.connector.version>
         <log4j.version>2.23.1</log4j.version>
         <junit5.version>5.8.1</junit5.version>
@@ -82,7 +82,8 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-s3-fs-hadoop</artifactId>
             <version>${flink.version}</version>
-            <scope>provided</scope>
+            <!-- This is available as plugin on the cluster -->
+            <!--            <scope>provided</scope>-->
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
@@ -91,12 +92,10 @@
         </dependency>
 
         <!-- The following dependencies are only required to run locally -->
-        <!-- FIXME this dependency also includes org.apache.hadoop.conf.Configuration, but on MSF the application cannot find the class -->
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client</artifactId>
             <version>${hadoop.version}</version>
-<!--            <scope>provided</scope>-->
             <!-- If not excluded, these dependencies cause clashing SLF4J bindings -->
             <exclusions>
                 <exclusion>
@@ -109,8 +108,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
-
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-hadoop-compatibility_2.12</artifactId>
@@ -235,10 +232,9 @@
                             </artifactSet>
                             <filters>
                                 <filter>
-                                    <!-- Do not copy the signatures in the META-INF folder.
-                                    Otherwise, this might cause SecurityExceptions when using the JAR. -->
                                     <artifact>*:*</artifact>
                                     <excludes>
+                                        <!-- Exclude signature files -->
                                         <exclude>META-INF/*.SF</exclude>
                                         <exclude>META-INF/*.DSA</exclude>
                                         <exclude>META-INF/*.RSA</exclude>
