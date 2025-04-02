@@ -1,21 +1,18 @@
 package com.amazonaws.services.msf;
 
 import com.amazonaws.services.kinesisanalytics.runtime.KinesisAnalyticsRuntime;
-import org.apache.avro.specific.SpecificDatumWriter;
+import com.amazonaws.services.msf.avro.StockPrice;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.connector.file.src.FileSource;
+import org.apache.flink.core.fs.Path;
 import org.apache.flink.formats.parquet.avro.AvroParquetReaders;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Preconditions;
-import org.apache.parquet.avro.AvroParquetReader;
-import org.apache.flink.core.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.amazonaws.services.msf.avro.StockPrice;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;

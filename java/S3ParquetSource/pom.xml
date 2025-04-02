@@ -21,8 +21,9 @@
         <kda.runtime.version>1.2.0</kda.runtime.version>
         <avro.version>1.11.3</avro.version>
         <parquet.avro.version>1.12.3</parquet.avro.version>
-        <hadoop.version>3.3.6</hadoop.version>
-        <!-- <hadoop.version>2.10.2</hadoop.version> --> <!-- this is the version Flink 1.20.0 uses -->
+        <!--        <hadoop.version>3.3.6</hadoop.version>-->
+        <hadoop.version>3.3.4</hadoop.version> <!-- this is the version Flink 1.20.0 uses for FS plugin -->
+        <!--        <hadoop.version>2.10.2</hadoop.version> &lt;!&ndash; this is the version Flink 1.20.0 uses &ndash;&gt;-->
         <aws.connector.version>5.0.0-1.20</aws.connector.version>
         <log4j.version>2.23.1</log4j.version>
         <junit5.version>5.8.1</junit5.version>
@@ -83,21 +84,24 @@
             <artifactId>flink-s3-fs-hadoop</artifactId>
             <version>${flink.version}</version>
             <!-- This is available as plugin on the cluster -->
-            <!--            <scope>provided</scope>-->
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-aws-kinesis-streams</artifactId>
             <version>${aws.connector.version}</version>
         </dependency>
-
-        <!-- The following dependencies are only required to run locally -->
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client</artifactId>
             <version>${hadoop.version}</version>
-            <!-- If not excluded, these dependencies cause clashing SLF4J bindings -->
             <exclusions>
+                <!-- Exclude hadoop-common that is provided with flink-s3-fs-hadoop -->
+<!--                <exclusion>-->
+<!--                    <groupId>org.apache.hadoop</groupId>-->
+<!--                    <artifactId>hadoop-common</artifactId>-->
+<!--                </exclusion>-->
+                <!-- If not excluded, these dependencies cause clashing SLF4J bindings -->
                 <exclusion>
                     <groupId>ch.qos.reload4j</groupId>
                     <artifactId>reload4j</artifactId>
@@ -105,6 +109,124 @@
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+
+                <!-- More exclusions from Flink FS POM -->
+                <exclusion>
+                    <groupId>jdk.tools</groupId>
+                    <artifactId>jdk.tools</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.jcraft</groupId>
+                    <artifactId>jsch</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-servlet</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-json</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-server</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.avro</groupId>
+                    <artifactId>avro</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-server</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-util</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-servlet</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-webapp</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>javax.servlet-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.servlet.jsp</groupId>
+                    <artifactId>jsp-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.kerby</groupId>
+                    <artifactId>kerb-simplekdc</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.curator</groupId>
+                    <artifactId>curator-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.curator</groupId>
+                    <artifactId>curator-framework</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.curator</groupId>
+                    <artifactId>curator-recipes</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.zookeeper</groupId>
+                    <artifactId>zookeeper</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-net</groupId>
+                    <artifactId>commons-net</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-cli</groupId>
+                    <artifactId>commons-cli</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-codec</groupId>
+                    <artifactId>commons-codec</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.protobuf</groupId>
+                    <artifactId>protobuf-java</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.code.gson</groupId>
+                    <artifactId>gson</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-math3</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.nimbusds</groupId>
+                    <artifactId>nimbus-jose-jwt</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.minidev</groupId>
+                    <artifactId>json-smart</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -124,11 +246,6 @@
         <dependency>
             <groupId>org.apache.parquet</groupId>
             <artifactId>parquet-avro</artifactId>
-            <version>${parquet.avro.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.parquet</groupId>
-            <artifactId>parquet-hadoop</artifactId>
             <version>${parquet.avro.version}</version>
         </dependency>
 
@@ -173,6 +290,7 @@
     </dependencies>
 
     <build>
+        <finalName>${jar.finalName}</finalName>
 
         <plugins>
             <!-- AVRO source generator -->
