@@ -2,7 +2,7 @@
   {
     "PropertyGroupId": "bucket",
     "PropertyMap": {
-      "name": "<BucketName>"
+      "name": "<bucket-name>"
     }
   }
 ]
