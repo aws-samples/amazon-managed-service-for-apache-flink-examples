@@ -1,0 +1,9 @@
+@namespace("com.amazonaws.services.msf.avro")
+protocol In {
+	record AirQuality {
+		int sensorId;
+		string room;
+		float qualityIndex;
+		timestamp_ms timestamp;
+	}
+}
