@@ -3,7 +3,7 @@
     "PropertyGroupId": "Iceberg",
     "PropertyMap": {
       "bucket.prefix": "s3://<my-bucket>/iceberg",
-      "catalog.db": "iceberg",
+      "catalog.db": "default",
       "catalog.table": "prices_iceberg"
     }
   }

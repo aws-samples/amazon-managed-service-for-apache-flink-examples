@@ -2,7 +2,7 @@
 
 * Flink version: 1.20.0
 * Flink API: DataStream API
-* Iceberg 1.6.1
+* Iceberg 1.8.1
 * Language: Java (11)
 * Flink connectors: [Iceberg](https://iceberg.apache.org/docs/latest/flink/)
 
