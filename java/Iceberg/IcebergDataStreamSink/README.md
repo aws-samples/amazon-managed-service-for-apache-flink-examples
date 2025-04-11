@@ -2,7 +2,7 @@
 
 * Flink version: 1.20.0
 * Flink API: DataStream API
-* Iceberg 1.6.1
+* Iceberg 1.8.1
 * Language: Java (11)
 * Flink connectors: [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/datastream/datagen/) 
    and [Iceberg](https://iceberg.apache.org/docs/latest/flink/)
@@ -37,16 +37,15 @@ When running locally, the configuration is read from the
 
 Runtime parameters:
 
-| Group ID  | Key                      | Default           | Description                                                                                                         |
-|-----------|--------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|
-| `DataGen` | `records.per.sec`        | `10.0`            | Records per second generated.                                                                                       |
-| `Iceberg` | `bucket.prefix`          | (mandatory)       | S3 bucket prefix, for example `s3://my-bucket/iceberg`.                                                             |
-| `Iceberg` | `catalog.db`             | `default`         | Name of the Glue Data Catalog database.                                                                             |
-| `Iceberg` | `catalog.table`          | `prices_iceberg`  | Name of the Glue Data Catalog table.                                                                                |
-| `Iceberg` | `partition.fields`       | `symbol`          | Comma separated list of partition fields.                                                                           |
-| `Iceberg` | `sort.field`             | `timestamp`       | Sort field.                                                                                                         |
-| `Iceberg` | `operation`              | `updsert`         | Iceberg operation. One of `upsert`, `append` or `overwrite`.                                                        |
-| `Iceberg` | `upsert.equality.fields` | `symbol`          | Comma separated list of fields used for upsert. It must match partition fields. Required if `operation` = `upsert`. |
+| Group ID  | Key                      | Default          | Description                                                                                                         |
+|-----------|--------------------------|------------------|---------------------------------------------------------------------------------------------------------------------|
+| `DataGen` | `records.per.sec`        | `10.0`           | Records per second generated.                                                                                       |
+| `Iceberg` | `bucket.prefix`          | (mandatory)      | S3 bucket prefix, for example `s3://my-bucket/iceberg`.                                                             |
+| `Iceberg` | `catalog.db`             | `default`        | Name of the Glue Data Catalog database.                                                                             |
+| `Iceberg` | `catalog.table`          | `prices_iceberg` | Name of the Glue Data Catalog table.                                                                                |
+| `Iceberg` | `partition.fields`       | `symbol`         | Comma separated list of partition fields.                                                                           |
+| `Iceberg` | `operation`              | `upsert`         | Iceberg operation. One of `upsert`, `append` or `overwrite`.                                                        |
+| `Iceberg` | `upsert.equality.fields` | `symbol`         | Comma separated list of fields used for upsert. It must match partition fields. Required if `operation` = `upsert`. |
 
 
 ### Checkpoints
