@@ -10,11 +10,11 @@
     "PropertyMap": {
 
       "table.bucket.arn": "<<ARN>>",
-      "catalog.db": "test_from_flink",
-      "catalog.table": "test_table",
+      "catalog.db": "default",
+      "catalog.table": "prices_s3table",
       "partition.fields": "symbol",
       "sort.field": "timestamp",
-      "operation": "upsert",
+      "operation": "append",
       "upsert.equality.fields": "symbol"
     }
   }

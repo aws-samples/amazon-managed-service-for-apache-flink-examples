@@ -2,7 +2,7 @@
 
 * Flink version: 1.19.0
 * Flink API: DataStream API
-* Iceberg 1.6.1
+* Iceberg 1.8.1
 * Language: Java (11)
 * Flink connectors: [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/datastream/datagen/) 
    and [Iceberg](https://iceberg.apache.org/docs/latest/flink/)
@@ -49,16 +49,15 @@ When running locally, the configuration is read from the
 
 Runtime parameters:
 
-| Group ID  | Key                      | Default           | Description                                                                                                         |
-|-----------|--------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|
-| `DataGen` | `records.per.sec`        | `100.0`           | Records per second generated.                                                                                       |
-| `Iceberg` | `table.bucket.arn`       | (mandatory)       | ARN of the S3 bucket, e.g., `arn:aws:s3tables:region:account-id:bucket/bucket-name`                                 |
-| `Iceberg` | `catalog.db`             | `test_from_flink` | Name of the S3 table database.                                                                                      |
-| `Iceberg` | `catalog.table`          | `test_table`      | Name of the S3 table.                                                                                               |
-| `Iceberg` | `partition.fields`       | `symbol`          | Comma separated list of partition fields.                                                                           |
-| `Iceberg` | `sort.field`             | `timestamp`       | Sort field.                                                                                                         |
-| `Iceberg` | `operation`              | `upsert`          | Iceberg operation. One of `upsert`, `append` or `overwrite`.                                                        |
-| `Iceberg` | `upsert.equality.fields` | `symbol`          | Comma separated list of fields used for upsert. It must match partition fields. Required if `operation` = `upsert`. |
+| Group ID  | Key                      | Default          | Description                                                                                                         |
+|-----------|--------------------------|------------------|---------------------------------------------------------------------------------------------------------------------|
+| `DataGen` | `records.per.sec`        | `100.0`          | Records per second generated.                                                                                       |
+| `Iceberg` | `table.bucket.arn`       | (mandatory)      | ARN of the S3 bucket, e.g., `arn:aws:s3tables:region:account-id:bucket/bucket-name`                                 |
+| `Iceberg` | `catalog.db`             | `default`        | Name of the S3 table database.                                                                                      |
+| `Iceberg` | `catalog.table`          | `prices_s3table` | Name of the S3 table.                                                                                               |
+| `Iceberg` | `partition.fields`       | `symbol`         | Comma separated list of partition fields.                                                                           |
+| `Iceberg` | `operation`              | `append`         | Iceberg operation. One of `upsert`, `append` or `overwrite`.                                                        |
+| `Iceberg` | `upsert.equality.fields` | `symbol`         | Comma separated list of fields used for upsert. It must match partition fields. Required if `operation` = `upsert`. |
 
 ### Checkpoints
 
