@@ -35,7 +35,6 @@ import java.util.Properties;
 public class IcebergSinkBuilder {
     private static final String DEFAULT_GLUE_DB = "default";
     private static final String DEFAULT_ICEBERG_TABLE_NAME = "prices_iceberg";
-    private static final String DEFAULT_ICEBERG_SORT_ORDER_FIELD = "accountNr";
     private static final String DEFAULT_ICEBERG_PARTITION_FIELDS = "symbol";
     private static final String DEFAULT_ICEBERG_OPERATION = "upsert";
     private static final String DEFAULT_ICEBERG_UPSERT_FIELDS = "symbol";
@@ -45,7 +44,7 @@ public class IcebergSinkBuilder {
      * If Iceberg Table has not been previously created, we will create it using the Partition Fields specified in the
      * Properties, as well as add a Sort Field to improve query performance
      */
-    private static void createTable(Catalog catalog, TableIdentifier outputTable, org.apache.iceberg.Schema icebergSchema, PartitionSpec partitionSpec, String sortField) {
+    private static void createTable(Catalog catalog, TableIdentifier outputTable, org.apache.iceberg.Schema icebergSchema, PartitionSpec partitionSpec) {
         // If table has been previously created, we do not do any operation or modification
         if (!catalog.tableExists(outputTable)) {
             Table icebergTable = catalog.createTable(outputTable, icebergSchema, partitionSpec);
@@ -78,8 +77,6 @@ public class IcebergSinkBuilder {
 
         String partitionFields = icebergProperties.getProperty("partition.fields", DEFAULT_ICEBERG_PARTITION_FIELDS);
         List<String> partitionFieldList = Arrays.asList(partitionFields.split("\\s*,\\s*"));
-
-        String sortField = icebergProperties.getProperty("sort.field", DEFAULT_ICEBERG_SORT_ORDER_FIELD);
 
         // Iceberg you can perform Appends, Upserts and Overwrites.
         String icebergOperation = icebergProperties.getProperty("operation", DEFAULT_ICEBERG_OPERATION);
@@ -119,7 +116,7 @@ public class IcebergSinkBuilder {
         // Based on how many fields we want to partition, we create the Partition Spec
         PartitionSpec partitionSpec = getPartitionSpec(icebergSchema, partitionFieldList);
         // We create the Iceberg Table, using the Iceberg Catalog, Table Identifier, Schema parsed in Iceberg Schema Format and the partition spec
-        createTable(catalog, outputTable, icebergSchema, partitionSpec, sortField);
+        createTable(catalog, outputTable, icebergSchema, partitionSpec);
         // Once the table has been created in the job or before, we load it
         TableLoader tableLoader = TableLoader.fromCatalog(glueCatalogLoader, outputTable);
         // Get RowType Schema from Iceberg Schema
