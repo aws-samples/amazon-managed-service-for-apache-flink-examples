@@ -38,5 +38,6 @@
         <module>SideOutputs</module>
         <module>PrometheusSink</module>
         <module>SQSSink</module>
+        <module>S3AvroSink</module>
     </modules>
 </project>
