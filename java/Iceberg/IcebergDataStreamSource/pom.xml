@@ -18,7 +18,7 @@
         <flink.version>1.20.0</flink.version>
         <avro.version>1.11.3</avro.version>
         <hadoop.version>3.4.0</hadoop.version>
-        <iceberg.version>1.6.1</iceberg.version>
+        <iceberg.version>1.8.1</iceberg.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
         <log4j.version>2.23.1</log4j.version>
         <junit5.version>5.8.1</junit5.version>
@@ -88,7 +88,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.iceberg</groupId>
-            <artifactId>iceberg-flink-1.19</artifactId>
+            <artifactId>iceberg-flink-1.20</artifactId>
             <version>${iceberg.version}</version>
         </dependency>
         <dependency>

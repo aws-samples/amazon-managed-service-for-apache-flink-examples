@@ -49,10 +49,6 @@ public class IcebergSinkBuilder {
         // If table has been previously created, we do not do any operation or modification
         if (!catalog.tableExists(outputTable)) {
             Table icebergTable = catalog.createTable(outputTable, icebergSchema, partitionSpec);
-            // Modifying newly created iceberg table to have a sort field
-            icebergTable.replaceSortOrder()
-                    .asc(sortField, NullOrder.NULLS_LAST)
-                    .commit();
             // The catalog.create table creates an Iceberg V1 table. If we want to perform upserts, we need to upgrade the table version to 2.
             TableOperations tableOperations = ((BaseTable) icebergTable).operations();
             TableMetadata appendTableMetadata = tableOperations.current();
