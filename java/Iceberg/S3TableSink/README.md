@@ -16,7 +16,7 @@ serialized with AVRO.
 
 ### Prerequisites
 
-### Create a Table Bucket
+#### Create a Table Bucket
 The sample application expects the S3 Table Bucket to exist and to have the ARN in the local environment:
 ```bash
 aws s3tables create-table-bucket --name flink-example
@@ -34,6 +34,13 @@ aws s3tables list-table-buckets
 
 This will show you the list of table buckets. Select the one you wish to write to and paste it into the config file in this project.
 
+#### Create a Namespace in the Table Bucket (Database)
+The sample application expects the Namespace in the Table Bucket to exist
+```bash
+aws s3tables create-namespace \
+    --table-bucket-arn arn:aws:s3tables:us-east-1:111122223333:bucket/flink-example \ 
+    --namespace default
+```
 
 #### IAM Permissions
 
