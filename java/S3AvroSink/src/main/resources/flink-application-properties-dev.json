@@ -2,7 +2,7 @@
   {
     "PropertyGroupId": "OutputBucket",
     "PropertyMap": {
-      "bucket.name": "msf-examples-output",
+      "bucket.name": "<output-bucket>",
       "bucket.path": "avrostockprices"
     }
   }

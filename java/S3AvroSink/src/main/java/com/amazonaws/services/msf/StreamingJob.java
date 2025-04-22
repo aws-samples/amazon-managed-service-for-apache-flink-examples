@@ -73,7 +73,7 @@ public class StreamingJob {
 
     public static void main(String[] args) throws Exception {
         // set up the streaming execution environment
-         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // Local dev specific settings
         if (isLocal(env)) {
@@ -88,7 +88,7 @@ public class StreamingJob {
         String bucketPath = Preconditions.checkNotNull(applicationProperties.getProperty("bucket.path"), "Path in S3 not defined");
 
         // Build S3 URL. Strip any initial fwd slash from bucket path
-        String s3UrlPath =  String.format("s3a://%s/%s", bucketName.trim(),  bucketPath.trim().replaceFirst("^/+", "") );
+        String s3UrlPath = String.format("s3a://%s/%s", bucketName.trim(), bucketPath.trim().replaceFirst("^/+", ""));
         LOGGER.info("Output URL: {}", s3UrlPath);
 
         // Source (data generator)
@@ -101,13 +101,11 @@ public class StreamingJob {
         // Sink (Parquet files to S3)
         FileSink<StockPrice> sink = getParquetS3Sink(s3UrlPath);
 
-        stockPrices.map( (price) -> {
-            LOGGER.debug(price.toString());
-            return price;
-        }).sinkTo(sink).name("avro-s3-sink");
+        stockPrices.sinkTo(sink).name("avro-s3-sink");
 
-//        stockPrices.print();
-
+        // Also print the output
+        // (This is for illustration purposes only and used when running locally. No output is printed when running on Managed Flink)
+        stockPrices.print();
 
         env.execute("Sink Avro to S3");
     }

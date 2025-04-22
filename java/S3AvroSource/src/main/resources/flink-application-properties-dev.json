@@ -2,8 +2,15 @@
   {
     "PropertyGroupId": "InputBucket",
     "PropertyMap": {
-      "bucket.name": "msf-examples-output",
+      "bucket.name": "<bucket-name>",
       "bucket.path": "avrostockprices"
+    }
+  },
+  {
+    "PropertyGroupId": "OutputStream0",
+    "PropertyMap": {
+      "stream.arn": "arn:aws:kinesis:us-east-1:<account-id>:stream/<stream-name>",
+      "aws.region": "us-east-1"
     }
   }
 ]

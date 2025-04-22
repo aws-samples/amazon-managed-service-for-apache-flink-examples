@@ -21,6 +21,7 @@
         <kda.runtime.version>1.2.0</kda.runtime.version>
         <avro.version>1.11.3</avro.version>
         <parquet.avro.version>1.15.1</parquet.avro.version>
+        <aws.connector.version>5.0.0-1.20</aws.connector.version>
 
         <log4j.version>2.23.1</log4j.version>
         <junit5.version>5.8.1</junit5.version>
@@ -60,6 +61,12 @@
             <version>${flink.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-json</artifactId>
+            <version>${flink.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Library to retrieve runtime application properties in Managed Service for Apache Flink  -->
         <dependency>
@@ -81,6 +88,11 @@
             <artifactId>flink-s3-fs-hadoop</artifactId>
             <version>${flink.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-aws-kinesis-streams</artifactId>
+            <version>${aws.connector.version}</version>
         </dependency>
 
         <!-- AVRO -->
