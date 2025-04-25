@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Wrapper for DeserializationSchema to support de-aggregation of Kinesis records.
+ * Wrapper adding de-aggregation to any DeserializationSchema
  *
  * @param <T> type returned by the DeserializationSchema
  */
