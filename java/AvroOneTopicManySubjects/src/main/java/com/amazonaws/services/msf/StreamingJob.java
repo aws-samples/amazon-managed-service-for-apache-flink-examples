@@ -67,7 +67,6 @@ public class StreamingJob {
             env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(new Configuration());
             env.enableCheckpointing(60000);
         }
-        env.setRuntimeMode(RuntimeExecutionMode.STREAMING);
 
         Properties applicationProperties = loadApplicationProperties(env).get(APPLICATION_CONFIG_GROUP);
         String bootstrapServers = Preconditions.checkNotNull(applicationProperties.getProperty("bootstrap.servers"), "bootstrap.servers not defined");
