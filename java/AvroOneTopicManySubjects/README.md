@@ -4,7 +4,8 @@
 * Flink API: DataStream API
 * Language: Java (11)
 
-This example demonstrates how to serialize/deserialize Avro messages in Kafka when one topic stores multiple subject types.
+This example demonstrates how to serialize/deserialize Avro messages in Kafka when one topic stores multiple subject 
+types, leveraging Confluent Schema Registry for schema management and evolution.
 
 See [this article](https://martin.kleppmann.com/2018/01/18/event-types-in-kafka-topic.html) for more information about why it's sometimes essential to store multiple subjects in the same topic.
 
