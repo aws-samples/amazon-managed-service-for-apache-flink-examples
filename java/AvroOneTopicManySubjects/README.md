@@ -3,6 +3,7 @@
 * Flink version: 1.20
 * Flink API: DataStream API
 * Language: Java (11)
+* Schema Registry: Confluent Schema Registry
 
 This example demonstrates how to serialize/deserialize Avro messages in Kafka when one topic stores multiple subject 
 types, leveraging Confluent Schema Registry for schema management and evolution.
