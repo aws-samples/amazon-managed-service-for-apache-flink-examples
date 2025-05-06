@@ -20,7 +20,7 @@
         <flink.version>1.20.0</flink.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
         <avro.version>1.11.3</avro.version>
-        <parquet.avro.version>1.15.1</parquet.avro.version>
+        <parquet.avro.version>1.15.2</parquet.avro.version>
 
         <log4j.version>2.23.1</log4j.version>
         <junit5.version>5.8.1</junit5.version>
