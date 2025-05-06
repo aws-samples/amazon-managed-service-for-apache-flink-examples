@@ -47,13 +47,13 @@ The CFN Stack creates two CloudWatch Alarms, a StepFunction and a Lambda functio
 generateautoscaler.sh type=<metric-type metric=<metric-name> stat=<statistics> 
 ```
 
-Script parameters:
-* `type` [`KinesisAnalytics`, `MSK`, `Kinesis`, `KinesisEFO`]: determines the metric type (default: `KinesisAnalytics`). See [Supported metric](#supported-metrics).
-* `metric`: (mandatory) name of the metric.
-* `stat` [`Average`, `Minimum`, `Maximum`, `Sum`] : metric statistics (default: `Maximum`).
-
-
 The script generates a CFN template file named `Autoscaler-<metric>-<statistic>.yaml` in the same directory.
+
+Script parameters:
+* `type` [`KinesisAnalytics`, `MSK`, `Kinesis`, `KinesisEFO`]: determines the metric type (default: `KinesisAnalytics`).
+* `metric`: (mandatory) name of the metric. See [Supported metric](#supported-metrics).
+* `stat` [`Average`, `Minimum`, `Maximum`, `Sum`] : metric statistics (default: `Maximum`). See [Supported statistics](#supported-statistics).
+
 
 Examples of valid generator commands:
 
@@ -70,13 +70,13 @@ Examples of valid generator commands:
 ### Supported metrics
 
 When you generate the CFN template you specify
-1. metric type (see below)
-2. metric name
-3. statistics (Maximum, Average etc)
+1. Metric type (see below)
+2. Metric name
+3. Statistic (Maximum, Average etc)
 
-The metric type determines the Namespace and Dimensions used by the metric.
+The metric type determines the Namespace and Dimensions of the CloudWatch metric to use for autoscaling.
 
-> In this autoscaler the name *KinesisAnalytics* refers to metrics exposed by Amazon Managed Service for Apache Flink. This is due to the CloudWatch Namespace that is called `AWS/KinesisAnalytics` for legacy reasons. 
+> The name *KinesisAnalytics* refers to metrics exposed by Amazon Managed Service for Apache Flink. This is due to the CloudWatch Namespace that is called `AWS/KinesisAnalytics` for legacy reasons. 
 
 
 | Metric Type  | Supported Metrics                                                                                                                                                                              | Namespace              | Dimensions                                |
@@ -103,7 +103,7 @@ The autoscaler supports the following metric statistics:
 
 The period of calculation of the statistic is defined when you create the stack (default: 60 sec).
 
-### Requirements to generate the autoscaler CFN template
+### Requirements for template generation
 
 To generate the CFN template you need:
 1. AWS CLI
@@ -130,7 +130,7 @@ To deploy it (to create the stack) you can either use the AWS console or [CloudF
 
 When you deploy the CFN Template you need to specify additional parameters, to specify the application to control and other variables of the autoscaler, such as thesholds and scaling factors. The parameters depends on the metric type you chose, when you generated the template.
 
-#### Paramers for all metric types
+### Paramers requested for all metric types
 
 Paramters you probably want to customize, for each application:
 
@@ -165,7 +165,7 @@ Parameters you seldom want to change:
 | Metric data point duration (metric period) | `MetricPeriod` | 60 (seconds) | Duration of each individual metric datapoints stats used for the alarm. This is the period over which the statistics is calculated. You probably do not want to change the default 60 seconds. | 
 
 
-#### Parameters for `MSK` metric type only
+### Parameters requested for `MSK` metric type only
 
 These parameters are requested only if you selected metric type `MSK` at template generation.
 
@@ -175,7 +175,7 @@ These parameters are requested only if you selected metric type `MSK` at templat
 | Kafka Consumer Group name | `KafkaConsumerGroupName` | (none)  | Name of the Kafka Consumer Group. |
 | Kafka topic name | `KafkaTopicName` | none)  | Name of the topic. |
 
-#### Parameters for `Kinesis` and `KinesisEFO` metric types only
+### Parameters requested for `Kinesis` and `KinesisEFO` metric types only
 
 These parameters are requested only if you selected metric type `Kinesis` or `KinesisEFO` at template generation.
 
