@@ -189,7 +189,7 @@ These parameters are requested only if you selected metric type `Kinesis` or `Ki
 
 ## Known limitation
 
-The autoscaler only supports for Managed Service for Apache Flink metrics with `Applicaiton` dimension.
+The autoscaler only supports for Managed Service for Apache Flink metrics with `Application` dimension.
 
 If your application uses *Monitoring metrics level* = *Application* all metrics are published to CloudWatch with `Application` 
 dimension only, and the autoscaler can use any metrics.
