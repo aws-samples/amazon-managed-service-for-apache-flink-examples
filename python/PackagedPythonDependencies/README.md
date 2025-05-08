@@ -1,4 +1,4 @@
-TBD
+## WORK IN PROGRESS
 
 Download the dependencies for the target architecture
 ```
@@ -21,9 +21,3 @@ additional Runtime Properties, as part of the application configuration:
 |---------------------------------------|-----------|-----------|--------------------------------|---------------------------------------------------------------------------|
 | `kinesis.analytics.flink.run.options` | `python`  | Y         | `main.py`                      | The Python script containing the main() method to start the job.          |
 | `kinesis.analytics.flink.run.options` | `jarfile` | Y         | `lib/pyflink-dependencies.jar` | Location (inside the zip) of the fat-jar containing all jar dependencies. |
-
-
-
-
-
-| `kinesis.analytics.flink.run.options` | `pyFiles` | Y         | `dep/`                         | Location (inside the zip) of the additional Python dependencies.          |
