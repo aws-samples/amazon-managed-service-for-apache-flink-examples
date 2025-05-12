@@ -53,3 +53,5 @@ Kafka and Confluent Schema Registry configuration is in [./docker-compose.yml](.
 To start the Flink job in IntelliJ:
 1. Edit the Run/Debug configuration (Use compound configuration to run both applications at the same time).
 2. Enable the option **"Add dependencies with 'provided' scope to the classpath"**.
+
+See this [page](../running-examples-locally.md) for more information.
