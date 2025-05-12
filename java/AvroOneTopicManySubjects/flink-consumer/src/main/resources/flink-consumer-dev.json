@@ -4,7 +4,7 @@
     "PropertyMap": {
       "bootstrap.servers": "localhost:29092",
       "source.topic": "sensor-data",
-      "source.consumer.group.id": "avro-one-topic-many-subjects"
+      "source.consumer.group.id": "flink-consumer"
     }
   }
 ]

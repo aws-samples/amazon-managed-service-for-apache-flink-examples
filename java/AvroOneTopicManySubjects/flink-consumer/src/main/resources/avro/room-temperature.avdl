@@ -4,6 +4,6 @@ protocol Out {
 		int sensorId;
 		string room;
 		float temperature;
-		timestamp_ms lastSampleTime;
+		timestamp_ms timestamp;
 	}
 }
