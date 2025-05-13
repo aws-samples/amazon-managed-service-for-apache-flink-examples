@@ -5,5 +5,13 @@
       "stream.name": "ExampleOutputStream",
       "aws.region": "us-east-1"
     }
+  },
+  {
+    "PropertyGroupId": "kinesis.analytics.flink.run.options",
+    "PropertyMap": {
+      "python": "main.py",
+      "jarfile": "lib/pyflink-dependencies.jar",
+      "pyFiles": "dep/"
+    }
   }
 ]
