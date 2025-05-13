@@ -21,7 +21,7 @@ main.py
 This module:
     1. Creates the execution environment and specify 3rd-party Python dependencies
     2. Sets any special configuration for local mode (e.g. when running in the IDE)
-    3. Register the Python dependencies
+    3. (Optional) Register the Python dependencies
     4. Retrieves the runtime configuration
     5. Defines and register a UDF that use the python library
     6. Creates a source table to generate data using DataGen connector
@@ -77,18 +77,25 @@ if is_local:
     print("PyFlink home: " + os.path.dirname(os.path.abspath(pyflink.__file__)))
     print("Logging directory: " + os.path.dirname(os.path.abspath(pyflink.__file__)) + '/log')
 
-################################################
-# 3. Register the additional Python dependencies
-################################################
 
-# If you are NOT running locally, register the Python dependencies in the dep/ subdirectory.
-# When running locally, the Python runtime will use the dependencies installed in the venv. This allows using Python
-# libraries which contain native dependencies, and develop on an architecture which is different from the
-# architecture of the machines where the job is deployed on Managed Flink
-if not is_local:
-    python_source_dir = str(pathlib.Path(__file__).parent)
-    table_env.add_python_file(file_path="file:///" + python_source_dir + "/dep")
+##########################################################################################
+# 3.  (Optional) Register the additional Python dependencies - alt. to specifying pyFiles
+##########################################################################################
 
+# Alternatively to specifying the runtime property kinesis.analytics.flink.run.options : pyFiles, you can
+# programmatically register the sub-folder containing the Python dependencies.
+# IMPORTANT: you must either specify pyFiles OR registering the dependencies programmatically. NOT both.
+# Also, important: when running locally for development you should install the Python dependencies in a venv and not
+# register them programmatically. The reason is that the dependencies downloaded in the dep/ subdirectory must match
+# the target architecture used by Managed Flink (linux x86_64), which can differ from the architecture of the machine
+# you are using for development.
+
+# Uncomment the following code as alternative to specifying
+# the runtime property kinesis.analytics.flink.run.options : pyFiles = dep/
+# if not is_local:
+#     # Only register the Python dependencies when running locally
+#     python_source_dir = str(pathlib.Path(__file__).parent)
+#     table_env.add_python_file(file_path="file:///" + python_source_dir + "/dep")
 
 
 # Utility method, extracting properties from the runtime configuration file
@@ -101,13 +108,12 @@ def get_application_properties():
     else:
         print('A file at "{}" was not found'.format(APPLICATION_PROPERTIES_FILE_PATH))
 
+
 # Utility method, extracting a property from a property group
 def property_map(props, property_group_id):
     for prop in props:
         if prop["PropertyGroupId"] == property_group_id:
             return prop["PropertyMap"]
-
-
 
 
 #####################################
@@ -122,31 +128,35 @@ output_stream_region = property_map(props, "OutputStream0")["aws.region"]
 logging.info(f"Output stream: {output_stream_name}, region: {output_stream_region}")
 
 
-
 #############################################################
 # 5.  Defines and register a UDF that uses the Python library
 #############################################################
 
-@udf(input_types=[DataTypes.FLOAT()], result_type=DataTypes.FLOAT())
-def my_square(a_number):
-    # This UDF demonstrates using an external Python library (NumPy) in a UDF, used for data processing
+
+@udf(input_types=[DataTypes.FLOAT(), DataTypes.FLOAT(), DataTypes.FLOAT(), DataTypes.FLOAT()],
+     result_type=DataTypes.FLOAT())
+def determinant(element1, element2, element3, element4):
     import numpy as np
-    return np.square(a_number)
+    from scipy import linalg
+    a = np.array([[element1, element2], [element3, element4]])
+    det = linalg.det(a)
+    return det
+
 
 # Register the UDF
-table_env.create_temporary_system_function("my_square", my_square)
+table_env.create_temporary_system_function("determinant", determinant)
 
 
 def main():
-
     # Demonstrate the Python dependency is also available in the main() method
-    # This piece of code is not needed. It only shows the registered dependency (NumPy) is available also during the
-    # job initialization, in the main() method.
+    # This piece of code is not doing anything useful. The goal is just to shows that the registered dependencies
+    # are also available job initialization, in the main() method.
+    # A more realistic case would be, for example, using boto3 to fetch some resources you need to initialize the job.
     import numpy as np
-    number = 42
-    square = np.square(number)
-    print(f"Check dependency in main(): square({number}) = {square}")
-
+    from scipy import linalg
+    matrix = np.array([[42, 43], [44, 43]])
+    det = linalg.det(matrix)
+    print(f"Check dependency in main(): determinant({matrix}) = {det}")
 
 
     #################################################
@@ -159,14 +169,24 @@ def main():
     table_env.execute_sql("""
                 CREATE TABLE random_numbers (
                     seed_time TIMESTAMP(3),
-                    a_number FLOAT
-                  )
-                  WITH (
+                    element1 FLOAT,
+                    element2 FLOAT,
+                    element3 FLOAT,
+                    element4 FLOAT
+                )
+                PARTITIONED BY (seed_time)
+                WITH (
                     'connector' = 'datagen',
                     'rows-per-second' = '1',
-                    'fields.a_number.min' = '0',
-                    'fields.a_number.max' = '100'
-                  )
+                    'fields.element1.min' = '0',
+                    'fields.element1.max' = '100',
+                    'fields.element2.min' = '0',
+                    'fields.element2.max' = '100',
+                    'fields.element3.min' = '0',
+                    'fields.element3.max' = '100',
+                    'fields.element4.min' = '0',
+                    'fields.element4.max' = '100'
+                )
         """)
 
     ###################################################
@@ -174,9 +194,11 @@ def main():
     ###################################################
 
     table_env.execute_sql("""
-            CREATE TEMPORARY VIEW squares
+            CREATE TEMPORARY VIEW determinants
             AS
-            SELECT seed_time, a_number, my_square(a_number) AS square
+            SELECT seed_time, 
+                   element1, element2, element3, element4, 
+                   determinant(element1, element2, element3, element4) AS determinant
             FROM random_numbers
     """)
 
@@ -187,10 +209,12 @@ def main():
     table_env.execute_sql(f"""
             CREATE TABLE output (
                 seed_time TIMESTAMP(3),
-                a_number FLOAT,
-                square FLOAT
+                element1 FLOAT,
+                element2 FLOAT,
+                element3 FLOAT,
+                element4 FLOAT,
+                determinant FLOAT
               )
-              PARTITIONED BY (a_number)
               WITH (
                 'connector' = 'kinesis',
                 'stream' = '{output_stream_name}',
@@ -208,20 +232,22 @@ def main():
     # table_env.execute_sql("""
     #     CREATE TABLE output (
     #             seed_time TIMESTAMP(3),
-    #             a_number FLOAT,
-    #             square FLOAT
+    #             element1 FLOAT,
+    #             element2 FLOAT,
+    #             element3 FLOAT,
+    #             element4 FLOAT,
+    #             determinant FLOAT
     #           )
     #           WITH (
     #             'connector' = 'print'
     #           )
     # """)
 
-
     # Executing an INSERT INTO statement will trigger the job
     table_result = table_env.execute_sql("""
             INSERT INTO output
-            SELECT seed_time, a_number, square
-                FROM squares
+            SELECT seed_time, element1, element2, element3, element4, determinant
+                FROM determinants
     """)
 
     # When running locally, as a standalone Python application, you must instruct Python not to exit at the end of the

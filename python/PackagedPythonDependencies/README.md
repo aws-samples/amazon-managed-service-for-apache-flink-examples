@@ -17,7 +17,8 @@ pip install -r requirements.txt
 To tell Managed Flink what Python script to run and the fat-jar containing all dependencies, you need to specific some
 additional Runtime Properties, as part of the application configuration:
 
-| Group ID                              | Key       | Mandatory | Value                          | Notes                                                                     |
-|---------------------------------------|-----------|-----------|--------------------------------|---------------------------------------------------------------------------|
-| `kinesis.analytics.flink.run.options` | `python`  | Y         | `main.py`                      | The Python script containing the main() method to start the job.          |
-| `kinesis.analytics.flink.run.options` | `jarfile` | Y         | `lib/pyflink-dependencies.jar` | Location (inside the zip) of the fat-jar containing all jar dependencies. |
+| Group ID                              | Key       | Mandatory | Value                          | Notes                                                                              |
+|---------------------------------------|-----------|-----------|--------------------------------|------------------------------------------------------------------------------------|
+| `kinesis.analytics.flink.run.options` | `python`  | Y         | `main.py`                      | The Python script containing the main() method to start the job.                   |
+| `kinesis.analytics.flink.run.options` | `jarfile` | Y         | `lib/pyflink-dependencies.jar` | Location (inside the zip) of the fat-jar containing all jar dependencies.          |
+| `kinesis.analytics.flink.run.options` | `pyFiles` | Y         | `dep/`                         | Relative path of the subdirectory (inside the zip) containing Python dependencies. |
