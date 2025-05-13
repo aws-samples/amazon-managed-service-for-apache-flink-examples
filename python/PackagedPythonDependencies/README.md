@@ -24,14 +24,15 @@ Drawbacks:
 * You need to use a virtual environment for the Python dependencies when running locally, because the CPU architecture of your machine may differ from the architecture used by Managed Service for Apache Flink
 * Python dependencies are included in the ZIP file slowing down a bit operations
 
+For more details about how packaging dependencies works, see [Packaging application and dependencies](#packaging-application-and-dependencies), below.
+
+
 
 The application includes [SciPy](https://scipy.org/) used in a UDF. The actual use is not important.
 It also shows how the same library can be used during the job initialization.
 
 The application generates random data using [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/table/datagen/)
 and send the output to a Kinesis Data Streams.
-
-For more details about how packaging dependencies works, see [Application packaging and dependencies](#application-packaging-and-dependencies), below.
 
 ---
 
@@ -145,10 +146,12 @@ Follow this process to make changes to the Python code or the dependencies
 
 ---
 
-### Application packaging and dependencies
+### Packaging application and dependencies
 
 
 This example also demonstrates how to include both jar dependencies - e.g. connectors - and Python libraries in a PyFlink application. It demonstrates how to package it for deploying on Amazon Managed Service for Apache Flink.
+
+The [`assembly/assembly.xml`](assembly/assembly.xml) file instructs Maven for including the correct files in the ZIP-file.  
 
 #### Jar dependencies
 

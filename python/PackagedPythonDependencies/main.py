@@ -92,6 +92,7 @@ if is_local:
 
 # Uncomment the following code as alternative to specifying
 # the runtime property kinesis.analytics.flink.run.options : pyFiles = dep/
+# DO NOT use both runtime property and programmatic registration.
 # if not is_local:
 #     # Only register the Python dependencies when running locally
 #     python_source_dir = str(pathlib.Path(__file__).parent)

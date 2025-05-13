@@ -1,6 +1,6 @@
-## Packaging Python dependencies
+## Downloading Python dependencies at runtime
 
-Examples showing how to include Python libraries in your PyFlink application.
+Examples showing how to include Python libraries in your PyFlink application, downloading them at runtime.
 
 * Flink version: 1.20
 * Flink API: Table API & SQL
@@ -26,6 +26,8 @@ The approach shown in this example has the following benefits:
 Drawbacks:
 * The dependencies downloaded at runtime are only available for data processing, for example in UDF. They are NOT available during the job initialization, in the `main()` method.
   If you need to usa a Python dependency during job initialization, you must use the approach illustrated by the [Packaging Python dependencies with the ZIP](../PackagedPythonDependencies)
+
+For more details about how packaging dependencies works, see [Packaging application and dependencies](#packaging-application-and-dependencies), below.
 
 
 The application is very simple, and uses _botocore_ and _boto3_ Python libraries.
@@ -89,8 +91,18 @@ For this application, the configuration properties to specify are:
 | `OutputStream0`  | `stream.name` | Y         | `ExampleOutputStream`             | Output stream name.           |
 | `OutputStream0`  | `aws.region`  | Y         | `us-east-1`                       | Region for the output stream. |
 
-In addition to these configuration properties, when running a PyFlink application in Managed Flink you need to set two
-[Additional configuring for PyFink application on Managed Flink](#additional-configuring-for-pyfink-application-on-managed-flink).
+
+#### Additional configuring for PyFink application on Managed Flink
+
+To tell Managed Flink what Python script to run and the fat-jar containing all dependencies, you need to specific some
+additional Runtime Properties, as part of the application configuration:
+
+| Group ID                              | Key       | Mandatory | Value                          | Notes                                                                     |
+|---------------------------------------|-----------|-----------|--------------------------------|---------------------------------------------------------------------------|
+| `kinesis.analytics.flink.run.options` | `python`  | Y         | `main.py`                      | The Python script containing the main() method to start the job.          |
+| `kinesis.analytics.flink.run.options` | `jarfile` | Y         | `lib/pyflink-dependencies.jar` | Location (inside the zip) of the fat-jar containing all jar dependencies. |
+
+These parameters are ignored when running locally.
 
 ---
 
@@ -176,10 +188,14 @@ libraries, boto3 and botocore in this case.
 
 ---
 
-### Application packaging and dependencies
+### Packaging application and dependencies
 
 This example also demonstrates how to include both jar dependencies - e.g. connectors - and Python libraries in a PyFlink
 application. It demonstrates how to package it for deploying on Amazon Managed Service for Apache Flink.
+
+
+The [`assembly/assembly.xml`](assembly/assembly.xml) file instructs Maven for including the correct files in the ZIP-file.  
+
 
 #### Jar dependencies
 
@@ -215,14 +231,4 @@ The approach demonstrated in this example is the following:
 
 With this approach the Python library are **not packaged** with the application artifact you deploy to Managed Service 
 for Apache Flink. They are installed by the runtime on the cluster, when the application starts.
-
-#### Additional configuring for PyFink application on Managed Flink
-
-To tell Managed Flink what Python script to run and the fat-jar containing all dependencies, you need to specific some
-additional Runtime Properties, as part of the application configuration:
-
-| Group ID                              | Key       | Mandatory | Value                          | Notes                                                                     |
-|---------------------------------------|-----------|-----------|--------------------------------|---------------------------------------------------------------------------|
-| `kinesis.analytics.flink.run.options` | `python`  | Y         | `main.py`                      | The Python script containing the main() method to start the job.          |
-| `kinesis.analytics.flink.run.options` | `jarfile` | Y         | `lib/pyflink-dependencies.jar` | Location (inside the zip) of the fat-jar containing all jar dependencies. |
 

@@ -13,11 +13,12 @@
             <outputDirectory>/</outputDirectory>
             <includes>
                 <include>**/*.py</include>
-                <include>requirements.txt</include>
             </includes>
             <!-- Python dependencies are handled by the next fileset -->
             <excludes>
                 <exclude>dep/**</exclude>
+                <!-- requirements.txt is not needed at runtime -->
+                <exclude>requirements.txt</exclude>
             </excludes>
         </fileSet>
 
