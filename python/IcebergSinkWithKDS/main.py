@@ -24,7 +24,7 @@ FIXME
     2. Set any special configuration for local mode (e.g. when running in the IDE)
     3. Retrieve the runtime configuration
     4. Create a source table from a Kinesis Data Stream
-    5. Create a sink table writing to a Kinesis Data Stream
+    5. Create a sink table writing to a Apache Iceberg table in AWS Glue data catalog stored on Amazon S3
     6. Insert the source table data into the sink table
 """
 
