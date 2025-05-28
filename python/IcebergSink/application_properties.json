@@ -7,15 +7,7 @@
    }
   },
   {
-    "PropertyGroupId": "InputStream0",
-    "PropertyMap": {
-      "stream.arn": "arn:aws:kinesis:us-east-1:<account-id>:stream/ExampleInputStream",
-      "flink.stream.initpos": "LATEST",
-      "aws.region": "us-east-1"
-    }
-  },
-  {
-    "PropertyGroupId": "OutputStream0",
+    "PropertyGroupId": "IcebergTable0",
     "PropertyMap": {
       "catalog.name": "glue_catalog",
       "warehouse.path": "s3://my_bucket/my_warehouse",

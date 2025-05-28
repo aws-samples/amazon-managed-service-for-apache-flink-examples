@@ -23,9 +23,10 @@ FIXME
     1. Creates a execution environment
     2. Set any special configuration for local mode (e.g. when running in the IDE)
     3. Retrieve the runtime configuration
-    4. Create a source table from a Kinesis Data Stream
-    5. Create a sink table writing to a Apache Iceberg table in AWS Glue data catalog stored on Amazon S3
-    6. Insert the source table data into the sink table
+    4. Creates a source table to generate data using DataGen connector
+    5. Create a catalog in AWS Glue data catalog
+    6. Create a sink table writing to an Apache Iceberg table on Amazon S3
+    7. Insert into the sink table (Iceberg S3)
 """
 
 import os
@@ -45,7 +46,7 @@ table_env.get_config().get_configuration().set_string(
 )
 
 table_env.get_config().get_configuration().set_string(
-    "execution.checkpointing.interval", "30s"
+    "execution.checkpointing.interval", "1 min"
 )
 
 # Location of the configuration file when running on Managed Flink.
@@ -98,10 +99,18 @@ def property_map(props, property_group_id):
         if prop["PropertyGroupId"] == property_group_id:
             return prop["PropertyMap"]
 
-
-AT_TIMESTAMP = "AT_TIMESTAMP"
-
 def main():
+
+    #####################################
+    # Default configs
+    #####################################
+
+    # Default catalog, database, and input/output tables
+    catalog = "default_catalog"
+    database = "default_database"
+    input_table = f"{catalog}.{database}.sensor_readings"
+    print_output_table = f"{catalog}.{database}.sensor_output"
+
 
     #####################################
     # 3. Retrieve runtime configuration
@@ -109,124 +118,113 @@ def main():
 
     props = get_application_properties()
 
-    # Input stream configuration
-    input_stream_properties = property_map(props, "InputStream0")
-    input_stream_arn = input_stream_properties["stream.arn"]
-    input_stream_region = input_stream_properties["aws.region"]
-    input_stream_init_position = input_stream_properties["flink.source.init.position"] if "flink.source.init.position" in input_stream_properties else None
-    input_stream_init_timestamp = input_stream_properties["flink.source.init.timestamp"] if "flink.source.init.timestamp" in input_stream_properties else None
-    if input_stream_init_position == AT_TIMESTAMP and input_stream_init_timestamp == None:
-            raise ValueError(f"A timestamp must be supplied for flink.source.init.position = {AT_TIMESTAMP}")
-
-    # Output stream configuration
-    output_stream_properties = property_map(props, "OutputStream0")
-    output_catalog_name = output_stream_properties["catalog.name"]
-    output_warehouse_path = output_stream_properties["warehouse.path"]
-    output_database_name = output_stream_properties["database.name"]
-    output_table_name = output_stream_properties["table.name"]
-    output_stream_region = output_stream_properties["aws.region"]
+    # Iceberg table configuration
+    iceberg_table_properties = property_map(props, "IcebergTable0")
+    iceberg_catalog_name = iceberg_table_properties["catalog.name"]
+    iceberg_warehouse_path = iceberg_table_properties["warehouse.path"]
+    iceberg_database_name = iceberg_table_properties["database.name"]
+    iceberg_table_name = iceberg_table_properties["table.name"]
+    iceberg_table_region = iceberg_table_properties["aws.region"]
 
     #################################################
-    # 4. Define source table using kinesis connector
+    # 4. Define input table using datagen connector
     #################################################
 
-    # Some trick is required to generate the string defining the initial position, depending on the configuration
-    # See Flink documentation for further details about configuring a Kinesis source table
-    # https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/table/kinesis/
-    source_init_pos = "\n'source.init.position' = '{0}',".format(
-        input_stream_init_position) if input_stream_init_position is not None else ''
-    source_init_timestamp = "\n'source.init.timestamp' = '{0}',".format(
-        input_stream_init_timestamp) if input_stream_init_timestamp is not None else ''
-
+    # In a real application, this table will probably be connected to a source stream, using for example the 'kinesis'
+    # connector.
     table_env.execute_sql(f"""
-        CREATE TABLE prices (
-                ticker VARCHAR(6),
-                price DOUBLE,
-                event_time TIMESTAMP(3),
-                WATERMARK FOR event_time AS event_time - INTERVAL '5' SECOND
-              )
-              PARTITIONED BY (ticker)
-              WITH (
-                'connector' = 'kinesis',
-                'stream.arn' = '{input_stream_arn}',
-                'aws.region' = '{input_stream_region}',
-                {source_init_pos}{source_init_timestamp}
-                'format' = 'json',
-                'json.timestamp-format.standard' = 'ISO-8601'
-              )
+            CREATE TABLE {input_table} (
+                sensor_id INT,
+                temperature NUMERIC(6,2),
+                measurement_time TIMESTAMP(3)
+            )
+            PARTITIONED BY (sensor_id)
+            WITH (
+                'connector' = 'datagen',
+                'fields.sensor_id.min' = '10',
+                'fields.sensor_id.max' = '20',
+                'fields.temperature.min' = '0',
+                'fields.temperature.max' = '100'
+            )
     """)
 
     #################################################
-    # 5. Define sink catalog using iceberg connector
+    # 5. Define catalog for iceberg table
     #################################################
 
     table_env.execute_sql(f"""
-            CREATE CATALOG {output_catalog_name} WITH (
+            CREATE CATALOG {iceberg_catalog_name} WITH (
                 'type' = 'iceberg',
                 'property-version' = '1',
                 'catalog-impl' = 'org.apache.iceberg.aws.glue.GlueCatalog',
                 'io-impl' = 'org.apache.iceberg.aws.s3.S3FileIO',
-                'warehouse' = '{output_warehouse_path}',
-                'aws.region' = '{output_stream_region}'
-              )""")
+                'warehouse' = '{iceberg_warehouse_path}',
+                'aws.region' = '{iceberg_table_region}'
+            )
+    """)
     
     #################################################
     # 6. Use the catalog and create database
     #################################################
 
     # Start by using the catalog
-    table_env.execute_sql(f"USE CATALOG `{output_catalog_name}`;")
+    table_env.execute_sql(f"USE CATALOG `{iceberg_catalog_name}`;")
 
     # Create database if not exists
-    table_env.execute_sql(f"CREATE DATABASE IF NOT EXISTS `{output_database_name}`;")
+    table_env.execute_sql(f"CREATE DATABASE IF NOT EXISTS `{iceberg_database_name}`;")
 
     # Use database
-    table_env.execute_sql(f"USE `{output_database_name}`;")
+    table_env.execute_sql(f"USE `{iceberg_database_name}`;")
 
     #################################################
-    # 7. Define sink table using iceberg connector
+    # 7. Define sink table for Iceberg table
     #################################################
 
     table_env.execute_sql(f"""
-            CREATE TABLE IF NOT EXISTS `{output_catalog_name}`.`{output_database_name}`.`{output_table_name}` (
-                ticker VARCHAR(6),
-                price DOUBLE,
-                event_time TIMESTAMP(3)
-              ) PARTITIONED BY (ticker)
-              WITH (
+            CREATE TABLE IF NOT EXISTS `{iceberg_catalog_name}`.`{iceberg_database_name}`.`{iceberg_table_name}` (
+                sensor_id INT NOT NULL,
+                temperature NUMERIC(6,2) NOT NULL,
+                `time` TIMESTAMP_LTZ(3) NOT NULL
+            ) 
+            PARTITIONED BY (sensor_id)
+            WITH (
                 'type' = 'iceberg',
                 'write.format.default' = 'parquet',
                 'write.parquet.compression-codec' = 'snappy',
                 'format-version' = '2'
-             )
+            )
     """)
 
-    # For local development purposes, you might want to print the output to the console, instead of sending it to a
-    # Kinesis Stream. To do that, you can replace the sink table using the 'kinesis' connector, above, with a sink table
-    # using the 'print' connector. Comment the statement immediately above and uncomment the one immediately below.
-
-    # table_env.execute_sql("""
-    #     CREATE TABLE output (
-    #             ticker VARCHAR(6),
-    #             price DOUBLE,
-    #             event_time TIMESTAMP(3)
-    #           )
-    #           WITH (
+    # table_env.execute_sql(f"""
+    #         CREATE TABLE {print_output_table}(
+    #             sensor_id INT NOT NULL,
+    #             temperature NUMERIC(6,2) NOT NULL,
+    #             `time` TIMESTAMP_LTZ(3) NOT NULL
+    #         )
+    #         PARTITIONED BY (sensor_id)
+    #         WITH (
     #             'connector' = 'print'
-    #           )""")
+    #         )
+    # """)
 
     # In a real application we would probably have some transformations between the input and the output.
     # For simplicity, we will send the source table directly to the sink table.
 
     ##########################################################################################
-    # 8. Define an INSERT INTO statement writing data from the source table to the sink table
+    # 8. Insert into the sink table
     ##########################################################################################
 
-    # Executing an INSERT INTO statement will trigger the job
     table_result = table_env.execute_sql(f"""
-        INSERT INTO `{output_catalog_name}`.`{output_database_name}`.`{output_table_name}`   
-        SELECT ticker, price, event_time 
-        FROM default_catalog.default_database.prices""")
+        INSERT INTO `{iceberg_catalog_name}`.`{iceberg_database_name}`.`{iceberg_table_name}`   
+        SELECT sensor_id, temperature, measurement_time as `time` 
+        FROM {input_table}""")
+
+    ## Uncomment below when using "print"
+    # table_result = table_env.execute_sql(f"""
+    #     INSERT INTO sensors_output   
+    #     SELECT sensor_id, temperature, measurement_time as `time` 
+    #     FROM {input_table}""")
+
 
     # When running locally, as a standalone Python application, you must instruct Python not to exit at the end of the
     # main() method, otherwise the job will stop immediately.

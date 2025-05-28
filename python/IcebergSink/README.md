@@ -1,17 +1,15 @@
-## Getting Started Flink Python project Apache Iceberg Sink
+## Example of writing to Apache Iceberg with PyFlink
 
-Sample PyFlink application reading from Kinesis Data Stream and writing to Apache Iceberg table on Amazon S3..
+Example showing a PyFlink application writing to Iceberg table in S3.
 
 * Flink version: 1.20
 * Flink API: Table API & SQL
-* Flink Connectors: Kinesis Connector
+* Flink Connectors: Apache Iceberg & Flink S3
 * Language: Python
 
-This example provides the basic skeleton for a PyFlink application.
+This application demonstrates settings up Apache Iceberg table as sink.
 
-The application is written in Python, but operators are defined using SQL.
-This is a popular way of defining applications in PyFlink, but not the only one. You could attain the same results
-using Table API ar DataStream API, in Python.
+The application is written in Python, but operators are defined using SQL. This is a popular way of defining applications in PyFlink, but not the only one. You could attain the same results using Table API ar DataStream API, in Python.
 
 The job can run both on Amazon Managed Service for Apache Flink, and locally for development.
 ---
@@ -22,17 +20,14 @@ This project uses Maven Shade Plugin to handle dependency conflicts:
 
 ```xml
 <relocations>
-  <!-- Hadoop Configuration -->
-  <relocation>
-    <pattern>org.apache.hadoop.conf</pattern>
-    <shadedPattern>shaded.org.apache.hadoop.conf</shadedPattern>
-  </relocation>
-  
-  <!-- Flink Hadoop Utilities -->
-  <relocation>
-    <pattern>org.apache.flink.runtime.util.HadoopUtils</pattern>
-    <shadedPattern>shadow.org.apache.flink.runtime.util.HadoopUtils</shadedPattern>
-  </relocation>
+    <relocation>
+        <pattern>org.apache.hadoop.conf</pattern>
+        <shadedPattern>shaded.org.apache.hadoop.conf</shadedPattern>
+    </relocation>
+    <relocation>
+        <pattern>org.apache.flink.runtime.util.HadoopUtils</pattern>
+        <shadedPattern>shadow.org.apache.flink.runtime.util.HadoopUtils</shadedPattern>
+    </relocation>
 </relocations>
 ```
 
@@ -40,16 +35,30 @@ This project uses Maven Shade Plugin to handle dependency conflicts:
 
 * Prevents classpath conflicts with Hadoop/Flink internals
 * Ensures our bundled dependencies don't clash with AWS Managed Flink's runtime
-* Required for stable operation with Iceberg and Kinesis connectors
+* Required for stable operation with Iceberg connector
 
 ---
 
-#### Key Takeaways
-1. Relocations are **classpath conflict prevention** mechanisms
-2. Critical for environments like Amazon Managed Service for Apache Flink that have strict classloading rules
-3. Always check for new conflicts when updating dependency versions
+## Excluded Java Versions in maven-shade-plugin
 
----
+We have excluded certain Java versions to avoid errors caused by [multi-release JARs](https://openjdk.org/jeps/238) where the META-INF/versions/XX directories contain **Java version-specific class files**.
+
+Example: A dependency might include optimized code for Java 21+ in META-INF/versions/21/....
+
+### Why Exclude Specific Versions
+
+* Avoid Compatibility Issues - If Flink job runs on an older Java runtime (e.g., Java 11/17), classes compiled for Java 21/22 would cause UnsupportedClassVersionError.
+* Prevent Conflicts - Some libraries include multi-release JARs that conflict with Flink’s dependencies when merged into a fat JAR.
+
+### Why Versions 21/22 Are Explicitly Excluded
+
+* Target Environment - Amazon Managed Service for Apache Flink recommends using Java 11 or Java 17, Java 21/22 classes are unnecessary and risky
+
+### When to Adjust These Exclusions
+
+* If You Upgrade to Java 21+ you can remove these exclusions to leverage performance optimizations in newer dependencies.
+
+* If You See Errors Like: *java.lang.UnsupportedClassVersionError: Unsupported major.minor version 65* → Revisit exclusions to match your runtime Java version.
 
 ### Requirements
 
@@ -70,44 +79,38 @@ This project uses Maven Shade Plugin to handle dependency conflicts:
 
 #### External dependencies
 
-The application expects 1 Kinesis Data Streams.
+The application requires Amazon S3 bucket to write the Iceberg table data. The application also needs appropriate permissions for Amazon S3 and AWS Glue as [discussed below](#iam-permissions).
 
-The stream name is defined in the configuration (see [below](#runtime-configuration)).
-The application defines no default name and region. 
-The [configuration for local development](./application_properties.json) set them, by default, to: 
-
-* `ExampleInputStream`, `us-east-1`
-
-Single-shard Streams in Provisioned mode will be sufficient for the emitted throughput.
+The target Iceberg table parameters are defined in the configuration (see [below](#runtime-configuration)).
 
 #### IAM permissions
 
-The application must have sufficient permissions to publish data to the Kinesis Data Streams.
+The application must have sufficient permissions to read and write to AWS Glue Data Catalog where catalog details will be stored and Amazon S3 bucket where Iceberg table data and metadata will be stored.
 
-When running locally, you need active valid AWS credentials that allow publishing data to the Streams.
+When running locally, you need active valid AWS credentials that allow reading and writing catalog to Glue and data to S3 bucket.
 
 ### Runtime configuration
 
- When running on Amazon Managed Service for Apache Flink the runtime configuration is read from *Runtime Properties*.
+* **Local development**: uses the local file [application_properties.json](./application_properties.json) - **Edit the file with your Iceberg table details which includes catalog name, warehouse location, database name, table name, and AWS region**
+* **On Amazon Managed Service for Apache Fink**: define Runtime Properties, using Group ID and property names based on the content of [application_properties.json](./application_properties.json)
 
- When running locally, the configuration is read from the [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json) file located in the resources folder.
+For this application, the configuration properties to specify are:
 
 Runtime parameters:
 
 | Group ID        | Key                    | Mandatory | Example Value (default for local)    | Notes                         |
 |-----------------|------------------------|-----------|--------------------------------------|-------------------------------|
-| `InputStream0`  | `stream.arn`          | Y         | `arn:aws:kinesis:<region>:<accountId>:stream/ExampleInputStream`                 | Input stream ARN                 |
-| `InputStream0`  | `aws.region`           | Y         | `us-east-1`                          | Region for the input stream.  |
-| `InputStream0`  | `flink.stream.initpos` | N         | `LATEST`                             | Start position in the input stream. `LATEST` by default |
-| `OutputStream0` | `catalog.name`          | Y         | `glue_catalog` | Catalog name to defined               |
-| `OutputStream0` | `aws.region`           | Y         | `us-east-1`                          | Region for the output Iceberg table and catalog.        |
-| `OutputStream0` | `warehouse.path`           | Y         | `s3://my_bucket/my_warehouse`                          | Warehouse path for catalog        |
-| `OutputStream0` | `database.name`           | Y         | `my_database`                          | Database name for Iceberg table        |
-| `OutputStream0` | `table.name`           | Y         | `my_table`                          | Table name to write the data        |
+| `IcebergTable0` | `catalog.name`          | Y         | `glue_catalog` | Catalog name to defined               |
+| `IcebergTable0` | `warehouse.path`           | Y         | `s3://my_bucket/my_warehouse`                          | Warehouse path for catalog        |
+| `IcebergTable0` | `database.name`           | Y         | `my_database`                          | Database name for Iceberg table        |
+| `IcebergTable0` | `table.name`           | Y         | `my_table`                          | Table name to write the data        |
+| `IcebergTable0` | `aws.region`           | Y         | `us-east-1`                          | Region for the output Iceberg table and catalog.        |
 
 
 In addition to these configuration properties, when running a PyFlink application in Managed Flink you need to set two
 [Additional configuring for PyFink application on Managed Flink](#additional-configuring-for-pyfink-application-on-managed-flink).
+
+> If you forget to edit the local `application_properties.json` configuration to point your Iceberg table and warehouse path, the application will fail to start locally.
 
 #### Additional configuring for PyFink application on Managed Flink
 
@@ -139,7 +142,7 @@ If you forget the set the environment variable `IS_LOCAL=true` or forget to run 
 
 > 🚨 The application does not log or print anything. 
 > If you do not see any output in the console, it does not mean the application is not running.
-> The output is sent to the Kinesis streams. You can inspect the content of the streams using the Data Viewer in the Kinesis console
+> The output is sent to the Iceberg table. You can inspect the content of the table using Amazon Athena or Trino/Spark on EMR.
 
 Note: if you modify the Python code, you do not need to re-run `mvn package` before running the application locally.
 
@@ -160,15 +163,15 @@ $ python -c "import pyflink;import os;print(os.path.dirname(os.path.abspath(pyfl
 
 #### Deploy and run on Amazon Managed Service for Apache Flink
 
-1. Make sure you have the 4 required Kinesis Streams
+1. Make sure you have the S3 bucket location for Iceberg warehouse path
 2. Create a Managed Flink application
-3. Modify the application IAM role to allow writing to all the 4 Kinesis Streams
+3. Modify the application IAM role to allow writing to Glue Data catalog and S3 location for the Iceberg table
 4. Package the application: run `mvn clean package` from this directory
 5. Upload to an S3 bucket the zip file that the previous creates in the [`./target`](./target) subdirectory
 6. Configure the Managed Flink application: set Application Code Location to the bucket and zip file you just uploaded
 7. Configure the Runtime Properties of the application, creating the Group ID, Keys and Values as defined in the [application_properties.json](./application_properties.json)
 8. Start the application
-9. When the application transitions to "Ready" you can open the Flink Dashboard to verify the job is running, and you can inspect the data published to the Kinesis Streams, using the Data Viewer in the Kinesis console.
+9. When the application transitions to "Ready" you can open the Flink Dashboard to verify the job is running, and you can inspect the data published to the Iceberg table from Athena or Trino/Spark on EMR.
 
 ##### Troubleshooting Python errors when the application runs on Amazon Managed Service for Apache Flink
 
@@ -217,15 +220,19 @@ Follow this process to make changes to the Python code
 
 ---
 
-### Generating sample data
-
-Use the [Python script](../data-generator/) provided, to generate sample stock data to Kinesis Data Stream.
-
----
-
 ### Application structure
 
-The application consumes data from a Kinesis source and publishes without any modification to a Kinesis sink.
+The application generates synthetic data using the [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/table/datagen/) connector.
+No external data generator is required.
+
+Generated records are written to a destination Iceberg table which cataloged in AWS Glue and data is written to S3.
+
+Data format is Parquet, and partitioning is by the `sensor_id`.
+
+Note that the Iceberg connector writes to S3 on checkpoint. For this reason, when running locally checkpoint is set up programmatically by the application every minute. When deployed on Amazon Managed Service for Apache Flink, the checkpoint
+configuration is configured as part of the Managed Flink application configuration. By default, it's every minute.
+
+If you disable checkpoints (or forget to set it up when running locally) the application runs but never writes any data to S3.
 
 ---
 
@@ -235,7 +242,7 @@ This examples also demonstrate how to include jar dependencies - e.g. connectors
 package it, for deploying on Amazon Managed Service for Apache Flink.
 
 Any jar dependencies must be added to the `<dependencies>` block in the [pom.xml](pom.xml) file.
-In this case, you can see we have included `flink-connector-aws-kinesis-streams` along with the ones needed for Iceberg sink to work with Flink.
+In this case, you can see we have included `iceberg-flink-runtime`, `iceberg-aws-bundle`, `flink-s3-fs-hadoop`, `flink-hadoop-fs`, and AWS SDK for Glue & S3 for Iceberg sink to work with Flink.
 
 Executing `mvn package` takes care of downloading any defined dependencies and create a single "fat-jar" containing all of them.
 This file, is generated in the `./target` subdirectory and is called `pyflink-dependencies.jar`
@@ -245,5 +252,4 @@ This file, is generated in the `./target` subdirectory and is called `pyflink-de
 When running locally, for example in your IDE, PyFlink will look for this jar file in `./target`.
 
 When you are happy with your Python code and you are ready to deploy the application to Amazon Managed Service for Apache Flink,
-run `mvn package` **again**. The zip file you find in `./target` is the artifact to upload to S3, containing
-both jar dependencies and your Python code.
+run `mvn package` **again**. The zip file you find in `./target` is the artifact to upload to S3, containing both jar dependencies and your Python code.

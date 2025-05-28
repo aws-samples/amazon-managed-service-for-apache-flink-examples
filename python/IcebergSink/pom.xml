@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.amazonaws</groupId>
-    <artifactId>managed-flink-pyfink-kinesis-to-iceberg</artifactId>
+    <artifactId>managed-flink-pyfink-iceberg-sink-example</artifactId>
     <version>1.0.0</version>
 
     <properties>
@@ -15,7 +15,6 @@
         <flink.version>1.20.0</flink.version>
         <flink.major.version>1.20</flink.major.version>
         <iceberg.version>1.9.0</iceberg.version>
-        <aws.connector.version>5.0.0-1.20</aws.connector.version>
         <awssdk.version>2.31.48</awssdk.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
     </properties>
@@ -34,11 +33,6 @@
 
     <!-- Specify any jar dependencies (e.g. connectors) required -->
     <dependencies>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-aws-kinesis-streams</artifactId>
-            <version>${aws.connector.version}</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/software.amazon.awssdk/glue -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
@@ -108,10 +102,14 @@
                                         <exclude>META-INF/*.SF</exclude>
                                         <exclude>META-INF/*.DSA</exclude>
                                         <exclude>META-INF/*.RSA</exclude>
+                                        <!-- Block Multi-Release JAR Classes.
+                                        If Flink job runs on an older Java runtime (e.g., Java 11/17), 
+                                        classes compiled for Java 21/22 would cause UnsupportedClassVersionError.
+                                        Example error: 
+                                        "java.lang.UnsupportedClassVersionError: Unsupported major.minor version 65"
+                                        -->
                                         <exclude>META-INF/versions/21/**</exclude>
                                         <exclude>META-INF/versions/22/**</exclude>
-                                        <!-- <exclude>META-INF/versions/17/**</exclude>
-                                        <exclude>META-INF/versions/**</exclude> -->
                                     </excludes>
                                 </filter>
                             </filters>
@@ -122,16 +120,18 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                 </transformer>
                             </transformers>
+                            <!-- Renames (relocates) Hadoop/Flink classes to avoid version conflicts when deploying to environments with pre-existing dependencies.
+                            This prevents ClassNotFoundException or NoSuchMethodError issues caused by conflicting library versions in the runtime classpath.-->
                             <relocations>
-								<relocation>
-									<pattern>org.apache.hadoop.conf</pattern>
-									<shadedPattern>shaded.org.apache.hadoop.conf</shadedPattern>
-								</relocation>
-								<relocation>
-									<pattern>org.apache.flink.runtime.util.HadoopUtils</pattern>
-									<shadedPattern>shadow.org.apache.flink.runtime.util.HadoopUtils</shadedPattern>
-								</relocation>
-							</relocations>
+                                <relocation>
+                                    <pattern>org.apache.hadoop.conf</pattern>
+                                    <shadedPattern>shaded.org.apache.hadoop.conf</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.apache.flink.runtime.util.HadoopUtils</pattern>
+                                    <shadedPattern>shadow.org.apache.flink.runtime.util.HadoopUtils</shadedPattern>
+                                </relocation>
+                            </relocations>
                         </configuration>
                     </execution>
                 </executions>
