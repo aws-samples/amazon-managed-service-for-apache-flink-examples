@@ -29,6 +29,7 @@
         <module>KafkaConfigProviders/Kafka-mTLS-Keystore-Sql-ConfigProviders</module>
         <module>KafkaConnectors</module>
         <module>KinesisConnectors</module>
+        <module>KinesisSourceDeaggregation</module>
         <module>DynamoDBStreamSource</module>
         <module>KinesisFirehoseSink</module>
         <module>S3ParquetSink</module>
@@ -39,5 +40,7 @@
         <module>SideOutputs</module>
         <module>PrometheusSink</module>
         <module>SQSSink</module>
+        <module>S3AvroSink</module>
+        <module>S3AvroSource</module>
     </modules>
 </project>

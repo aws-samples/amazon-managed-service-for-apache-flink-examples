@@ -13,6 +13,9 @@ a bucketing in the format `year=yyyy/month=MM/day=dd/hour=HH/` and rotating file
 Note that FileSystem sink commit the writes on checkpoint. For this reason, checkpoint are programmatically enabled when running locally.
 When running on Managed Flink checkpoints are controlled by the application configuration and enabled by default.
 
+> ⚠️ Reading Parquest files from S3 is currently not supported in Amazon Managed Service for Apache Flink using the Flink 1.20 runtime.
+
+
 ## Prerequisites
 
 * An S3 bucket for writing data. The application IAM Role must allow writing to the bucket
