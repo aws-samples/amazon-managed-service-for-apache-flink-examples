@@ -12,6 +12,11 @@
         <buildDirectory>${project.basedir}/target</buildDirectory>
         <zip.finalName>${project.name}-${project.version}</zip.finalName>
         <jar.finalName>pyflink-dependencies</jar.finalName>
+
+        <target.java.version>11</target.java.version>
+        <maven.compiler.source>${target.java.version}</maven.compiler.source>
+        <maven.compiler.target>${target.java.version}</maven.compiler.target>
+
         <flink.version>1.20.0</flink.version>
         <flink.major.version>1.20</flink.major.version>
         <iceberg.version>1.9.0</iceberg.version>
@@ -20,15 +25,15 @@
     </properties>
 
     <dependencyManagement>
-      <dependencies>
-        <dependency>
-          <groupId>software.amazon.awssdk</groupId>
-          <artifactId>bom</artifactId>
-          <version>${awssdk.version}</version>
-          <type>pom</type>
-          <scope>import</scope>
-        </dependency>
-      </dependencies>
+        <dependencies>
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>${awssdk.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
     </dependencyManagement>
 
     <!-- Specify any jar dependencies (e.g. connectors) required -->
@@ -68,6 +73,16 @@
     <build>
         <directory>${buildDirectory}</directory>
         <plugins>
+            <!-- Java Compiler -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>${target.java.version}</source>
+                    <target>${target.java.version}</target>
+                </configuration>
+            </plugin>
 
             <!-- Maven Shade Plugin to create the "fat-jar" with all required dependencies -->
             <plugin>
