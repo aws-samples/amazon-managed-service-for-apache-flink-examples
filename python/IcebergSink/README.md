@@ -41,24 +41,18 @@ This project uses Maven Shade Plugin to handle dependency conflicts:
 
 ## Excluded Java Versions in maven-shade-plugin
 
+Apache Flink 1.20 [only supports Java 11 as non-experimental](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/deployment/java_compatibility/). 
+Amazon Managed Service for Apache Flink currently runs on Java 11. 
+Any Java code must be compiled with a target java version 11.
+
 We have excluded certain Java versions to avoid errors caused by [multi-release JARs](https://openjdk.org/jeps/238) where the META-INF/versions/XX directories contain **Java version-specific class files**.
 
 Example: A dependency might include optimized code for Java 21+ in META-INF/versions/21/....
 
 ### Why Exclude Specific Versions
 
-* Avoid Compatibility Issues - If Flink job runs on an older Java runtime (e.g., Java 11/17), classes compiled for Java 21/22 would cause UnsupportedClassVersionError.
+*  Avoid Compatibility Issues - If you include JAR dependencies compiled for Java 21/22 you may face errors like  *java.lang.UnsupportedClassVersionError: Unsupported major.minor version 65* 
 * Prevent Conflicts - Some libraries include multi-release JARs that conflict with Flink’s dependencies when merged into a fat JAR.
-
-### Why Versions 21/22 Are Explicitly Excluded
-
-* Target Environment - Amazon Managed Service for Apache Flink recommends using Java 11 or Java 17, Java 21/22 classes are unnecessary and risky
-
-### When to Adjust These Exclusions
-
-* If You Upgrade to Java 21+ you can remove these exclusions to leverage performance optimizations in newer dependencies.
-
-* If You See Errors Like: *java.lang.UnsupportedClassVersionError: Unsupported major.minor version 65* → Revisit exclusions to match your runtime Java version.
 
 ### Requirements
 
@@ -75,7 +69,7 @@ Example: A dependency might include optimized code for Java 21+ in META-INF/vers
 > JDK and Maven are used to download and package any required Flink dependencies, e.g. connectors, and
   to package the application as `.zip` file, for deployment to Amazon Managed Service for Apache Flink.
 
-> This code has been tested and compiled using Java JDK 17.0.15 (Corretto-17.0.15.6.1) and mvn 3.9.9
+> This code has been tested and compiled using OpenJDK 11.0.22 and Maven 3.9.6
 
 #### External dependencies
 
@@ -98,13 +92,13 @@ For this application, the configuration properties to specify are:
 
 Runtime parameters:
 
-| Group ID        | Key                    | Mandatory | Example Value (default for local)    | Notes                         |
-|-----------------|------------------------|-----------|--------------------------------------|-------------------------------|
-| `IcebergTable0` | `catalog.name`          | Y         | `glue_catalog` | Catalog name to defined               |
-| `IcebergTable0` | `warehouse.path`           | Y         | `s3://my_bucket/my_warehouse`                          | Warehouse path for catalog        |
-| `IcebergTable0` | `database.name`           | Y         | `my_database`                          | Database name for Iceberg table        |
-| `IcebergTable0` | `table.name`           | Y         | `my_table`                          | Table name to write the data        |
-| `IcebergTable0` | `aws.region`           | Y         | `us-east-1`                          | Region for the output Iceberg table and catalog.        |
+| Group ID        | Key             | Mandatory | Example Value (default for local) | Notes                                            |
+|-----------------|-----------------|-----------|-----------------------------------|--------------------------------------------------|
+| `IcebergTable0` | `catalog.name`  | Y         | `glue_catalog`                    | Catalog name to defined                          |
+| `IcebergTable0` | `warehouse.path`| Y         | `s3://my_bucket/my_warehouse`     | Warehouse path for catalog                       |
+| `IcebergTable0` | `database.name` | Y         | `my_database`                     | Database name for Iceberg table                  |
+| `IcebergTable0` | `table.name`    | Y         | `my_table`                        | Table name to write the data                     |
+| `IcebergTable0` | `aws.region`    | Y         | `us-east-1`                       | Region for the output Iceberg table and catalog. |
 
 
 In addition to these configuration properties, when running a PyFlink application in Managed Flink you need to set two
