@@ -1,0 +1,19 @@
+[
+  {
+  "PropertyGroupId": "kinesis.analytics.flink.run.options",
+  "PropertyMap": {
+    "python": "main.py",
+    "jarfile": "lib/pyflink-dependencies.jar"
+   }
+  },
+  {
+    "PropertyGroupId": "IcebergTable0",
+    "PropertyMap": {
+      "catalog.name": "glue_catalog",
+      "warehouse.path": "s3://my_bucket/my_warehouse",
+      "database.name": "my_database",
+      "table.name": "my_table",
+      "aws.region": "us-east-1"
+    }
+  }
+]
