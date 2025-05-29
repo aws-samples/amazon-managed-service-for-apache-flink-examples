@@ -21,9 +21,7 @@
         <kda.runtime.version>1.2.0</kda.runtime.version>
         <avro.version>1.11.3</avro.version>
         <parquet.avro.version>1.12.3</parquet.avro.version>
-        <!--        <hadoop.version>3.3.6</hadoop.version>-->
         <hadoop.version>3.3.4</hadoop.version> <!-- this is the version Flink 1.20.0 uses for FS plugin -->
-        <!--        <hadoop.version>2.10.2</hadoop.version> &lt;!&ndash; this is the version Flink 1.20.0 uses &ndash;&gt;-->
         <aws.connector.version>5.0.0-1.20</aws.connector.version>
         <log4j.version>2.23.1</log4j.version>
         <junit5.version>5.8.1</junit5.version>
@@ -63,6 +61,12 @@
             <version>${flink.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-json</artifactId>
+            <version>${flink.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Library to retrieve runtime application properties in Managed Service for Apache Flink  -->
         <dependency>
@@ -75,51 +79,44 @@
         <!-- Flink connectors -->
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-files</artifactId>
-            <version>${flink.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-s3-fs-hadoop</artifactId>
-            <version>${flink.version}</version>
-            <!-- This is available as plugin on the cluster -->
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-aws-kinesis-streams</artifactId>
             <version>${aws.connector.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-files</artifactId>
+            <version>${flink.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Hadoop S3 File System, required locally. On the Flink cluster it is installed as plugin -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-s3-fs-hadoop</artifactId>
+            <version>${flink.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Hadoop client, required to write Parquet with FileSystem sink -->
+        <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client</artifactId>
             <version>${hadoop.version}</version>
-            <exclusions>
-                <!-- Exclude hadoop-common that is provided with flink-s3-fs-hadoop -->
-<!--                <exclusion>-->
-<!--                    <groupId>org.apache.hadoop</groupId>-->
-<!--                    <artifactId>hadoop-common</artifactId>-->
-<!--                </exclusion>-->
-                <!-- If not excluded, these dependencies cause clashing SLF4J bindings -->
-                <exclusion>
-                    <groupId>ch.qos.reload4j</groupId>
-                    <artifactId>reload4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
 
-                <!-- More exclusions from Flink FS POM -->
+            <exclusions>
+                <!-- Excluding most of transitive dependencies, not really used, to reduce the size of the JAR -->
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-yarn-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-yarn-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>jdk.tools</groupId>
                     <artifactId>jdk.tools</artifactId>
@@ -228,13 +225,25 @@
                     <groupId>net.minidev</groupId>
                     <artifactId>json-smart</artifactId>
                 </exclusion>
+
+                <!-- Exclusions to avoid clashing of SLF4J bindings -->
+                <exclusion>
+                    <groupId>ch.qos.reload4j</groupId>
+                    <artifactId>reload4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-hadoop-compatibility_2.12</artifactId>
-            <version>${flink.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <!-- Parquet -->
@@ -364,9 +373,22 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.amazonaws.services.msf.StreamingJob</mainClass>
+                                    <mainClass>com.amazonaws.services.msf.S3ParquetToKinesisJob</mainClass>
                                 </transformer>
                             </transformers>
+
+                            <!-- We relocate Hadoop-conf classes packaged with the application,
+                            along with the modified HadoopUtils class -->
+                            <relocations>
+                                <relocation>
+                                    <pattern>org.apache.hadoop.conf</pattern>
+                                    <shadedPattern>shaded.org.apache.hadoop.conf</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.apache.flink.runtime.util.HadoopUtils</pattern>
+                                    <shadedPattern>shadow.org.apache.flink.runtime.util.HadoopUtils</shadedPattern>
+                                </relocation>
+                            </relocations>
                         </configuration>
                     </execution>
                 </executions>
