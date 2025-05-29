@@ -21,12 +21,12 @@ or, when running locally, from the [`resources/flink-application-properties-dev.
 
 All parameters are case-sensitive.
 
-| Group ID         | Key            | Description                        | 
-|------------------|----------------|------------------------------------|
-| `OutputBucket`   | `bucket.name`  | Name of the destination S3 bucket. |
-| `OutputBucket`   | `bucket.path`  | Base path withing the bucket.      |
-| `OutputStream0`  | `stream.arn`   | ARN of the output stream.          |
-| `OutputStream0`  | `aws.region`   | Region of the output stream.       |
+| Group ID        | Key            | Description                   | 
+|-----------------|----------------|-------------------------------|
+| `InputBucket`   | `bucket.name`  | Name of the source S3 bucket. |
+| `InputBucket`   | `bucket.path`  | Base path within the bucket.  |
+| `OutputStream0` | `stream.arn`   | ARN of the output stream.     |
+| `OutputStream0` | `aws.region`   | Region of the output stream.  |
 
 Every parameter in the `OutputStream0` is passed to the Kinesis client of the sink.
 

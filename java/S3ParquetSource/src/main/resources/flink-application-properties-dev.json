@@ -1,0 +1,17 @@
+[
+  {
+    "PropertyGroupId": "InputBucket",
+    "PropertyMap": {
+      "bucket.name": "<bucket-name>",
+      "bucket.path": "parquetstockprices",
+      "discovery.interval.seconds": "30"
+    }
+  },
+  {
+    "PropertyGroupId": "OutputStream0",
+    "PropertyMap": {
+      "stream.arn": "arn:aws:kinesis:us-east-1:<account-id>:stream/<stream-name>",
+      "aws.region": "us-east-1"
+    }
+  }
+]
