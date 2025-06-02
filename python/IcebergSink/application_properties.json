@@ -10,7 +10,7 @@
     "PropertyGroupId": "IcebergTable0",
     "PropertyMap": {
       "catalog.name": "glue_catalog",
-      "warehouse.path": "s3://my_bucket/my_warehouse",
+      "warehouse.path": "s3://<bucket-name>/my_warehouse",
       "database.name": "my_database",
       "table.name": "my_table",
       "aws.region": "us-east-1"
