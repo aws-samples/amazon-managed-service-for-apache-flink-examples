@@ -1,0 +1,20 @@
+[
+  {
+    "PropertyGroupId": "CDCSource",
+    "PropertyMap": {
+      "hostname": "localhost",
+      "port": "1433",
+      "username": "flink_cdc",
+      "password": "FlinkCDC@123",
+      "database.name": "SampleDataPlatform",
+      "table.name": "dbo.Customers"
+    }
+  },
+  {
+    "PropertyGroupId": "DynamoDBSink",
+    "PropertyMap": {
+      "table.name": "Customers",
+      "aws.region": "us-east-1"
+    }
+  }
+]
