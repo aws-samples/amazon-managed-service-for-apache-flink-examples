@@ -14,6 +14,23 @@ to capture changes from a database, and sink data to a DynamoDB table doing upse
 
 TBD
 
+### Requirements
+
+1. SQL Server Agent must be running
+2. The user passed to FlinCDC must be `db_owner` for the database
+3. CDC must be enabled both on the database AND on the table
+    ```sql
+    USE MyDB;
+    EXEC sys.sp_cdc_enable_db;
+    
+    EXEC sys.sp_cdc_enable_table
+         @source_schema = N'dbo',
+         @source_name = N'Customers',
+         @role_name = NULL,
+         @supports_net_changes = 0;
+    ```
+
+
 ## References
 
 * [Flink CDC SQL Server documentation](https://nightlies.apache.org/flink/flink-cdc-docs-release-3.4/docs/connectors/flink-sources/sqlserver-cdc)
