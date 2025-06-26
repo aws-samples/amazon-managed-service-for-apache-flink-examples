@@ -7,8 +7,10 @@ Flink API: SQL
 Language: Java (11)
 Flink connectors: Flink CDC SQL Server source (3.4), JDBC sink
 
-The job is implemented in SQL embedded in Java. It uses the [Flink CDC SQL Server source connector](https://nightlies.apache.org/flink/flink-cdc-docs-release-3.4/docs/connectors/flink-sources/sqlserver-cdc/)
-to capture changes from a database, and propagates the changes to a different database using [JDBC Sink connector](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/table/jdbc/).
+The job is implemented in SQL embedded in Java. 
+It uses the [Flink CDC SQL Server source connector](https://nightlies.apache.org/flink/flink-cdc-docs-release-3.4/docs/connectors/flink-sources/sqlserver-cdc/)
+to capture changes from a database.
+Changes are propagated to the destination database using [JDBC Sink connector](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/table/jdbc/).
 
 ### Source database
 
@@ -21,13 +23,13 @@ See [Flink CDC Sources documentation](https://nightlies.apache.org/flink/flink-c
 
 ### Destination database
 
-Note that the JDBC sink is agnostic to the actual destination database technology. This example is tested with both MySQL 
-and PostgreSQL but can be easily adjusted to different databases.
+Note that the JDBC sink is agnostic to the actual destination database technology. 
+This example is tested with both MySQL and PostgreSQL but can be easily adjusted to different databases.
 
 The `JdbcSink` `url` decides the destination database (see [Runtime configuration](#runtime-configuration), below).
 The correct JDBC driver must be included in the `pom.xml`. This example includes both MySQL and PostgreSQL drivers.
 
-### Testing locally using Docker Compose
+### Testing with local databases using Docker Compose
 
 This example can be run locally using Docker.
 
@@ -67,11 +69,17 @@ When running on Amazon Managed Service for Apache Flink and with databases on AW
       CONSTRAINT [CustomerPK] PRIMARY KEY CLUSTERED ([CustomerID] ASC)
       ) ON [PRIMARY];
       ```
-   6. CDC must be enabled both on the source database AND on the table
+   6. CDC must be enabled both on the source database. on Amazon RDS SQL Server use the following stored procedure:
+      ```sql
+      exec msdb.dbo.rds_cdc_enable_db 'MyDB'
+      ```
+      On self-managed SQL server you need to call a different procedure, while in the database:
        ```sql
        USE MyDB;
        EXEC sys.sp_cdc_enable_db;
-    
+       ```
+   7. CDC must also be enabled on the table:   
+       ```sql
        EXEC sys.sp_cdc_enable_table
             @source_schema = N'dbo',
             @source_name = N'Customers',
@@ -97,19 +105,44 @@ When running on Amazon Managed Service for Apache Flink and with databases on AW
 ### Running in IntelliJ
 
 You can run this example directly in IntelliJ, without any local Flink cluster or local Flink installation.
+Run the databases locally using Docker Compose, as described [above](#testing-with-local-databases-using-docker-compose).
 
-See [Running examples locally](../../running-examples-locally.md) for details.
+See [Running examples locally](../../running-examples-locally.md) for details about running the application in the IDE.
 
 
 ### Running on Amazon Managed Service for Apache Flink
 
-TBD
-(set up VPC connectivity)
+To run the application in Amazon Managed Service for Apache Flink make sure the application configuration has the following:
+* VPC networking 
+* The selected Subnets can route traffic to both the source and destination databases
+* The Security Group allow traffic from the application to both source and destination databases
+
 
 ### Runtime configuration
 
-TBD
+When running on Amazon Managed Service for Apache Flink the runtime configuration is read from *Runtime Properties*.
 
+When running locally, the configuration is read from the [`resources/flink-application-properties-dev.json`](resources/flink-application-properties-dev.json) file located in the resources folder.
+
+Runtime parameters:
+
+| Group ID    | Key             | Description                                                                                                                | 
+|-------------|-----------------|----------------------------------------------------------------------------------------------------------------------------|
+| `CDCSource` | `hostname`      | Source database DNS hostname or IP                                                                                         |
+| `CDCSource` | `port`          | Source database port (normally `1433`)                                                                                     |
+| `CDCSource` | `username`      | Source database username. The user must be `dbo` of the database                                                           |
+| `CDCSource` | `password`      | Source database password                                                                                                   |
+| `CDCSource` | `database.name` | Source database name                                                                                                       |
+| `CDCSource` | `table.name`    | Source table name. e.g. `dbo.Customers`                                                                                    |
+| `JdbcSink`  | `url`           | Destination database JDBC URL. e.g. `jdbc:postgresql://localhost:5432/targetdb`. Note: the URL includes the database name. |
+| `JdbcSink`  | `table.name`    | Destination table. e.g. `customers`                                                                                        |
+| `JdbcSink`  | `username`      | Destination database user                                                                                                  |
+| `JdbcSink`  | `password`      | Destination database password                                                                                              |
+
+### Known limitations
+
+Using the SQL interface of Flink CDC Sources greatly simplify the implementation of a passthrough application.
+However, schema changes in the source table are ignored.
 
 ## References
 
