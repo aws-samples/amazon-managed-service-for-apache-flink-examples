@@ -11,10 +11,12 @@
     }
   },
   {
-    "PropertyGroupId": "DynamoDBSink",
+    "PropertyGroupId": "JdbcSink",
     "PropertyMap": {
-      "table.name": "Customers",
-      "aws.region": "us-east-1"
+      "table.name": "customers",
+      "url": "jdbc:postgresql://localhost:5432/targetdb",
+      "username": "flinkusr",
+      "password": "PassW0rd!"
     }
   }
 ]

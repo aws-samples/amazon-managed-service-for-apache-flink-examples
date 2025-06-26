@@ -18,7 +18,9 @@
         <maven.compiler.target>${target.java.version}</maven.compiler.target>
         <flink.version>1.20.0</flink.version>
         <flink.cdc.version>3.4.0</flink.cdc.version>
-        <aws.connectors.version>5.0.0-1.20</aws.connectors.version>
+        <flink.jdbc.connector.version>3.3.0-1.20</flink.jdbc.connector.version>
+        <mysql.jdbc.driver.version>9.3.0</mysql.jdbc.driver.version>
+        <postgresql.jdbc.driver.version>42.7.2</postgresql.jdbc.driver.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
         <log4j.version>2.23.1</log4j.version>
     </properties>
@@ -86,9 +88,23 @@
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-dynamodb</artifactId>
-            <version>${aws.connectors.version}</version>
+            <artifactId>flink-connector-jdbc</artifactId>
+            <version>${flink.jdbc.connector.version}</version>
         </dependency>
+
+        <!-- JDBC drivers -->
+        <!-- Only include the driver of the database you are using as destination -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>${mysql.jdbc.driver.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${postgresql.jdbc.driver.version}</version>
+        </dependency>
+
 
         <!-- Add logging framework, to produce console output when running in the IDE. -->
         <!-- These dependencies are excluded from the application JAR by default. -->
@@ -163,7 +179,7 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.amazonaws.services.msf.FlinkCDCSqlServerSourceJob</mainClass>
+                                    <mainClass>com.amazonaws.services.msf.FlinkCDCSqlServer2JdbcJob</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

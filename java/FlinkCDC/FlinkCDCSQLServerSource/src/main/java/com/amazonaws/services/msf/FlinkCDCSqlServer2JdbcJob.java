@@ -14,16 +14,13 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 
-public class FlinkCDCSqlServerSourceJob {
-    private static final Logger LOG = LoggerFactory.getLogger(FlinkCDCSqlServerSourceJob.class);
+public class FlinkCDCSqlServer2JdbcJob {
+    private static final Logger LOG = LoggerFactory.getLogger(FlinkCDCSqlServer2JdbcJob.class);
 
     // Name of the local JSON resource with the application properties in the same format as they are received from the Amazon Managed Service for Apache Flink runtime
     private static final String LOCAL_APPLICATION_PROPERTIES_RESOURCE = "flink-application-properties-dev.json";
 
     private static final int DEFAULT_CDC_DB_PORT = 1433;
-    private static final String DEFAULT_CDC_DATABASE_NAME = "SampleDataPlatform";
-    private static final String DEFAULT_CDC_TABLE_NAME = "dbo.Customers";
-    private static final String DEFAULT_DDB_TABLE_NAME = "Customers";
 
     private static boolean isLocal(StreamExecutionEnvironment env) {
         return env instanceof LocalStreamEnvironment;
@@ -36,7 +33,7 @@ public class FlinkCDCSqlServerSourceJob {
         if (isLocal(env)) {
             LOG.info("Loading application properties from '{}'", LOCAL_APPLICATION_PROPERTIES_RESOURCE);
             return KinesisAnalyticsRuntime.getApplicationProperties(
-                    FlinkCDCSqlServerSourceJob.class.getClassLoader()
+                    FlinkCDCSqlServer2JdbcJob.class.getClassLoader()
                             .getResource(LOCAL_APPLICATION_PROPERTIES_RESOURCE).getPath());
         } else {
             LOG.info("Loading application properties from Amazon Managed Service for Apache Flink");
@@ -69,8 +66,8 @@ public class FlinkCDCSqlServerSourceJob {
                 "  LastName STRING," +
                 "  mail STRING," +
                 // Some additional metadata columns for demonstration purposes
-                "  `_ingestion_ts` AS PROCTIME()," + // The time when Flink is processing this record
-                "  `_operation_ts` TIMESTAMP_LTZ(3) METADATA FROM 'op_ts' VIRTUAL," + // The time when the operation was executed on the db
+                "  `_change_processed_at` AS PROCTIME()," + // The time when Flink is processing this record
+                "  `_source_updated_at` TIMESTAMP_LTZ(3) METADATA FROM 'op_ts' VIRTUAL," + // The time when the operation was executed on the db
                 "  `_table_name` STRING METADATA FROM 'table_name' VIRTUAL," + // Name of the table in the source db
                 "  `_schema_name` STRING METADATA FROM 'schema_name' VIRTUAL, " + // Name of the schema in the source db
                 "  `_db_name` STRING METADATA FROM 'database_name' VIRTUAL," + // name of the database
@@ -82,54 +79,74 @@ public class FlinkCDCSqlServerSourceJob {
                 "  'username' = '" + Preconditions.checkNotNull(cdcSourceProperties.getProperty("username"), "missing CDC source username") + "'," +
                 // For simplicity, we are passing the db password as a runtime configuration unencrypted. This should be avoided in production
                 "  'password' = '" + Preconditions.checkNotNull(cdcSourceProperties.getProperty("password"), "missing CDC source password") + "'," +
-                "  'database-name' = '" + Preconditions.checkNotNull(cdcSourceProperties.getProperty("database.name", DEFAULT_CDC_DATABASE_NAME), "missing CDC source database name") + "'," +
-                "  'table-name' = '" + Preconditions.checkNotNull(cdcSourceProperties.getProperty("table.name", DEFAULT_CDC_TABLE_NAME), "missing CDC source table name") + "'" +
+                "  'database-name' = '" + Preconditions.checkNotNull(cdcSourceProperties.getProperty("database.name"), "missing CDC source database name") + "'," +
+                "  'table-name' = '" + Preconditions.checkNotNull(cdcSourceProperties.getProperty("table.name"), "missing CDC source table name") + "'" +
                 ")");
 
 
-        // Create a DynamoDB sink table
-        Properties dynamoDBProperties = applicationProperties.get("DynamoDBSink");
-        tableEnv.executeSql("CREATE TABLE DDBSinkTable (" +
-                "  CustomerID INT," +
-                "  FirstName STRING," +
-                "  MiddleInitial STRING," +
-                "  LastName STRING," +
-                "  mail STRING," +
-                "  `_ingestion_ts` TIMESTAMP_LTZ(3)," +
-                "  `_operation_ts` TIMESTAMP_LTZ(3)," +
-                "  `_table_name` STRING," +
-                "  `_schema_name` STRING," +
-                "  `_db_name` STRING" +
-                //               "  PRIMARY KEY(CustomerID) NOT ENFORCED" +
-                ") PARTITIONED BY (`CustomerID`) " +
-                "WITH (" +
-                "  'connector' = 'dynamodb'," +
-                "  'table-name' = '" + Preconditions.checkNotNull(dynamoDBProperties.getProperty("table.name", DEFAULT_DDB_TABLE_NAME), "missing DynamoDB table name") + "'," +
-                "  'aws.region' = '" + Preconditions.checkNotNull(dynamoDBProperties.getProperty("aws.region"), "missing AWS region") + "'" +
-                ")");
-
-        // While developing locally, you can comment the sink table to DynamoDB and uncomment the following table to print records to the console
-        // When the job is running on Managed Flink any output to console is not visible
-        tableEnv.executeSql("CREATE TABLE PrintSinkTable (" +
-                "  CustomerID INT," +
-                "  FirstName STRING," +
-                "  MiddleInitial STRING," +
-                "  LastName STRING," +
-                "  mail STRING," +
-                "  `_ingestion_ts` TIMESTAMP_LTZ(3)," +
-                "  `_operation_ts` TIMESTAMP_LTZ(3)," +
-                "  `_table_name` STRING," +
-                "  `_schema_name` STRING," +
-                "  `_db_name` STRING," +
-                "  PRIMARY KEY(CustomerID) NOT ENFORCED" +
+        // Create a JDBC sink table
+        // Note that the definition of the table is agnostic to the actual destination database (e.g. MySQL or PostgreSQL)
+        Properties jdbcSinkProperties = applicationProperties.get("JdbcSink");
+        tableEnv.executeSql("CREATE TABLE DestinationTable (" +
+                "  customer_id INT," +
+                "  first_name STRING," +
+                "  middle_initial STRING," +
+                "  last_name STRING," +
+                "  email STRING," +
+                "  _source_updated_at TIMESTAMP(3)," +
+                "  _change_processed_at TIMESTAMP(3)," +
+                "  PRIMARY KEY(customer_id) NOT ENFORCED" +
                 ") WITH (" +
-                "  'connector' = 'print'" +
+                "  'connector' = 'jdbc'," +
+                "  'url' = '" + Preconditions.checkNotNull(jdbcSinkProperties.getProperty("url"), "missing destination database JDBC URL") + "'," +
+                "  'table-name' = '" + Preconditions.checkNotNull(jdbcSinkProperties.getProperty("table.name"), "missing destination database table name") + "'," +
+                "  'username' = '" + Preconditions.checkNotNull(jdbcSinkProperties.getProperty("username"), "missing destination database username") + "'," +
+                "  'password' = '" + Preconditions.checkNotNull(jdbcSinkProperties.getProperty("password"), "missing destination database password") + "'" +
                 ")");
+
+        // While developing locally it may be useful to also print the output to console.
+        // When the job is running on Managed Flink any output to console is not visible and it would cause overhead
+        if( isLocal(env)) {
+            tableEnv.executeSql("CREATE TABLE PrintSinkTable (" +
+                    "  CustomerID INT," +
+                    "  FirstName STRING," +
+                    "  MiddleInitial STRING," +
+                    "  LastName STRING," +
+                    "  mail STRING," +
+                    "  `_change_processed_at` TIMESTAMP_LTZ(3)," +
+                    "  `_source_updated_at` TIMESTAMP_LTZ(3)," +
+                    "  `_table_name` STRING," +
+                    "  `_schema_name` STRING," +
+                    "  `_db_name` STRING," +
+                    "  PRIMARY KEY(CustomerID) NOT ENFORCED" +
+                    ") WITH (" +
+                    "  'connector' = 'print'" +
+                    ")");
+        }
 
 
         StreamStatementSet statementSet = tableEnv.createStatementSet();
-        statementSet.addInsertSql("INSERT INTO DDBSinkTable SELECT * FROM Customers");
-        statementSet.addInsertSql("INSERT INTO PrintSinkTable SELECT * FROM Customers");
+        statementSet.addInsertSql("INSERT INTO DestinationTable (" +
+                "customer_id, " +
+                "first_name, " +
+                "middle_initial, " +
+                "last_name, " +
+                "email, " +
+                "_source_updated_at, " +
+                "_change_processed_at" +
+                ") SELECT " +
+                "CustomerID, " +
+                "FirstName, " +
+                "MiddleInitial, " +
+                "LastName, " +
+                "mail, " +
+                "`_source_updated_at`, " +
+                "`_change_processed_at` " +
+                "FROM Customers");
+        if( isLocal(env)) {
+            statementSet.addInsertSql("INSERT INTO PrintSinkTable SELECT * FROM Customers");
+        }
+
 
         // Execute the two INSERT INTO statements
         statementSet.execute();
