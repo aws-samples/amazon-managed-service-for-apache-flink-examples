@@ -1,10 +1,15 @@
-## Configuring Kafka connectors secrets at runtime, using Config Providers
+# Kafka Config Providers Examples
 
-This directory includes example that shows how to configure secrets for Kafka connector authentication
-scheme at runtime, using [MSK Config Providers](https://github.com/aws-samples/msk-config-providers).
+Examples demonstrating secure configuration management for Kafka connectors using MSK Config Providers in Amazon Managed Service for Apache Flink.
 
-Using Config Providers, secrets and files (TrustStore and KeyStore) required to set up the Kafka authentication
-and SSL, can be fetched at runtime and not embedded in the application JAR.
+These examples show how to configure secrets and certificates for Kafka connector authentication at runtime, 
+without embedding sensitive information in the application JAR, leveraging [MSK Config Providers](https://github.com/aws-samples/msk-config-providers).
 
-* [Configuring mTLS TrustStore and KeyStore using Config Providers](./Kafka-mTLS-KeystoreWithConfigProviders)
-* [Configuring SASL/SCRAM (SASL_SSL) TrustStore and credentials using Config Providers](./Kafka-SASL_SSL-WithConfigProviders)
+## Table of Contents
+
+### mTLS Authentication
+- [**Kafka mTLS with DataStream API**](./Kafka-mTLS-Keystore-ConfigProviders) - Using Config Providers to fetch KeyStore and passwords for mTLS authentication with DataStream API
+- [**Kafka mTLS with Table API & SQL**](./Kafka-mTLS-Keystore-Sql-ConfigProviders) - Using Config Providers to fetch KeyStore and passwords for mTLS authentication with Table API & SQL
+
+### SASL Authentication
+- [**Kafka SASL/SCRAM**](./Kafka-SASL_SSL-ConfigProviders) - Using Config Providers to fetch SASL/SCRAM credentials from AWS Secrets Manager
