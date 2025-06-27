@@ -104,8 +104,9 @@ public class FlinkCDCSqlServer2JdbcJob {
                 "  'password' = '" + Preconditions.checkNotNull(jdbcSinkProperties.getProperty("password"), "missing destination database password") + "'" +
                 ")");
 
-        // While developing locally it may be useful to also print the output to console.
-        // When the job is running on Managed Flink any output to console is not visible and it would cause overhead
+        // When running locally we add a secondary sink to print the output to the console.
+        // When the job is running on Managed Flink any output to console is not visible and may cause overhead.
+        // It is recommended not to print any output to the console when running the application on Managed Flink.
         if( isLocal(env)) {
             tableEnv.executeSql("CREATE TABLE PrintSinkTable (" +
                     "  CustomerID INT," +
@@ -124,7 +125,9 @@ public class FlinkCDCSqlServer2JdbcJob {
                     ")");
         }
 
-
+        // Note that we use a statement set to add the two "INSERT INTO..." statements.
+        // When tableEnv.executeSQL(...) is used with INSERT INTO on a job running in Application mode, like on Managed Flink,
+        // the first statement triggers the job execution, and any code which follows is ignored.
         StreamStatementSet statementSet = tableEnv.createStatementSet();
         statementSet.addInsertSql("INSERT INTO DestinationTable (" +
                 "customer_id, " +

@@ -2,10 +2,10 @@
 
 This example shows how to capture data from a database (SQL Server in this case) directly from Flink using a Flink CDC source connector.
 
-Flink version: 1.20
-Flink API: SQL
-Language: Java (11)
-Flink connectors: Flink CDC SQL Server source (3.4), JDBC sink
+* Flink version: 1.20
+* Flink API: SQL
+* Language: Java (11)
+* Flink connectors: Flink CDC SQL Server source (3.4), JDBC sink
 
 The job is implemented in SQL embedded in Java. 
 It uses the [Flink CDC SQL Server source connector](https://nightlies.apache.org/flink/flink-cdc-docs-release-3.4/docs/connectors/flink-sources/sqlserver-cdc/)
@@ -14,7 +14,7 @@ Changes are propagated to the destination database using [JDBC Sink connector](h
 
 ### Source database
 
-This example uses Ms SQL Server as source database. To use a different database ad CDC source you need to use a different Flink CDC Source connector.
+This example uses Ms SQL Server as source database. To use a different database as CDC source you need to switch to a different Flink CDC Source connector.
 
 Different Flink CDC Sources require different configurations and support different metadata fields. To switch the source to a different database you need to modify the code.
 
@@ -26,7 +26,7 @@ See [Flink CDC Sources documentation](https://nightlies.apache.org/flink/flink-c
 Note that the JDBC sink is agnostic to the actual destination database technology. 
 This example is tested with both MySQL and PostgreSQL but can be easily adjusted to different databases.
 
-The `JdbcSink` `url` decides the destination database (see [Runtime configuration](#runtime-configuration), below).
+The `url` property in the `JdbcSink` configuration group decides the destination database (see [Runtime configuration](#runtime-configuration), below).
 The correct JDBC driver must be included in the `pom.xml`. This example includes both MySQL and PostgreSQL drivers.
 
 ### Testing with local databases using Docker Compose
@@ -34,7 +34,7 @@ The correct JDBC driver must be included in the `pom.xml`. This example includes
 This example can be run locally using Docker.
 
 A [Docker Compose file](./docker/docker-compose.yml) is provided to run local SQL Server, MySQL and PostgreSQL databases.
-The local databases are initialized creating users, databases and tables. Some initial data are also inserted into the source table.
+The local databases are initialized by creating users, databases and tables. Some initial records are also inserted into the source table.
 
 You can run the Flink application inside your IDE following the instructions in [Running in IntelliJ](#running-in-intellij). 
 The default local configuration connects to the local PostgreSQL db defined in Docker Compose.
@@ -48,16 +48,16 @@ Use `docker compose down -v` to shut them down, also removing the data volumes.
 
 When running on Amazon Managed Service for Apache Flink and with databases on AWS, you need to set up the databases manually, ensuring you set up all the following:
 
-> You can find the SQL scripts which set up the dockerized databases checking out the init scripts for 
+> YYou can find the SQL scripts that set up the dockerized databases by checking out the init scripts for 
 > [SQL Server](docker/sqlserver-init/init.sql), [MySQL](docker/mysql-init/init.sql), 
 > and [PostgreSQL](docker/postgres-init/init.sql).
 
 1. **Source database (Ms SQL Server)**
    1. SQL Server Agent must be running
    2. Native (user/password) authentication must be enabled
-   3. The login used by FlinCDC (e.g. `flink_cdc`) must be `db_owner` for the database
-   4. The source database and table must match the `database.name`and `table.name` you specify in the source configuration (e.g. `SampleDataPlatform` and `Customers`)
-   5. The source table with must have this schema:
+   3. The login used by Flink CDC (e.g. `flink_cdc`) must be `db_owner` for the database
+   4. The source database and table must match the `database.name` and `table.name` you specify in the source configuration (e.g. `SampleDataPlatform` and `Customers`)
+   5. The source table must have this schema:
       ```sql
       CREATE TABLE [dbo].[Customers]
       (
@@ -69,7 +69,7 @@ When running on Amazon Managed Service for Apache Flink and with databases on AW
       CONSTRAINT [CustomerPK] PRIMARY KEY CLUSTERED ([CustomerID] ASC)
       ) ON [PRIMARY];
       ```
-   6. CDC must be enabled both on the source database. on Amazon RDS SQL Server use the following stored procedure:
+   6. CDC must be enabled both on the source database. On Amazon RDS SQL Server use the following stored procedure:
       ```sql
       exec msdb.dbo.rds_cdc_enable_db 'MyDB'
       ```
@@ -115,7 +115,7 @@ See [Running examples locally](../../running-examples-locally.md) for details ab
 To run the application in Amazon Managed Service for Apache Flink make sure the application configuration has the following:
 * VPC networking 
 * The selected Subnets can route traffic to both the source and destination databases
-* The Security Group allow traffic from the application to both source and destination databases
+* The Security Group allows traffic from the application to both source and destination databases
 
 
 ### Runtime configuration
@@ -130,7 +130,7 @@ Runtime parameters:
 |-------------|-----------------|----------------------------------------------------------------------------------------------------------------------------|
 | `CDCSource` | `hostname`      | Source database DNS hostname or IP                                                                                         |
 | `CDCSource` | `port`          | Source database port (normally `1433`)                                                                                     |
-| `CDCSource` | `username`      | Source database username. The user must be `dbo` of the database                                                           |
+| `CDCSource` | `username`      | Source database username. The user must be `dbo_owner` of the database                                                     |
 | `CDCSource` | `password`      | Source database password                                                                                                   |
 | `CDCSource` | `database.name` | Source database name                                                                                                       |
 | `CDCSource` | `table.name`    | Source table name. e.g. `dbo.Customers`                                                                                    |
@@ -141,7 +141,7 @@ Runtime parameters:
 
 ### Known limitations
 
-Using the SQL interface of Flink CDC Sources greatly simplify the implementation of a passthrough application.
+Using the SQL interface of Flink CDC Sources greatly simplifies the implementation of a passthrough application.
 However, schema changes in the source table are ignored.
 
 ## References
