@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.amazonaws</groupId>
-    <artifactId>managed-flink-pyfink-getting-started</artifactId>
+    <artifactId>managed-flink-pyflink-getting-started</artifactId>
     <version>1.0.0</version>
 
     <properties>

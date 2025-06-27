@@ -10,7 +10,9 @@ Sample PyFlink application reading from and writing to Kinesis Data Stream.
 This example provides the basic skeleton for a PyFlink application.
 It shows how to correctly package JAR dependencies such as Flink connectors.
 
-> To learn **how to package Pythion dependencies** check out these two examples
+
+> This example does not include external Python dependencies.
+> To learn **how to package Pythion dependencies** check out these two examples:
 > 1. [PythonDependencies](../PythonDependencies): how to download Python dependencies at runtime using `requirements.txt`
 > 2. [PackagedPythonDependencies](../PackagedPythonDependencies): how to package dependencies with the application artifact
 
