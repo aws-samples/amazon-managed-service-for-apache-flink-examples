@@ -8,6 +8,13 @@ Sample PyFlink application reading from and writing to Kinesis Data Stream.
 * Language: Python
 
 This example provides the basic skeleton for a PyFlink application.
+It shows how to correctly package JAR dependencies such as Flink connectors.
+
+> To learn **how to package Pythion dependencies** check out these two examples
+> 1. [PythonDependencies](../PythonDependencies): how to download Python dependencies at runtime using `requirements.txt`
+> 2. [PackagedPythonDependencies](../PackagedPythonDependencies): how to package dependencies with the application artifact
+
+---
 
 The application is written in Python, but operators are defined using SQL.
 This is a popular way of defining applications in PyFlink, but not the only one. You could attain the same results
