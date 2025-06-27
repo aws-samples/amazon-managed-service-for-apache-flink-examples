@@ -42,5 +42,6 @@
         <module>SQSSink</module>
         <module>S3AvroSink</module>
         <module>S3AvroSource</module>
+        <module>FlinkCDC/FlinkCDCSQLServerSource</module>
     </modules>
 </project>

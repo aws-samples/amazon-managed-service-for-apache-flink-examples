@@ -1,0 +1,77 @@
+services:
+
+  # Ms SQL Server + init
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: mssql-server-2022
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong@Passw0rd
+      - MSSQL_PID=Developer
+      - MSSQL_AGENT_ENABLED=true
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+      - ./sqlserver-init/init.sql:/tmp/init.sql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -Q 'SELECT 1' -C"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  sqlserver-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    volumes:
+      - ./sqlserver-init/init.sql:/tmp/init.sql
+    command: >
+      bash -c "
+      echo 'Waiting for SQL Server to be ready...' &&
+      sleep 5 &&
+      echo 'Running initialization script...' &&
+      /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P YourStrong@Passw0rd -i /tmp/init.sql -C &&
+      echo 'Initialization completed!'
+      "
+
+  # MySQL database
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: R00tpwd!
+      MYSQL_DATABASE: targetdb
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    command: --default-authentication-plugin=mysql_native_password
+
+  # PostgreSQL database
+  postgres:
+    image: postgres:15
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_DB: targetdb
+      POSTGRES_USER: flinkusr
+      POSTGRES_PASSWORD: PassW0rd!
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d
+
+volumes:
+  sqlserver_data:
+    driver: local
+  mysql_data:
+    driver: local
+  postgres_data:
+    driver: local
