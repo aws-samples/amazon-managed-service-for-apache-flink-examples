@@ -7,8 +7,8 @@ Example applications in Java, Python, Scala and SQL for Amazon Managed Service f
 ### Java Examples
 
 #### Getting Started
-- [**Getting Started - DataStream API**](./java/GettingStarted) - Skeleton project for a basic Flink Java application using DataStream API with Kinesis source and sink
-- [**Getting Started - Table API & SQL**](./java/GettingStartedTable) - Basic Flink Java application using Table API & SQL with DataStream API, generating random data and writing to S3
+- [**Getting Started - DataStream API**](./java/GettingStarted) - Skeleton project for a basic Flink Java application using DataStream API
+- [**Getting Started - Table API & SQL**](./java/GettingStartedTable) - Basic Flink Java application using Table API & SQL with DataStream API
 
 #### Connectors
 - [**Kinesis Connectors**](./java/KinesisConnectors) - Examples of Flink Kinesis Connector source and sink (standard and EFO)
@@ -22,7 +22,7 @@ Example applications in Java, Python, Scala and SQL for Amazon Managed Service f
 - [**Flink CDC**](./java/FlinkCDC) - Change Data Capture examples using Flink CDC
 
 #### Reading and writing files and transactional data lake formats
-- [**Iceberg**](./java/Iceberg) - Working with Apache Iceberg tables
+- [**Iceberg**](./java/Iceberg) - Working with Apache Iceberg and Amazon S3 Tables
 - [**S3 Sink**](./java/S3Sink) - Writing JSON data to Amazon S3
 - [**S3 Avro Sink**](./java/S3AvroSink) - Writing Avro format data to Amazon S3
 - [**S3 Avro Source**](./java/S3AvroSource) - Reading Avro format data from Amazon S3
@@ -45,11 +45,11 @@ Example applications in Java, Python, Scala and SQL for Amazon Managed Service f
 ### Python Examples
 
 #### Getting Started
-- [**Getting Started**](./python/GettingStarted) - Basic PyFlink application reading from and writing to Kinesis Data Stream using Table API & SQL
+- [**Getting Started**](./python/GettingStarted) - Basic PyFlink application Table API & SQL
 
-#### Handling dependencies
+#### Handling Python dependencies
 - [**Python Dependencies**](./python/PythonDependencies) - Managing Python dependencies in PyFlink applications using `requirements.txt`
-- [**Packaged Python Dependencies**](./python/PackagedPythonDependencies) - Advanced dependency packaging for PyFlink applications
+- [**Packaged Python Dependencies**](./python/PackagedPythonDependencies) - Managing Python dependencies packaged with the PyFlink application at build time
 
 #### Connectors
 - [**Datastream Kafka Connector**](./python/DatastreamKafkaConnector) - Using Kafka connector with PyFlink DataStream API
@@ -58,7 +58,7 @@ Example applications in Java, Python, Scala and SQL for Amazon Managed Service f
 - [**Firehose Sink**](./python/FirehoseSink) - Writing data to Amazon Kinesis Data Firehose
 - [**Iceberg Sink**](./python/IcebergSink) - Writing data to Apache Iceberg tables
 
-#### Stream Processing & Functions
+#### Stream Processing Patterns
 - [**Windowing**](./python/Windowing) - Time-based window aggregation examples with PyFlink/SQL
 - [**User Defined Functions (UDF)**](./python/UDF) - Creating and using custom functions in PyFlink
 
@@ -74,7 +74,7 @@ Example applications in Java, Python, Scala and SQL for Amazon Managed Service f
 
 ### Infrastructure & Operations
 
-- [**Auto Scaling**](./infrastructure/AutoScaling) - Automatically scale Amazon Managed Service for Apache Flink applications based on CloudWatch metrics
+- [**Auto Scaling**](./infrastructure/AutoScaling) - Custom autoscaler for Amazon Managed Service for Apache Flink
 - [**Scheduled Scaling**](./infrastructure/ScheduledScaling) - Scale applications up and down based on daily time schedules
 - [**Monitoring**](./infrastructure/monitoring) - Extended CloudWatch Dashboard examples for monitoring applications
 - [**Scripts**](./infrastructure/scripts) - Useful shell scripts for interacting with Amazon Managed Service for Apache Flink control plane API
