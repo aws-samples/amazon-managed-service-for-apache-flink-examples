@@ -1,0 +1,22 @@
+[
+  {
+    "PropertyGroupId": "DataGen",
+    "PropertyMap": {
+      "records.per.second": "1000"
+    }
+  },
+  {
+    "PropertyGroupId": "KinesisSink",
+    "PropertyMap": {
+      "stream.arn": "arn:aws:kinesis:eu-west-1:<account-id>:stream/FlinkDataGeneratorTestStream",
+      "aws.region": "eu-west-1"
+    }
+  },
+  {
+    "PropertyGroupId": "KafkaSink-DISABLE",
+    "PropertyMap": {
+      "bootstrap.servers": "localhost:9092",
+      "topic": "stock-prices"
+    }
+  }
+]

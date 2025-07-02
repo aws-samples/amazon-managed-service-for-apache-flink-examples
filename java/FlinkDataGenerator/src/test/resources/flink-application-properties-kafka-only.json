@@ -1,0 +1,15 @@
+[
+  {
+    "PropertyGroupId": "DataGen",
+    "PropertyMap": {
+      "records.per.second": "5"
+    }
+  },
+  {
+    "PropertyGroupId": "KafkaSink",
+    "PropertyMap": {
+      "bootstrap.servers": "localhost:9092",
+      "topic": "test-topic"
+    }
+  }
+]

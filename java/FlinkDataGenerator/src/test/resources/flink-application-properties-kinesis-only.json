@@ -1,0 +1,15 @@
+[
+  {
+    "PropertyGroupId": "DataGen",
+    "PropertyMap": {
+      "records.per.second": "5"
+    }
+  },
+  {
+    "PropertyGroupId": "KinesisSink",
+    "PropertyMap": {
+      "stream.arn": "arn:aws:kinesis:us-east-1:123456789012:stream/test-stream",
+      "aws.region": "us-east-1"
+    }
+  }
+]

@@ -1,0 +1,8 @@
+[
+  {
+    "PropertyGroupId": "DataGen",
+    "PropertyMap": {
+      "records.per.second": "5"
+    }
+  }
+]
