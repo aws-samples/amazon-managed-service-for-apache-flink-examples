@@ -59,6 +59,7 @@ The AWS team managing the repository reserves the right to modify or reject new 
   versions, external dependencies, permissions, and runtime configuration. Use [this example](https://github.com/aws-samples/amazon-managed-service-for-apache-flink-examples/tree/main/java/KafkaConfigProviders/Kafka-SASL_SSL-ConfigProviders)
   as a reference.
 * Make sure the example works with what explained in the README, and without any implicit dependency or configuration.
+* Add an entry for the new example in the top-level [README](README.md) or in the README of the subfolder, if the example is in a subfolder such as `java/FlinkCDC` or `java/Iceberg`
 
 #### AWS authentication and credentials
 
@@ -66,10 +67,19 @@ The AWS team managing the repository reserves the right to modify or reject new 
 * Any permissions must be provided from the IAM Role assigned to the Managed Apache Flink application. When running locally, leverage the IDE AWS plugins.
 
 #### Dependencies in PyFlink examples
-  * Use the pattern illustrated by [this example](https://github.com/aws-samples/amazon-managed-service-for-apache-flink-examples/tree/main/python/GettingStarted)
-    to provide JAR dependencies and build the ZIP using Maven.
-  * If the application also requires Python dependencies, use the pattern illustrated by [this example](https://github.com/aws-samples/amazon-managed-service-for-apache-flink-examples/tree/main/python/PythonDependencies)
-    leveraging `requirements.txt`.
+
+* Use the pattern illustrated by [this example](https://github.com/aws-samples/amazon-managed-service-for-apache-flink-examples/tree/main/python/GettingStarted)
+  to provide JAR dependencies and build the ZIP using Maven.
+* If the application also requires Python dependencies used for UDF and data processing in general, use the pattern illustrated by [this example](https://github.com/aws-samples/amazon-managed-service-for-apache-flink-examples/tree/main/python/PythonDependencies)
+  leveraging `requirements.txt`.
+* Only if the application requires Python dependencies used during the job initialization, in the main(), use the pattern 
+  illustrated in [this other example](https://github.com/aws-samples/amazon-managed-service-for-apache-flink-examples/tree/main/python/PackagedPythonDependencies),
+  packaging dependencies in the ZIP artifact.
+
+#### Top POM-file for Java examples
+
+* Add the new Java example also to the `pom.xml` file in the `java/` folder
+
 
 ## Reporting Bugs/Feature Requests
 
