@@ -40,7 +40,8 @@ Example applications in Java, Python, Scala and SQL for Amazon Managed Service f
 - [**Async I/O**](./java/AsyncIO) - Asynchronous I/O patterns with retries for external API calls\
 - [**Custom Metrics**](./java/CustomMetrics) - Creating and publishing custom application metrics
 
-
+#### Utilities
+- [**Fink Data Generator (JSON)**](java/FlinkDataGenerator) - How to use a Flink application as data generator, for functional and load testing.
 
 ### Python Examples
 

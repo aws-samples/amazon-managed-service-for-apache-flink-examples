@@ -1,0 +1,578 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudWatch Dashboard for Flink Data Generator with conditional Kinesis and Kafka widgets'
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Dashboard Configuration"
+        Parameters:
+          - DashboardName
+          - Application
+          - Region
+      - Label:
+          default: "Kinesis Configuration"
+        Parameters:
+          - StreamName
+      - Label:
+          default: "MSK Configuration"
+        Parameters:
+          - ClusterName
+          - Topic
+    ParameterLabels:
+      DashboardName:
+        default: "Dashboard Name"
+      Application:
+        default: "Application Name"
+      Region:
+        default: "AWS Region"
+      StreamName:
+        default: "Kinesis Stream Name"
+      ClusterName:
+        default: "MSK Cluster Name"
+      Topic:
+        default: "Kafka Topic Name"
+
+Parameters:
+  DashboardName:
+    Type: String
+    Default: FlinkDataGenerator
+    Description: Name of the CloudWatch Dashboard
+  
+  Application:
+    Type: String
+    Default: FlinkDataGenerator
+    Description: Name of the Flink application
+  
+  Region:
+    Type: String
+    Default: eu-west-1
+    Description: AWS region where resources are deployed
+    AllowedValues:
+      - us-east-1
+      - us-east-2
+      - us-west-1
+      - us-west-2
+      - eu-west-1
+      - eu-west-2
+      - eu-west-3
+      - eu-central-1
+      - ap-northeast-1
+      - ap-northeast-2
+      - ap-southeast-1
+      - ap-southeast-2
+      - ap-south-1
+      - sa-east-1
+  
+  StreamName:
+    Type: String
+    Default: ''
+    Description: Name of the Kinesis Data Stream (leave empty to skip Kinesis widget)
+  
+  ClusterName:
+    Type: String
+    Default: ''
+    Description: Name of the MSK (Kafka) cluster (leave empty to skip Kafka widget)
+  
+  Topic:
+    Type: String
+    Default: ''
+    Description: Name of the Kafka topic (leave empty to skip Kafka widget)
+
+Conditions:
+  HasKafkaConfig: !And
+    - !Not [!Equals [!Ref ClusterName, '']]
+    - !Not [!Equals [!Ref Topic, '']]
+  
+  HasKinesisConfig: !Not [!Equals [!Ref StreamName, '']]
+  
+  HasBothSinks: !And
+    - !Condition HasKafkaConfig
+    - !Condition HasKinesisConfig
+  
+  HasOnlyKafka: !And
+    - !Condition HasKafkaConfig
+    - !Not [!Condition HasKinesisConfig]
+  
+  HasOnlyKinesis: !And
+    - !Condition HasKinesisConfig
+    - !Not [!Condition HasKafkaConfig]
+
+Resources:
+  # Dashboard with both Kafka and Kinesis widgets
+  DashboardWithBothSinks:
+    Type: AWS::CloudWatch::Dashboard
+    Condition: HasBothSinks
+    Properties:
+      DashboardName: !Ref DashboardName
+      DashboardBody: !Sub |
+        {
+          "widgets": [
+            {
+              "type": "metric",
+              "x": 0,
+              "y": 0,
+              "width": 8,
+              "height": 6,
+              "properties": {
+                "metrics": [
+                  [{"expression": "m1 / 4", "label": "globalGeneratedRecordCount", "id": "e1", "region": "${Region}"}],
+                  [{"expression": "m2 * m3", "label": "globalGeneratedRecordsPerSec", "id": "e2", "yAxis": "right", "region": "${Region}"}],
+                  ["AWS/KinesisAnalytics", "generatedRecordCount", "Application", "${Application}", {"stat": "Sum", "id": "m1", "visible": false, "region": "${Region}"}],
+                  [".", "generatedRecordRatePerParallelism", ".", ".", {"id": "m2", "visible": false, "region": "${Region}"}],
+                  [".", "taskParallelism", ".", ".", {"id": "m3", "visible": false, "region": "${Region}"}]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${Region}",
+                "stat": "Average",
+                "period": 60,
+                "title": "Data Generator",
+                "yAxis": {
+                  "left": {"label": "Record count", "showUnits": false},
+                  "right": {"label": "Record/sec", "showUnits": false}
+                }
+              }
+            },
+            {
+              "type": "metric",
+              "x": 8,
+              "y": 0,
+              "width": 8,
+              "height": 6,
+              "properties": {
+                "metrics": [
+                  [{"expression": "m1+m2+m3+m4+m5+m6", "label": "Total bytesInPerSec", "id": "e1", "yAxis": "right", "region": "${Region}"}],
+                  ["AWS/Kafka", "BytesInPerSec", "Cluster Name", "${ClusterName}", "Broker ID", "1", "Topic", "${Topic}", {"yAxis": "right", "region": "${Region}", "id": "m1", "visible": false}],
+                  ["...", "2", ".", ".", {"yAxis": "right", "region": "${Region}", "id": "m2", "visible": false}],
+                  ["...", "3", ".", ".", {"yAxis": "right", "region": "${Region}", "id": "m3", "visible": false}],
+                  ["...", "4", ".", ".", {"yAxis": "right", "region": "${Region}", "id": "m4", "visible": false}],
+                  ["...", "5", ".", ".", {"yAxis": "right", "region": "${Region}", "id": "m5", "visible": false}],
+                  ["...", "6", ".", ".", {"yAxis": "right", "region": "${Region}", "id": "m6", "visible": false}],
+                  [{"expression": "m7+m8+m9+m10+m11+m12", "label": "Total MessagesInPerSec", "id": "e2", "region": "${Region}", "color": "#aec7e8"}],
+                  ["AWS/Kafka", "MessagesInPerSec", "Cluster Name", "${ClusterName}", "Broker ID", "1", "Topic", "${Topic}", {"region": "${Region}", "id": "m7", "visible": false}],
+                  ["...", "2", ".", ".", {"region": "${Region}", "id": "m8", "visible": false}],
+                  ["...", "3", ".", ".", {"region": "${Region}", "id": "m9", "visible": false}],
+                  ["...", "4", ".", ".", {"region": "${Region}", "id": "m10", "visible": false}],
+                  ["...", "5", ".", ".", {"region": "${Region}", "id": "m11", "visible": false}],
+                  ["...", "6", ".", ".", {"region": "${Region}", "id": "m12", "visible": false}]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${Region}",
+                "period": 60,
+                "yAxis": {
+                  "left": {"label": "Messages/Sec", "showUnits": false, "min": 0},
+                  "right": {"label": "Bytes/Sec", "showUnits": false, "min": 0}
+                },
+                "title": "Kafka output",
+                "stat": "Average"
+              }
+            },
+            {
+              "type": "metric",
+              "x": 16,
+              "y": 0,
+              "width": 8,
+              "height": 6,
+              "properties": {
+                "metrics": [
+                  [{"expression": "m3 / 60", "label": "PublishedRecordsPerSec", "id": "e1", "yAxis": "right"}],
+                  ["AWS/Kinesis", "PutRecords.ThrottledRecords", "StreamName", "${StreamName}", {"region": "${Region}", "id": "m1"}],
+                  [".", "WriteProvisionedThroughputExceeded", ".", ".", {"id": "m2", "region": "${Region}", "stat": "Average"}],
+                  [".", "IncomingRecords", ".", ".", {"id": "m3", "region": "${Region}", "yAxis": "right", "stat": "Sum", "visible": false}]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${Region}",
+                "stat": "Maximum",
+                "period": 60,
+                "yAxis": {
+                  "left": {"label": "Throttling", "showUnits": false, "min": 0},
+                  "right": {"label": "Records/sec", "showUnits": false, "min": 0}
+                },
+                "title": "Kinesis Data Stream output"
+              }
+            },
+            {
+              "type": "metric",
+              "x": 0,
+              "y": 6,
+              "width": 8,
+              "height": 5,
+              "properties": {
+                "metrics": [
+                  ["AWS/KinesisAnalytics", "containerMemoryUtilization", "Application", "${Application}", {"region": "${Region}", "label": "containerMemoryUtilization", "id": "m1"}],
+                  [".", "containerCPUUtilization", ".", ".", {"yAxis": "right", "region": "${Region}", "label": "containerCPUUtilization", "id": "m2"}]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${Region}",
+                "title": "Generator resource utilization",
+                "stat": "Average",
+                "period": 60,
+                "yAxis": {
+                  "left": {"label": "Mem (%)", "showUnits": false, "min": 0, "max": 100},
+                  "right": {"label": "CPU (%)", "showUnits": false, "min": 0, "max": 100}
+                },
+                "annotations": {
+                  "horizontal": [{"label": "Threshold", "value": 90}]
+                }
+              }
+            },
+            {
+              "type": "metric",
+              "x": 8,
+              "y": 6,
+              "width": 8,
+              "height": 5,
+              "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                  ["AWS/KinesisAnalytics", "busyTimeMsPerSecond", "Application", "${Application}", {"region": "${Region}"}],
+                  [".", "backPressuredTimeMsPerSecond", ".", ".", {"region": "${Region}"}],
+                  [".", "idleTimeMsPerSecond", ".", ".", {"region": "${Region}"}]
+                ],
+                "region": "${Region}",
+                "title": "Generator application busy-ness",
+                "yAxis": {
+                  "left": {"label": "1/1000", "showUnits": false, "min": 0, "max": 1000},
+                  "right": {"label": ""}
+                },
+                "period": 300,
+                "liveData": true
+              }
+            },
+            {
+              "type": "metric",
+              "x": 16,
+              "y": 6,
+              "width": 8,
+              "height": 5,
+              "properties": {
+                "metrics": [
+                  ["AWS/KinesisAnalytics", "uptime", "Application", "${Application}", {"region": "${Region}"}],
+                  [".", "fullRestarts", ".", ".", {"yAxis": "right", "region": "${Region}"}]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${Region}",
+                "stat": "Maximum",
+                "period": 60,
+                "title": "Generator uptime and restart"
+              }
+            }
+          ]
+        }
+  # Dashboard with only Kafka widget
+  DashboardWithKafkaOnly:
+    Type: AWS::CloudWatch::Dashboard
+    Condition: HasOnlyKafka
+    Properties:
+      DashboardName: !Ref DashboardName
+      DashboardBody: !Sub |
+        {
+          "widgets": [
+            {
+              "type": "metric",
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 6,
+              "properties": {
+                "metrics": [
+                  [{"expression": "m1 / 4", "label": "globalGeneratedRecordCount", "id": "e1", "region": "${Region}"}],
+                  [{"expression": "m2 * m3", "label": "globalGeneratedRecordsPerSec", "id": "e2", "yAxis": "right", "region": "${Region}"}],
+                  ["AWS/KinesisAnalytics", "generatedRecordCount", "Application", "${Application}", {"stat": "Sum", "id": "m1", "visible": false, "region": "${Region}"}],
+                  [".", "generatedRecordRatePerParallelism", ".", ".", {"id": "m2", "visible": false, "region": "${Region}"}],
+                  [".", "taskParallelism", ".", ".", {"id": "m3", "visible": false, "region": "${Region}"}]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${Region}",
+                "stat": "Average",
+                "period": 60,
+                "title": "Data Generator",
+                "yAxis": {
+                  "left": {"label": "Record count", "showUnits": false},
+                  "right": {"label": "Record/sec", "showUnits": false}
+                }
+              }
+            },
+            {
+              "type": "metric",
+              "x": 12,
+              "y": 0,
+              "width": 12,
+              "height": 6,
+              "properties": {
+                "metrics": [
+                  [{"expression": "m1+m2+m3+m4+m5+m6", "label": "Total bytesInPerSec", "id": "e1", "yAxis": "right", "region": "${Region}"}],
+                  ["AWS/Kafka", "BytesInPerSec", "Cluster Name", "${ClusterName}", "Broker ID", "1", "Topic", "${Topic}", {"yAxis": "right", "region": "${Region}", "id": "m1", "visible": false}],
+                  ["...", "2", ".", ".", {"yAxis": "right", "region": "${Region}", "id": "m2", "visible": false}],
+                  ["...", "3", ".", ".", {"yAxis": "right", "region": "${Region}", "id": "m3", "visible": false}],
+                  ["...", "4", ".", ".", {"yAxis": "right", "region": "${Region}", "id": "m4", "visible": false}],
+                  ["...", "5", ".", ".", {"yAxis": "right", "region": "${Region}", "id": "m5", "visible": false}],
+                  ["...", "6", ".", ".", {"yAxis": "right", "region": "${Region}", "id": "m6", "visible": false}],
+                  [{"expression": "m7+m8+m9+m10+m11+m12", "label": "Total MessagesInPerSec", "id": "e2", "region": "${Region}", "color": "#aec7e8"}],
+                  ["AWS/Kafka", "MessagesInPerSec", "Cluster Name", "${ClusterName}", "Broker ID", "1", "Topic", "${Topic}", {"region": "${Region}", "id": "m7", "visible": false}],
+                  ["...", "2", ".", ".", {"region": "${Region}", "id": "m8", "visible": false}],
+                  ["...", "3", ".", ".", {"region": "${Region}", "id": "m9", "visible": false}],
+                  ["...", "4", ".", ".", {"region": "${Region}", "id": "m10", "visible": false}],
+                  ["...", "5", ".", ".", {"region": "${Region}", "id": "m11", "visible": false}],
+                  ["...", "6", ".", ".", {"region": "${Region}", "id": "m12", "visible": false}]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${Region}",
+                "period": 60,
+                "yAxis": {
+                  "left": {"label": "Messages/Sec", "showUnits": false, "min": 0},
+                  "right": {"label": "Bytes/Sec", "showUnits": false, "min": 0}
+                },
+                "title": "Kafka output",
+                "stat": "Average"
+              }
+            },
+            {
+              "type": "metric",
+              "x": 0,
+              "y": 6,
+              "width": 8,
+              "height": 5,
+              "properties": {
+                "metrics": [
+                  ["AWS/KinesisAnalytics", "containerMemoryUtilization", "Application", "${Application}", {"region": "${Region}", "label": "containerMemoryUtilization", "id": "m1"}],
+                  [".", "containerCPUUtilization", ".", ".", {"yAxis": "right", "region": "${Region}", "label": "containerCPUUtilization", "id": "m2"}]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${Region}",
+                "title": "Generator resource utilization",
+                "stat": "Average",
+                "period": 60,
+                "yAxis": {
+                  "left": {"label": "Mem (%)", "showUnits": false, "min": 0, "max": 100},
+                  "right": {"label": "CPU (%)", "showUnits": false, "min": 0, "max": 100}
+                },
+                "annotations": {
+                  "horizontal": [{"label": "Threshold", "value": 90}]
+                }
+              }
+            },
+            {
+              "type": "metric",
+              "x": 8,
+              "y": 6,
+              "width": 8,
+              "height": 5,
+              "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                  ["AWS/KinesisAnalytics", "busyTimeMsPerSecond", "Application", "${Application}", {"region": "${Region}"}],
+                  [".", "backPressuredTimeMsPerSecond", ".", ".", {"region": "${Region}"}],
+                  [".", "idleTimeMsPerSecond", ".", ".", {"region": "${Region}"}]
+                ],
+                "region": "${Region}",
+                "title": "Generator application busy-ness",
+                "yAxis": {
+                  "left": {"label": "1/1000", "showUnits": false, "min": 0, "max": 1000},
+                  "right": {"label": ""}
+                },
+                "period": 300,
+                "liveData": true
+              }
+            },
+            {
+              "type": "metric",
+              "x": 16,
+              "y": 6,
+              "width": 8,
+              "height": 5,
+              "properties": {
+                "metrics": [
+                  ["AWS/KinesisAnalytics", "uptime", "Application", "${Application}", {"region": "${Region}"}],
+                  [".", "fullRestarts", ".", ".", {"yAxis": "right", "region": "${Region}"}]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${Region}",
+                "stat": "Maximum",
+                "period": 60,
+                "title": "Generator uptime and restart"
+              }
+            }
+          ]
+        }
+  # Dashboard with only Kinesis widget
+  DashboardWithKinesisOnly:
+    Type: AWS::CloudWatch::Dashboard
+    Condition: HasOnlyKinesis
+    Properties:
+      DashboardName: !Ref DashboardName
+      DashboardBody: !Sub |
+        {
+          "widgets": [
+            {
+              "type": "metric",
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 6,
+              "properties": {
+                "metrics": [
+                  [{"expression": "m1 / 4", "label": "globalGeneratedRecordCount", "id": "e1", "region": "${Region}"}],
+                  [{"expression": "m2 * m3", "label": "globalGeneratedRecordsPerSec", "id": "e2", "yAxis": "right", "region": "${Region}"}],
+                  ["AWS/KinesisAnalytics", "generatedRecordCount", "Application", "${Application}", {"stat": "Sum", "id": "m1", "visible": false, "region": "${Region}"}],
+                  [".", "generatedRecordRatePerParallelism", ".", ".", {"id": "m2", "visible": false, "region": "${Region}"}],
+                  [".", "taskParallelism", ".", ".", {"id": "m3", "visible": false, "region": "${Region}"}]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${Region}",
+                "stat": "Average",
+                "period": 60,
+                "title": "Data Generator",
+                "yAxis": {
+                  "left": {"label": "Record count", "showUnits": false},
+                  "right": {"label": "Record/sec", "showUnits": false}
+                }
+              }
+            },
+            {
+              "type": "metric",
+              "x": 12,
+              "y": 0,
+              "width": 12,
+              "height": 6,
+              "properties": {
+                "metrics": [
+                  [{"expression": "m3 / 60", "label": "PublishedRecordsPerSec", "id": "e1", "yAxis": "right"}],
+                  ["AWS/Kinesis", "PutRecords.ThrottledRecords", "StreamName", "${StreamName}", {"region": "${Region}", "id": "m1"}],
+                  [".", "WriteProvisionedThroughputExceeded", ".", ".", {"id": "m2", "region": "${Region}", "stat": "Average"}],
+                  [".", "IncomingRecords", ".", ".", {"id": "m3", "region": "${Region}", "yAxis": "right", "stat": "Sum", "visible": false}]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${Region}",
+                "stat": "Maximum",
+                "period": 60,
+                "yAxis": {
+                  "left": {"label": "Throttling", "showUnits": false, "min": 0},
+                  "right": {"label": "Records/sec", "showUnits": false, "min": 0}
+                },
+                "title": "Kinesis Data Stream output"
+              }
+            },
+            {
+              "type": "metric",
+              "x": 0,
+              "y": 6,
+              "width": 8,
+              "height": 5,
+              "properties": {
+                "metrics": [
+                  ["AWS/KinesisAnalytics", "containerMemoryUtilization", "Application", "${Application}", {"region": "${Region}", "label": "containerMemoryUtilization", "id": "m1"}],
+                  [".", "containerCPUUtilization", ".", ".", {"yAxis": "right", "region": "${Region}", "label": "containerCPUUtilization", "id": "m2"}]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${Region}",
+                "title": "Generator resource utilization",
+                "stat": "Average",
+                "period": 60,
+                "yAxis": {
+                  "left": {"label": "Mem (%)", "showUnits": false, "min": 0, "max": 100},
+                  "right": {"label": "CPU (%)", "showUnits": false, "min": 0, "max": 100}
+                },
+                "annotations": {
+                  "horizontal": [{"label": "Threshold", "value": 90}]
+                }
+              }
+            },
+            {
+              "type": "metric",
+              "x": 8,
+              "y": 6,
+              "width": 8,
+              "height": 5,
+              "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                  ["AWS/KinesisAnalytics", "busyTimeMsPerSecond", "Application", "${Application}", {"region": "${Region}"}],
+                  [".", "backPressuredTimeMsPerSecond", ".", ".", {"region": "${Region}"}],
+                  [".", "idleTimeMsPerSecond", ".", ".", {"region": "${Region}"}]
+                ],
+                "region": "${Region}",
+                "title": "Generator application busy-ness",
+                "yAxis": {
+                  "left": {"label": "1/1000", "showUnits": false, "min": 0, "max": 1000},
+                  "right": {"label": ""}
+                },
+                "period": 300,
+                "liveData": true
+              }
+            },
+            {
+              "type": "metric",
+              "x": 16,
+              "y": 6,
+              "width": 8,
+              "height": 5,
+              "properties": {
+                "metrics": [
+                  ["AWS/KinesisAnalytics", "uptime", "Application", "${Application}", {"region": "${Region}"}],
+                  [".", "fullRestarts", ".", ".", {"yAxis": "right", "region": "${Region}"}]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${Region}",
+                "stat": "Maximum",
+                "period": 60,
+                "title": "Generator uptime and restart"
+              }
+            }
+          ]
+        }
+Outputs:
+  DashboardName:
+    Description: Name of the created CloudWatch Dashboard
+    Value: !If
+      - HasBothSinks
+      - !Ref DashboardWithBothSinks
+      - !If
+        - HasOnlyKafka
+        - !Ref DashboardWithKafkaOnly
+        - !If
+          - HasOnlyKinesis
+          - !Ref DashboardWithKinesisOnly
+          - 'No dashboard created - missing required parameters'
+  
+  DashboardURL:
+    Description: URL to access the CloudWatch Dashboard
+    Value: !If
+      - HasBothSinks
+      - !Sub 'https://${Region}.console.aws.amazon.com/cloudwatch/home?region=${Region}#dashboards:name=${DashboardName}'
+      - !If
+        - HasOnlyKafka
+        - !Sub 'https://${Region}.console.aws.amazon.com/cloudwatch/home?region=${Region}#dashboards:name=${DashboardName}'
+        - !If
+          - HasOnlyKinesis
+          - !Sub 'https://${Region}.console.aws.amazon.com/cloudwatch/home?region=${Region}#dashboards:name=${DashboardName}'
+          - 'No dashboard URL - missing required parameters'
+  
+  ConfigurationSummary:
+    Description: Summary of the dashboard configuration
+    Value: !If
+      - HasBothSinks
+      - 'Dashboard created with both Kafka and Kinesis widgets'
+      - !If
+        - HasOnlyKafka
+        - 'Dashboard created with Kafka widget only'
+        - !If
+          - HasOnlyKinesis
+          - 'Dashboard created with Kinesis widget only'
+          - 'No dashboard created - ClusterName+Topic or StreamName required'
