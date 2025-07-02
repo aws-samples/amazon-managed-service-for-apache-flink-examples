@@ -121,9 +121,8 @@ public class DataGeneratorJob {
         return KinesisStreamsSink.<T>builder()
                 .setStreamArn(outputStreamArn)
                 .setKinesisClientProperties(outputProperties)
-                .setPartitionKeyGenerator(partitionKeyGenerator)
                 .setSerializationSchema(serializationSchema)
-                .setPartitionKeyGenerator(element -> String.valueOf(element.hashCode()))
+                .setPartitionKeyGenerator(partitionKeyGenerator)
                 .build();
     }
 
@@ -175,6 +174,7 @@ public class DataGeneratorJob {
         // Add a passthrough operator exposing basic metrics
         var outputStream = stockPricesStream.map(new MetricEmitterNoOpMap<>()).uid("metric-emitter");
 
+
         // Check if at least one sink is configured
         Properties kinesisProperties = applicationProperties.get("KinesisSink");
         Properties kafkaProperties = applicationProperties.get("KafkaSink");
@@ -188,12 +188,13 @@ public class DataGeneratorJob {
 
         // Create Kinesis sink with JSON serialization (only if configured)
         if (hasKinesisSink) {
+            PartitionKeyGenerator<StockPrice> partitionKeyGenerator = (record) -> String.valueOf(record.getTicker());
             KinesisStreamsSink<StockPrice> kinesisSink = createKinesisSink(
                     kinesisProperties,
                     // Serialize the Kinesis record as JSON
                     new JsonSerializationSchema<>(),
-                    // shard by `ticker`
-                    record -> String.valueOf(record.getTicker())
+                    // Shard by `ticker`
+                    partitionKeyGenerator
             );
             outputStream.sinkTo(kinesisSink).uid("kinesis-sink").disableChaining();
             LOG.info("Kinesis sink configured");
@@ -202,13 +203,15 @@ public class DataGeneratorJob {
         // Create Kafka sink with JSON serialization (only if configured)
         if (hasKafkaSink) {
             String kafkaTopic = Preconditions.checkNotNull(StringUtils.trimToNull(kafkaProperties.getProperty("topic")), "Kafka topic not defined");
+            SerializationSchema<StockPrice> valueSerializationSchema = new JsonSerializationSchema<>();
+            SerializationSchema<StockPrice> keySerializationSchema = (stockPrice) -> stockPrice.getTicker().getBytes();
             KafkaRecordSerializationSchema<StockPrice> kafkaRecordSerializationSchema =
                     KafkaRecordSerializationSchema.<StockPrice>builder()
                             .setTopic(kafkaTopic)
                             // Serialize the Kafka record value (payload) as JSON
-                            .setValueSerializationSchema(new JsonSerializationSchema<>())
+                            .setValueSerializationSchema(valueSerializationSchema)
                             // Partition by `ticker`
-                            .setKeySerializationSchema(stock -> stock.getTicker().getBytes())
+                            .setKeySerializationSchema(keySerializationSchema)
                             .build();
 
             KafkaSink<StockPrice> kafkaSink = createKafkaSink(kafkaProperties, kafkaRecordSerializationSchema);

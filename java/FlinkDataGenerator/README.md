@@ -35,7 +35,7 @@ The data generator application must be able to write to the Kinesis Stream or th
 ### Runtime configuration
 
 The application reads the runtime configuration from the Runtime Properties, when running on Amazon Managed Service for Apache Flink,
-or, when running locally, from the [`src/main/resources/flink-application-properties-dev.json`](src/main/resources/flink-application-properties-dev.json) file located in the resources folder.
+or, when running locally, from the [`src/main/resources/flink-application-properties-dev.json`](src/main/resources/flink-application-properties-dev.json) file.
 All parameters are case-sensitive.
 
 The presence of the configuration group `KafkaSink` enables the Kafka sink. 
@@ -82,6 +82,13 @@ The data generation can be easily customized to match your specific records, mod
   You can use [Jackson annotations](https://github.com/FasterXML/jackson-annotations/wiki/Jackson-Annotations) to customize the generated JSON.
 * The class [StockPriceGeneratorFunction](src/main/java/com/amazonaws/services/msf/domain/StockPriceGeneratorFunction.java)
   contains the logic for generating each record.
+
+### Partitioning
+
+Records published in Kinesis or Kafka are partitioned by the `ticker` field.
+
+If you customize the data object you also need to modify the `PartitionKeyGenerator<T>` and `SerializationSchema<T>`
+extracting the key in the Kinesis and Kafka sink respectively.
 
 ## Using the data generator for load testing
 
@@ -132,8 +139,6 @@ When creating the CloudFormation stack you need to provide:
 
 ### Known limitations and possible extensions
 
-* The data generator only writes JSON, to MSK or Kinesis.
-* To support a record different from `StockPrice` you have to customize the [StockPrice](src/main/java/com/amazonaws/services/msf/domain/StockPrice.java) record class
-  and the function generating data [StockPriceGeneratorFunction](src/main/java/com/amazonaws/services/msf/domain/StockPriceGeneratorFunction.java).
+* Only JSON serialization is supported.
 * Data generation is stateless. The logic generating each record does not know about other records previously generated.
-* The generator only supports fixed rate. No ramp up or ramp down.
+* Fixed record rate only. No ramp up or ramp down.
