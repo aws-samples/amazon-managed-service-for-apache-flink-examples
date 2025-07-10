@@ -1,4 +1,4 @@
-import java.time.Instant;
+package com.amazonaws.services.msf.pojo;
 
 public class StockPrice {
     private String timestamp;
@@ -50,7 +50,7 @@ public class StockPrice {
 
     @Override
     public String toString() {
-        return "StockPrice{" +
+        return "com.amazonaws.services.msf.pojo.StockPrice{" +
                 "timestamp='" + timestamp + '\'' +
                 ", symbol='" + symbol + '\'' +
                 ", price=" + price +

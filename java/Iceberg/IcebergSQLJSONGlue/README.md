@@ -1,8 +1,8 @@
 # Flink Iceberg Sink using SQL API
 
-* Flink version: 1.20.0
+* Flink version: 1.20.1
 * Flink API: SQL API
-* Iceberg 1.8.1
+* Iceberg 1.9.1
 * Language: Java (11)
 * Flink connectors: [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/datastream/datagen/) 
    and [Iceberg](https://iceberg.apache.org/docs/latest/flink/)
@@ -57,7 +57,21 @@ At the moment there are current limitations concerning Flink Iceberg integration
 * Doesn't support Iceberg Table with hidden partitioning
 * Doesn't support adding columns, removing columns, renaming columns or changing columns.
 
-### Schema and schema evolution
+### Hadoop Library Availability Challenge
+
+When integrating Flink with Iceberg, there's a common configuration challenge that affects most Flink deployments:
+
+#### The Challenge
+* When using Flink SQL's `CREATE CATALOG` statements, Hadoop libraries must be available on the system classpath
+* However, standard Flink distributions use shaded dependencies that can create class loading conflicts with Hadoop's expectations
+* This is particularly relevant for TaskManagers (which is the case for most generic Flink clusters, except EMR)
+
+#### Solution Approaches
+1. **For SQL Applications (This Example)**
+   * If Hadoop is not pre-installed in the cluster, you'll need to create a custom HadoopUtils class and properly configure Maven dependencies
+   * This example includes the necessary configuration to handle these dependencies
+
+### Schema
 
 The application uses a predefined schema for the stock price data with the following fields:
 * `timestamp`: STRING - ISO timestamp of the record
@@ -65,11 +79,6 @@ The application uses a predefined schema for the stock price data with the follo
 * `price`: FLOAT - Stock price (0-10 range)
 * `volumes`: INT - Trade volumes (0-1000000 range)
 
-This schema matches the AVRO schema used in the DataStream API example for consistency.
-The equivalent AVRO schema definition is available in [price.avsc](./src/main/resources/price.avsc) for reference.
-
-Schema changes would require updating both the POJO class and the SQL table definition.
-Unlike the DataStream approach with AVRO, this SQL approach requires explicit schema management.
 
 ### Running locally, in IntelliJ
 

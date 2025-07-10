@@ -1,9 +1,12 @@
+package com.amazonaws.services.msf.source;
+
+import com.amazonaws.services.msf.pojo.StockPrice;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.flink.connector.datagen.source.GeneratorFunction;
 import java.time.Instant;
 
 /**
- * Function used by DataGen source to generate random records as StockPrice POJOs.
+ * Function used by DataGen source to generate random records as com.amazonaws.services.msf.pojo.StockPrice POJOs.
  * 
  * The generator mimics the behavior of AvroGenericStockTradeGeneratorFunction
  * from the IcebergDataStreamSink example.
