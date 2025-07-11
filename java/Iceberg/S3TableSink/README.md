@@ -1,4 +1,4 @@
-# Flink Iceberg Sink using DataStream API
+# Iceberg Sink to Amazon S3 Tables using DataStream API
 
 * Flink version: 1.19.0
 * Flink API: DataStream API
@@ -21,7 +21,7 @@ The sample application expects the S3 Table Bucket to exist and to have the ARN 
 ```bash
 aws s3tables create-table-bucket --name flink-example
 {
-      "arn": "arn:aws:s3tables:us-east-1:111122223333:bucket/flink-example"
+      "arn": "arn:aws:s3tables:<region>:<account-id>:bucket/flink-example"
 
 }
 ```
@@ -52,7 +52,7 @@ Runtime parameters:
 | Group ID  | Key                      | Default           | Description                                                                                                         |
 |-----------|--------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|
 | `DataGen` | `records.per.sec`        | `100.0`           | Records per second generated.                                                                                       |
-| `Iceberg` | `table.bucket.arn`       | (mandatory)       | ARN of the S3 bucket, e.g., `arn:aws:s3tables:region:account-id:bucket/bucket-name`                                 |
+| `Iceberg` | `table.bucket.arn`       | (mandatory)       | ARN of the S3 Table bucket, e.g., `arn:aws:s3tables:<region>:<account-id>:bucket/<bucket-name>`                     |
 | `Iceberg` | `catalog.db`             | `test_from_flink` | Name of the S3 table database.                                                                                      |
 | `Iceberg` | `catalog.table`          | `test_table`      | Name of the S3 table.                                                                                               |
 | `Iceberg` | `partition.fields`       | `symbol`          | Comma separated list of partition fields.                                                                           |

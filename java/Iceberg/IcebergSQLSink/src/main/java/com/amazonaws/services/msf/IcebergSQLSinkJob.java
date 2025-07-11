@@ -38,11 +38,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
-public class GlueTableSQLJSONExample {
+public class IcebergSQLSinkJob {
+    private static final Logger LOG = LoggerFactory.getLogger(IcebergSQLSinkJob.class);
+
     // Constants
     private static final String CATALOG_NAME = "glue";
     private static final String LOCAL_APPLICATION_PROPERTIES_RESOURCE = "flink-application-properties-dev.json";
-    private static final Logger LOG = LoggerFactory.getLogger(GlueTableSQLJSONExample.class);
+    public static final String DEFAULT_DATABASE = "default";
+    public static final String DEFAULT_TABLE = "prices_iceberg";
 
     private static boolean isLocal(StreamExecutionEnvironment env) {
         return env instanceof LocalStreamEnvironment;
@@ -58,7 +61,7 @@ public class GlueTableSQLJSONExample {
         if (isLocal(env)) {
             LOG.info("Loading application properties from '{}'", LOCAL_APPLICATION_PROPERTIES_RESOURCE);
             return KinesisAnalyticsRuntime.getApplicationProperties(
-                    Objects.requireNonNull(GlueTableSQLJSONExample.class.getClassLoader()
+                    Objects.requireNonNull(IcebergSQLSinkJob.class.getClassLoader()
                             .getResource(LOCAL_APPLICATION_PROPERTIES_RESOURCE)).getPath());
         } else {
             LOG.info("Loading application properties from Amazon Managed Service for Apache Flink");
@@ -96,8 +99,8 @@ public class GlueTableSQLJSONExample {
 
     private static IcebergConfig setupIcebergProperties(Properties icebergProperties) {
         String s3BucketPrefix = icebergProperties.getProperty("bucket.prefix");
-        String glueDatabase = icebergProperties.getProperty("catalog.db", "default");
-        String glueTable = icebergProperties.getProperty("catalog.table", "prices_iceberg");
+        String glueDatabase = icebergProperties.getProperty("catalog.db", DEFAULT_DATABASE);
+        String glueTable = icebergProperties.getProperty("catalog.table", DEFAULT_TABLE);
 
         Preconditions.checkNotNull(s3BucketPrefix, "You must supply an s3 bucket prefix for the warehouse.");
         Preconditions.checkNotNull(glueDatabase, "You must supply a database name");

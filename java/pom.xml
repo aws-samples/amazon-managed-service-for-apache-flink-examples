@@ -23,6 +23,7 @@
         <module>GettingStartedTable</module>
         <module>Iceberg/IcebergDataStreamSink</module>
         <module>Iceberg/IcebergDataStreamSource</module>
+        <module>Iceberg/IcebergSQLSink</module>
         <module>Iceberg/S3TableSink</module>
         <module>KafkaConfigProviders/Kafka-mTLS-Keystore-ConfigProviders</module>
         <module>KafkaConfigProviders/Kafka-SASL_SSL-ConfigProviders</module>

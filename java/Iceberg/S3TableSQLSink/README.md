@@ -1,11 +1,11 @@
-# Flink Iceberg Sink using SQL API
+# Iceberg ink to Amazon S3 Table using SQL
 
-* Flink version: 1.20.1
+* Flink version: 1.20.0
 * Flink API: SQL API
 * Iceberg 1.9.1
 * Language: Java (11)
-* Flink connectors: [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/datastream/datagen/) 
-   and [Iceberg](https://iceberg.apache.org/docs/latest/flink/)
+* Flink connectors: [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/datastream/datagen/)
+  and [Iceberg](https://iceberg.apache.org/docs/latest/flink/) sink
 
 This example demonstrates how to use
 [Flink SQL API with Iceberg](https://iceberg.apache.org/docs/latest/flink-writes/) and the Glue Data Catalog.
@@ -37,12 +37,12 @@ When running locally, the configuration is read from the
 
 Runtime parameters:
 
-| Group ID  | Key                      | Default           | Description                                                                                                         |
-|-----------|--------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|
-| `DataGen` | `records.per.sec`        | `10.0`            | Records per second generated.                                                                                       |
-| `Iceberg` | `bucket.prefix`          | (mandatory)       | S3 bucket prefix, for example `s3://my-bucket/iceberg`.                                                             |
-| `Iceberg` | `catalog.db`             | `default`         | Name of the Glue Data Catalog database.                                                                             |
-| `Iceberg` | `catalog.table`          | `prices_iceberg`  | Name of the Glue Data Catalog table.                                                                                |
+| Group ID  | Key                      | Default           | Description                                            |
+|-----------|--------------------------|-------------------|--------------------------------------------------------|
+| `DataGen` | `records.per.sec`        | `10.0`            | Records per second generated.                          |
+| `Iceberg` | `bucket.prefix`          | (mandatory)       | S3 bucket prefix, for example `s3://mybucket/iceberg`. |
+| `Iceberg` | `catalog.db`             | `default`         | Name of the Glue Data Catalog database.                |
+| `Iceberg` | `catalog.table`          | `prices_iceberg`  | Name of the Glue Data Catalog table.                   |
 
 ### Checkpoints
 
@@ -57,21 +57,43 @@ At the moment there are current limitations concerning Flink Iceberg integration
 * Doesn't support Iceberg Table with hidden partitioning
 * Doesn't support adding columns, removing columns, renaming columns or changing columns.
 
-### Hadoop Library Availability Challenge
+### Hadoop Library Clash
 
 When integrating Flink with Iceberg, there's a common configuration challenge that affects most Flink deployments:
 
-#### The Challenge
+#### Problem
+
 * When using Flink SQL's `CREATE CATALOG` statements, Hadoop libraries must be available on the system classpath
 * However, standard Flink distributions use shaded dependencies that can create class loading conflicts with Hadoop's expectations
 * This is particularly relevant for TaskManagers (which is the case for most generic Flink clusters, except EMR)
 
-#### Solution Approaches
-1. **For SQL Applications (This Example)**
-   * If Hadoop is not pre-installed in the cluster, you'll need to create a custom HadoopUtils class and properly configure Maven dependencies
-   * This example includes the necessary configuration to handle these dependencies
+#### Solution
 
-### Schema
+This example shows a simple workaround to prevent the Hadoop class clashing:
+1. Include a modified version of the Flink class `org.apache.flink.runtime.util.HadoopUtils`
+2. Use Maven Shade Plugin to prevent class conflicts
+
+The modified [`org.apache.flink.runtime.util.HadoopUtils`](src/main/java/org/apache/flink/runtime/util/HadoopUtils.java) 
+class is included in the source code of this project. You can include it as-is in your project, using the same package name.
+
+The shading is configured in the [`pom.xml`](pom.xml). In your project you can copy the `<relocations>...</relocations>` configuration 
+into the `maven-shade-plugin` configuration.
+
+```xml
+<relocations>
+    <relocation>
+        <pattern>org.apache.hadoop.conf</pattern>
+        <shadedPattern>shaded.org.apache.hadoop.conf</shadedPattern>
+    </relocation>
+    <relocation>
+        <pattern>org.apache.flink.runtime.util.HadoopUtils</pattern>
+        <shadedPattern>shadow.org.apache.flink.runtime.util.HadoopUtils</shadedPattern>
+    </relocation>
+</relocations>
+```
+
+
+### Sample Data Schema
 
 The application uses a predefined schema for the stock price data with the following fields:
 * `timestamp`: STRING - ISO timestamp of the record
