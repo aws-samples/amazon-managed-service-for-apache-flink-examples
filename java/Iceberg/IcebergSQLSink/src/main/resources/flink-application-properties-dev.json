@@ -10,7 +10,7 @@
     "PropertyMap": {
       "bucket.prefix": "s3://<bucket-name>/iceberg",
       "catalog.db": "iceberg",
-      "catalog.table": "prices_iceberg2"
+      "catalog.table": "sqlsink_prices"
     }
   }
 ]

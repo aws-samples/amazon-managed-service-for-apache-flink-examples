@@ -128,28 +128,29 @@ public class IcebergSQLSinkJob {
     }
 
     public static void main(String[] args) throws Exception {
-        // 1. Initialize environments - using standard environment instead of WebUI for production consistency
+        // 1. Initialize environments
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         final StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
 
-        // 2 If running local, we need to enable Checkpoints. Iceberg commits data with every checkpoint
+        // 2. If running local, we need to enable Checkpoints. Iceberg commits data with every checkpoint
         if (isLocal(env)) {
-            env.enableCheckpointing(60000);
+            // For development, we are checkpointing every 30 second to have data commited faster.
+            env.enableCheckpointing(30000);
         }
 
-        // 3. Setup configuration properties with validation
+        // 3. Parse and validate the configuration for the Iceberg sink
         Map<String, Properties> applicationProperties = loadApplicationProperties(env);
         Properties icebergProperties = applicationProperties.get("Iceberg");
         IcebergConfig config = setupIcebergProperties(icebergProperties);
 
-        // 4. Create data generator source
+        // 4. Create data generator source, using DataStream API
         Properties dataGenProperties = applicationProperties.get("DataGen");
         DataStream<StockPrice> stockPriceDataStream = env.fromSource(
                 createDataGenerator(dataGenProperties),
                 WatermarkStrategy.noWatermarks(),
                 "DataGen");
 
-        // 5. Convert DataStream to Table and create view
+        // 5. Convert DataStream to a Table and create view
         Table stockPriceTable = tableEnv.fromDataStream(stockPriceDataStream);
         tableEnv.createTemporaryView("stockPriceTable", stockPriceTable);
 
@@ -167,9 +168,9 @@ public class IcebergSQLSinkJob {
         tableEnv.executeSql(createTableStatement);
 
         // 7. Execute SQL operations - Insert data from stock price stream
-        String insertQuery = "INSERT INTO " + sinkTableName +
-                " SELECT `timestamp`, symbol, price, volumes FROM default_catalog.default_database.stockPriceTable";
-        LOG.info("Executing insert statement: {}", insertQuery);
+        String insertQuery = "INSERT INTO " + sinkTableName + " " +
+                "SELECT `timestamp`, symbol, price, volumes " +
+                "FROM default_catalog.default_database.stockPriceTable";
         TableResult insertResult = tableEnv.executeSql(insertQuery);
 
         // Keep the job running to continuously insert data

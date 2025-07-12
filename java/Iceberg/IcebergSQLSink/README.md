@@ -1,4 +1,4 @@
-# Iceberg ink to Amazon S3 Table using SQL
+## Iceberg Sink (Glue Data Catalog) using SQL
 
 * Flink version: 1.20.0
 * Flink API: SQL API
@@ -37,12 +37,18 @@ When running locally, the configuration is read from the
 
 Runtime parameters:
 
-| Group ID  | Key                      | Default           | Description                                            |
-|-----------|--------------------------|-------------------|--------------------------------------------------------|
-| `DataGen` | `records.per.sec`        | `10.0`            | Records per second generated.                          |
-| `Iceberg` | `bucket.prefix`          | (mandatory)       | S3 bucket prefix, for example `s3://mybucket/iceberg`. |
-| `Iceberg` | `catalog.db`             | `default`         | Name of the Glue Data Catalog database.                |
-| `Iceberg` | `catalog.table`          | `prices_iceberg`  | Name of the Glue Data Catalog table.                   |
+| Group ID  | Key                      | Default           | Description                                                                                |
+|-----------|--------------------------|-------------------|--------------------------------------------------------------------------------------------|
+| `DataGen` | `records.per.sec`        | `10.0`            | Records per second generated.                                                              |
+| `Iceberg` | `bucket.prefix`          | (mandatory)       | S3 bucket and path URL prefix, starting with `s3://`. For example `s3://mybucket/iceberg`. |
+| `Iceberg` | `catalog.db`             | `default`         | Name of the Glue Data Catalog database.                                                    |
+| `Iceberg` | `catalog.table`          | `prices_iceberg`  | Name of the Glue Data Catalog table.                                                       |
+
+### Running locally, in IntelliJ
+
+You can run this example directly in IntelliJ, without any local Flink cluster or local Flink installation.
+
+See [Running examples locally](https://github.com/nicusX/amazon-managed-service-for-apache-flink-examples/blob/main/java/running-examples-locally.md) for details.
 
 ### Checkpoints
 
@@ -51,21 +57,31 @@ Checkpointing must be enabled. Iceberg commits writes on checkpoint.
 When running locally, the application enables checkpoints programmatically, every 30 seconds.
 When deployed to Managed Service for Apache Flink, checkpointing is controlled by the application configuration.
 
-### Known limitations
+### Sample Data Schema
+
+The application uses a predefined schema for the stock price data with the following fields:
+* `timestamp`: STRING - ISO timestamp of the record
+* `symbol`: STRING - Stock symbol (e.g., AAPL, AMZN)
+* `price`: FLOAT - Stock price (0-10 range)
+* `volumes`: INT - Trade volumes (0-1000000 range)
+
+### Known limitations of the Flink Iceberg sink
 
 At the moment there are current limitations concerning Flink Iceberg integration:
 * Doesn't support Iceberg Table with hidden partitioning
 * Doesn't support adding columns, removing columns, renaming columns or changing columns.
 
-### Hadoop Library Clash
+---
 
-When integrating Flink with Iceberg, there's a common configuration challenge that affects most Flink deployments:
+### Known Flink issue: Hadoop library clash
 
-#### Problem
+When integrating Flink with Iceberg, there's a common issue affecting most Flink setups
 
-* When using Flink SQL's `CREATE CATALOG` statements, Hadoop libraries must be available on the system classpath
-* However, standard Flink distributions use shaded dependencies that can create class loading conflicts with Hadoop's expectations
-* This is particularly relevant for TaskManagers (which is the case for most generic Flink clusters, except EMR)
+When using Flink SQL's `CREATE CATALOG` statements, Hadoop libraries must be available on the system classpath.
+However, standard Flink distributions use shaded dependencies that can create class loading conflicts with Hadoop's 
+expectations.
+Flink default classloading, when running in Application mode, prevents from using some Hadoop classes even if 
+included in the application uber-jar.
 
 #### Solution
 
@@ -91,19 +107,3 @@ into the `maven-shade-plugin` configuration.
     </relocation>
 </relocations>
 ```
-
-
-### Sample Data Schema
-
-The application uses a predefined schema for the stock price data with the following fields:
-* `timestamp`: STRING - ISO timestamp of the record
-* `symbol`: STRING - Stock symbol (e.g., AAPL, AMZN)
-* `price`: FLOAT - Stock price (0-10 range)
-* `volumes`: INT - Trade volumes (0-1000000 range)
-
-
-### Running locally, in IntelliJ
-
-You can run this example directly in IntelliJ, without any local Flink cluster or local Flink installation.
-
-See [Running examples locally](https://github.com/nicusX/amazon-managed-service-for-apache-flink-examples/blob/main/java/running-examples-locally.md) for details.
