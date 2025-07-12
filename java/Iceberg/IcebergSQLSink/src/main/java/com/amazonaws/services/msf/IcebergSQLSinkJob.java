@@ -134,7 +134,9 @@ public class IcebergSQLSinkJob {
 
         // 2 If running local, we need to enable Checkpoints. Iceberg commits data with every checkpoint
         if (isLocal(env)) {
-            env.enableCheckpointing(60000);
+            // For development, we are checkpointing every 30 second to see files being committed faster
+            // In production, committing every 30 second may generate small files.
+            env.enableCheckpointing(30000);
         }
 
         // 3. Setup configuration properties with validation
@@ -167,9 +169,9 @@ public class IcebergSQLSinkJob {
         tableEnv.executeSql(createTableStatement);
 
         // 7. Execute SQL operations - Insert data from stock price stream
-        String insertQuery = "INSERT INTO " + sinkTableName +
-                " SELECT `timestamp`, symbol, price, volumes FROM default_catalog.default_database.stockPriceTable";
-        LOG.info("Executing insert statement: {}", insertQuery);
+        String insertQuery = "INSERT INTO " + sinkTableName + " " +
+                "SELECT `timestamp`, symbol, price, volumes " +
+                "FROM default_catalog.default_database.stockPriceTable";
         TableResult insertResult = tableEnv.executeSql(insertQuery);
 
         // Keep the job running to continuously insert data
