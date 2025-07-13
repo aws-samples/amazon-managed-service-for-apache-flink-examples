@@ -12,8 +12,7 @@
       "catalog.db": "default",
       "catalog.table": "prices_iceberg",
       "partition.fields": "symbol",
-      "sort.field": "timestamp",
-      "operation": "upsert",
+      "operation": "append",
       "upsert.equality.fields": "symbol"
     }
   }

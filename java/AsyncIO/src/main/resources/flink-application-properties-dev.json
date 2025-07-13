@@ -3,7 +3,7 @@
     "PropertyGroupId": "OutputStream0",
     "PropertyMap": {
       "aws.region": "us-east-1",
-      "stream.arn": "ExampleOutputStream-ARN-GOES-HERE",
+      "stream.arn": "arn:aws:kinesis:us-east-1:<account-id>:stream/ExampleOutputStream",
       "flink.stream.initpos": "LATEST"
     }
   },
@@ -11,8 +11,8 @@
     "PropertyGroupId": "EndpointService",
     "PropertyMap": {
       "aws.region": "us-east-1",
-      "api.url": "API-GATEWAY-URL",
-      "api.key": "API-GATEWAY-KEY"
+      "api.url": "<API-Gateway-URL>",
+      "api.key": "<API-Gateway-key>"
     }
   }
 ]

@@ -1,0 +1,9 @@
+[
+  {
+    "PropertyGroupId": "OutputBucket",
+    "PropertyMap": {
+      "bucket.name": "<output-bucket>",
+      "bucket.path": "avrostockprices"
+    }
+  }
+]

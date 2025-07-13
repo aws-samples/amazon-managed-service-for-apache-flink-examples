@@ -1,0 +1,24 @@
+name: Check for Exposed ARNs
+
+on:
+  pull_request:
+
+jobs:
+  check-arns:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Check for exposed ARNs
+        run: |
+          # Find files containing ARN patterns with actual account IDs
+          # Exclude .git directory, markdown files, and this workflow file itself
+          if grep -r --include="*" --exclude="*.md" --exclude-dir=".git" --exclude=".github/workflows/check-arns.yml" -E 'arn:aws:[^:]+:[^:]+:[0-9]{12}:' .; then
+            echo "ERROR: Found unsanitized ARNs in the repository"
+            echo "Please replace account IDs with a placeholder such as <account-id>"
+            echo "Files with exposed ARNs:"
+            grep -r --include="*" --exclude="*.md" --exclude-dir=".git" --exclude=".github/workflows/check-arns.yml" -l -E 'arn:aws:[^:]+:[^:]+:[0-9]{12}:' .
+            exit 1
+          fi
+          
+          echo "All files checked - no exposed ARNs found"

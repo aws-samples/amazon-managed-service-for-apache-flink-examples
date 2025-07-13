@@ -6,12 +6,14 @@
 * Connectors: FileSystem Sink (and DataGen connector)
 
 This example demonstrates how to write Parquet files to S3.
+See the [S3 Parquet Source](../S3ParquetSource) example to read Parquet files from S3.
 
 The example generates random stock price data using the DataGen connector and writes to S3 as Parquet files with 
 a bucketing in the format `year=yyyy/month=MM/day=dd/hour=HH/` and rotating files on checkpoint.
 
 Note that FileSystem sink commit the writes on checkpoint. For this reason, checkpoint are programmatically enabled when running locally.
 When running on Managed Flink checkpoints are controlled by the application configuration and enabled by default.
+
 
 ## Prerequisites
 

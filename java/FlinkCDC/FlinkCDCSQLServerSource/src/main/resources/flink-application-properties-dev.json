@@ -1,0 +1,22 @@
+[
+  {
+    "PropertyGroupId": "CDCSource",
+    "PropertyMap": {
+      "hostname": "localhost",
+      "port": "1433",
+      "username": "flink_cdc",
+      "password": "FlinkCDC@123",
+      "database.name": "SampleDataPlatform",
+      "table.name": "dbo.Customers"
+    }
+  },
+  {
+    "PropertyGroupId": "JdbcSink",
+    "PropertyMap": {
+      "table.name": "customers",
+      "url": "jdbc:postgresql://localhost:5432/targetdb",
+      "username": "flinkusr",
+      "password": "PassW0rd!"
+    }
+  }
+]

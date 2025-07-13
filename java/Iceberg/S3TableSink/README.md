@@ -1,8 +1,8 @@
-# Iceberg Sink to Amazon S3 Tables using DataStream API
+# Flink Iceberg Sink using DataStream API
 
 * Flink version: 1.19.0
 * Flink API: DataStream API
-* Iceberg 1.6.1
+* Iceberg 1.8.1
 * Language: Java (11)
 * Flink connectors: [DataGen](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/datastream/datagen/) 
    and [Iceberg](https://iceberg.apache.org/docs/latest/flink/)
@@ -16,12 +16,12 @@ serialized with AVRO.
 
 ### Prerequisites
 
-### Create a Table Bucket
+#### Create a Table Bucket
 The sample application expects the S3 Table Bucket to exist and to have the ARN in the local environment:
 ```bash
 aws s3tables create-table-bucket --name flink-example
 {
-      "arn": "arn:aws:s3tables:<region>:<account-id>:bucket/flink-example"
+      "arn": "arn:aws:s3tables:us-east-1:111122223333:bucket/flink-example"
 
 }
 ```
@@ -34,6 +34,13 @@ aws s3tables list-table-buckets
 
 This will show you the list of table buckets. Select the one you wish to write to and paste it into the config file in this project.
 
+#### Create a Namespace in the Table Bucket (Database)
+The sample application expects the Namespace in the Table Bucket to exist
+```bash
+aws s3tables create-namespace \
+    --table-bucket-arn arn:aws:s3tables:us-east-1:111122223333:bucket/flink-example \ 
+    --namespace default
+```
 
 #### IAM Permissions
 
@@ -49,16 +56,15 @@ When running locally, the configuration is read from the
 
 Runtime parameters:
 
-| Group ID  | Key                      | Default           | Description                                                                                                         |
-|-----------|--------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|
-| `DataGen` | `records.per.sec`        | `100.0`           | Records per second generated.                                                                                       |
-| `Iceberg` | `table.bucket.arn`       | (mandatory)       | ARN of the S3 Table bucket, e.g., `arn:aws:s3tables:<region>:<account-id>:bucket/<bucket-name>`                     |
-| `Iceberg` | `catalog.db`             | `test_from_flink` | Name of the S3 table database.                                                                                      |
-| `Iceberg` | `catalog.table`          | `test_table`      | Name of the S3 table.                                                                                               |
-| `Iceberg` | `partition.fields`       | `symbol`          | Comma separated list of partition fields.                                                                           |
-| `Iceberg` | `sort.field`             | `timestamp`       | Sort field.                                                                                                         |
-| `Iceberg` | `operation`              | `upsert`          | Iceberg operation. One of `upsert`, `append` or `overwrite`.                                                        |
-| `Iceberg` | `upsert.equality.fields` | `symbol`          | Comma separated list of fields used for upsert. It must match partition fields. Required if `operation` = `upsert`. |
+| Group ID  | Key                      | Default          | Description                                                                                                         |
+|-----------|--------------------------|------------------|---------------------------------------------------------------------------------------------------------------------|
+| `DataGen` | `records.per.sec`        | `100.0`          | Records per second generated.                                                                                       |
+| `Iceberg` | `table.bucket.arn`       | (mandatory)      | ARN of the S3 bucket, e.g., `arn:aws:s3tables:region:account-id:bucket/bucket-name`                                 |
+| `Iceberg` | `catalog.db`             | `default`        | Name of the S3 table database.                                                                                      |
+| `Iceberg` | `catalog.table`          | `prices_s3table` | Name of the S3 table.                                                                                               |
+| `Iceberg` | `partition.fields`       | `symbol`         | Comma separated list of partition fields.                                                                           |
+| `Iceberg` | `operation`              | `append`         | Iceberg operation. One of `upsert`, `append` or `overwrite`.                                                        |
+| `Iceberg` | `upsert.equality.fields` | `symbol`         | Comma separated list of fields used for upsert. It must match partition fields. Required if `operation` = `upsert`. |
 
 ### Checkpoints
 

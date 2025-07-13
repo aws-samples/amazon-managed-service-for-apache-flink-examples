@@ -68,7 +68,7 @@ public class StreamingJob {
     }
 
     public static void main(String[] args) throws Exception {
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(new Configuration());
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
 
         // Local dev specific settings
@@ -80,11 +80,6 @@ public class StreamingJob {
 
         Map<String, Properties> applicationProperties = loadApplicationProperties(env);
         icebergProperties = applicationProperties.get("Iceberg");
-
-        Catalog s3 = createCatalog(tableEnv);
-        s3.createDatabase(icebergProperties.getProperty("catalog.db"),
-                        new CatalogDatabaseImpl(Map.of(),
-                        "Sample Database"), true);
 
         // Get AVRO Schema from the definition bundled with the application
         // Note that the application must "knows" the AVRO schema upfront, i.e. the schema must be either embedded
@@ -108,21 +103,6 @@ public class StreamingJob {
 
         env.execute("Flink S3 Table Sink");
     }
-
-    private static Catalog createCatalog(StreamTableEnvironment tableEnv) {
-
-        Configuration conf = new Configuration();
-        conf.setString("warehouse", icebergProperties.getProperty("table.bucket.arn"));
-        conf.setString("catalog-impl", "software.amazon.s3tables.iceberg.S3TablesCatalog");
-        conf.setString("type", "iceberg");
-        conf.setString("io-impl", "org.apache.iceberg.aws.s3.S3FileIO");
-
-        final String catalogName = "s3";
-        CatalogDescriptor descriptor = CatalogDescriptor.of(catalogName, conf);
-        tableEnv.createCatalog(catalogName, descriptor);
-        return tableEnv.getCatalog(catalogName).get();
-    }
-
 
     private static DataStream<GenericRecord> createDataStream(StreamExecutionEnvironment env, Map<String, Properties> applicationProperties, Schema avroSchema) {
         Properties dataGeneratorProperties = applicationProperties.get("DataGen");

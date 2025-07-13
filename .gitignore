@@ -13,8 +13,7 @@ venv/
 .java-version
 /pyflink/
 __pycache__/
-/.vscode/
-/.docker/
+.vscode/
 /.run/
 
 clean.sh

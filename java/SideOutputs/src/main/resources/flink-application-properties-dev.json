@@ -3,7 +3,7 @@
     "PropertyGroupId": "ProcessedOutputStream",
     "PropertyMap": {
       "aws.region": "us-east-1",
-      "stream.arn": "ExampleOutputStream-ARN-GOES-HERE",
+      "stream.arn": "arn:aws:kinesis:us-east-1:<account-id>:stream/ExampleOutputStream",
       "flink.stream.initpos": "LATEST"
     }
   },
@@ -11,7 +11,7 @@
     "PropertyGroupId": "DLQOutputStream",
     "PropertyMap": {
       "aws.region": "us-east-1",
-      "stream.arn": "DLQStream-ARN-GOES-HERE",
+      "stream.arn": "arn:aws:kinesis:us-east-1:<account-id>:stream/DLQStream",
       "flink.stream.initpos": "LATEST"
     }
   }

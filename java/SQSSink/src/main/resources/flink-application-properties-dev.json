@@ -2,7 +2,7 @@
   {
     "PropertyGroupId": "OutputQueue0",
     "PropertyMap": {
-      "sqs-url": "https://sqs.us-east-1.amazonaws.com/012345678901/MyTestQueue",
+      "sqs-url": "https://sqs.us-east-1.amazonaws.com/<account-id>/MyTestQueue",
       "aws.region": "us-east-1"
     }
   }
