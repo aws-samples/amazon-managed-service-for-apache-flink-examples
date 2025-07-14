@@ -1,0 +1,16 @@
+[
+  {
+    "PropertyGroupId": "DataGen",
+    "PropertyMap": {
+      "records.per.sec": 10.0
+    }
+  },
+  {
+    "PropertyGroupId": "Iceberg",
+    "PropertyMap": {
+      "bucket.prefix": "s3://<bucket-name>/iceberg",
+      "catalog.db": "iceberg",
+      "catalog.table": "sqlsink_prices"
+    }
+  }
+]
