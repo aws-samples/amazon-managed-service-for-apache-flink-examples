@@ -45,5 +45,6 @@
         <module>S3AvroSource</module>
         <module>FlinkCDC/FlinkCDCSQLServerSource</module>
         <module>FlinkDataGenerator</module>
+        <module>JdbcSink</module>
     </modules>
 </project>

@@ -1,0 +1,17 @@
+[
+  {
+    "PropertyGroupId": "DataGen",
+    "PropertyMap": {
+      "records.per.second": "5"
+    }
+  },
+  {
+    "PropertyGroupId": "JdbcSink",
+    "PropertyMap": {
+      "url": "jdbc:postgresql://localhost:5432/testdb",
+      "username": "flinkuser",
+      "password": "flinkpassword",
+      "table.name": "users"
+    }
+  }
+]
