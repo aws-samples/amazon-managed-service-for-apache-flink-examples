@@ -8,7 +8,6 @@ import org.apache.flink.util.Preconditions;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.iceberg.BaseTable;
-import org.apache.iceberg.NullOrder;
 import org.apache.iceberg.PartitionSpec;
 import org.apache.iceberg.Table;
 import org.apache.iceberg.TableMetadata;
@@ -19,9 +18,9 @@ import org.apache.iceberg.catalog.TableIdentifier;
 import org.apache.iceberg.flink.CatalogLoader;
 import org.apache.iceberg.flink.FlinkSchemaUtil;
 import org.apache.iceberg.flink.TableLoader;
-import org.apache.iceberg.flink.sink.AvroGenericRecordToRowDataMapper;
 import org.apache.iceberg.flink.sink.FlinkSink;
 import org.apache.iceberg.flink.util.FlinkCompatibilityUtil;
+import org.apache.iceberg.shaded.org.apache.avro.Schema;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -88,11 +87,12 @@ public class IcebergSinkBuilder {
         String upsertEqualityFields = icebergProperties.getProperty("upsert.equality.fields", DEFAULT_ICEBERG_UPSERT_FIELDS);
         List<String> equalityFieldsList = Arrays.asList(upsertEqualityFields.split("[, ]+"));
 
+        Schema shadedAvroSchema = new Schema.Parser().parse(avroSchema.toString());
 
         // Convert Avro Schema to Iceberg Schema, this will be used for creating the table
-        org.apache.iceberg.Schema icebergSchema = AvroSchemaUtil.toIceberg(avroSchema);
+        org.apache.iceberg.Schema icebergSchema = AvroSchemaUtil.toIceberg(shadedAvroSchema);
         // Avro Generic Record to Row Data Mapper
-        MapFunction<GenericRecord, RowData> avroGenericRecordToRowDataMapper = AvroGenericRecordToRowDataMapper.forAvroSchema(avroSchema);
+        AvroGenericRecordToRowDataMapper avroGenericRecordToRowDataMapper = AvroGenericRecordToRowDataMapper.forAvroSchema(avroSchema);
 
 
         // Catalog properties for using Glue Data Catalog

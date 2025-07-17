@@ -8,9 +8,9 @@
   {
     "PropertyGroupId": "Iceberg",
     "PropertyMap": {
-      "bucket.prefix": "s3://<my-bucket>/iceberg",
-      "catalog.db": "default",
-      "catalog.table": "prices_iceberg",
+      "bucket.prefix": "s3://<bucket-name>/iceberg",
+      "catalog.db": "iceberg",
+      "catalog.table": "prices_iceberg_datastream",
       "partition.fields": "symbol",
       "operation": "append",
       "upsert.equality.fields": "symbol"
