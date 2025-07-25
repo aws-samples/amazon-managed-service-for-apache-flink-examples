@@ -5,7 +5,7 @@ Parameters:
   PolicyName:
     Type: String
     Description: 'Name for the IAM Policy'
-    Default: 'CMKKeyAdministratorPolicy'
+    Default: 'MsfCmkKeyAdministratorPolicy'
     AllowedPattern: '^[a-zA-Z0-9+=,.@_-]+$'
     ConstraintDescription: 'Must be a valid IAM policy name'
     

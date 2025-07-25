@@ -40,15 +40,20 @@ Because of these dependencies, setting up CMK for an application must be done in
 
 ### Setting up CMK on an application
 
-1. Create the *Operator's Base IAM Policy* using the [msf-cmk-operator-iam-policy.yaml](msf-base-operator-iam-policy.yaml) CFN template. Attach the Base Policy to the Operator's User or Role.
-2. If the application doesn't exist yet, use Operator's credentials to create an application, _without_ CMK.
-3. Create the *Key Administrator's IAM Policy* using [msf-key-administrator-policy.yaml](kms-key-administrator-policy.yaml). Attach the Policy to the IAM User/Role you are going to use to manage the CMK key. 
-4. Use the Key Administrator's credentials to create the CMK, using [msf-kms-key.yaml](msf-kms-key.yaml). The template will ask you to provide the application, the Operator's Role/User, and the Key Administrator's Role/User.
-5. Create the *Operator's CMK IAM Policy* using [msf-cmk-operator-iam-policy.yaml](msf-cmk-operator-iam-policy.yaml). Attach the new policy to the Operator's User/Role, without removing the Base policy. The template will ask to provide the application and the CMK.
-6. Use the Operator's credentials to update the application, enabling CMK with the key you created at step (4)
+1. Create the *Operator's Base IAM Policy* using the [msf-cmk-operator-iam-policy.yaml](msf-base-operator-iam-policy.yaml) CFN template. 
+2. Attach the Base Policy to the Operator's User or Role.
+3. If the application doesn't exist yet, use Operator's credentials to create an application, _without_ CMK.
+4. Create the *Key Administrator's IAM Policy* using [msf-key-administrator-policy.yaml](kms-key-administrator-policy.yaml). 
+5. Attach the Policy to the IAM User/Role you are going to use to manage the CMK key. 
+6. Use the Key Administrator's credentials to create the CMK, using [msf-kms-key.yaml](msf-kms-key.yaml). The template will ask you to provide the application name, the Operator's Role/User, and the Key Administrator's Role/User ARNs.
+7. Create the *Operator's CMK IAM Policy* using [msf-cmk-operator-iam-policy.yaml](msf-cmk-operator-iam-policy.yaml). 
+8. Attach the new policy to the Operator's User/Role, without removing the Base policy. The template will ask to provide the application name and the CMK ID.
+9. Use the Operator's credentials to update the application, enabling CMK with the key you created at step (6)
 
+> Note 1: No CFN template is provided for steps (2), (3), (4), (7), and (8). These steps depend on your setup and whether you are using IAM Users or Roles as Operator and Key Administrator. You can use the AWS CLI, the Console, or any automation tool for these steps.  
+> Refer to *Using Customer Managed Key in Amazon Managed Service for Apache Flink*[**TODO link**] service documentation page for setting CMK on an existing application.
 
-> Note: the *Operator's Base IAM Policy* defined by [msf-base-operator-iam-policy.yaml](msf-base-operator-iam-policy.yaml) gives the Operator broad permissions to control any application in the account and attach any service role to the application. You can restrict this policy with further conditions as required.
+> Note 2: the *Operator's Base IAM Policy* defined by [msf-base-operator-iam-policy.yaml](msf-base-operator-iam-policy.yaml) gives the Operator broad permissions to control any application in the account and attach any service role to the application. You can restrict this policy with further conditions as required.
 
 
 ### Testing CMK
