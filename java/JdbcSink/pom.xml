@@ -18,7 +18,6 @@
         <maven.compiler.target>${target.java.version}</maven.compiler.target>
         <flink.version>1.20.0</flink.version>
         <flink.jdbc.connector.version>3.3.0-1.20</flink.jdbc.connector.version>
-        <hikari.version>5.1.0</hikari.version>
         <postgresql.jdbc.driver.version>42.7.2</postgresql.jdbc.driver.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
         <log4j.version>2.23.1</log4j.version>
@@ -87,11 +86,11 @@
             <version>${postgresql.jdbc.driver.version}</version>
         </dependency>
 
-        <!-- HikariCP connection pool -->
+        <!-- JDBC Named Parameters -->
         <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-            <version>${hikari.version}</version>
+            <groupId>com.axiomalaska</groupId>
+            <artifactId>jdbc-named-parameters</artifactId>
+            <version>1.1</version>
         </dependency>
 
         <!-- JavaFaker for generating fake data -->

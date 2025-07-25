@@ -1,16 +1,18 @@
 package com.amazonaws.services.msf;
 
 import com.amazonaws.services.kinesisanalytics.runtime.KinesisAnalyticsRuntime;
-import com.amazonaws.services.msf.domain.User;
-import com.amazonaws.services.msf.domain.UserGeneratorFunction;
+import com.amazonaws.services.msf.domain.StockPrice;
+import com.amazonaws.services.msf.domain.StockPriceGeneratorFunction;
+import com.axiomalaska.jdbc.NamedParameterPreparedStatement;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;
 import org.apache.flink.connector.datagen.source.DataGeneratorSource;
 import org.apache.flink.connector.datagen.source.GeneratorFunction;
 import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
-import org.apache.flink.connector.jdbc.core.datastream.sink.JdbcSink;
-import org.apache.flink.connector.jdbc.core.datastream.sink.JdbcSinkBuilder;
+import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
+import org.apache.flink.connector.jdbc.JdbcStatementBuilder;
+import org.apache.flink.connector.jdbc.JdbcSink;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -20,6 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -29,7 +33,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * A Flink application that generates random user data using DataGeneratorSource
+ * A Flink application that generates random stock price data using DataGeneratorSource
  * and writes it to a PostgreSQL database using the JDBC connector.
  */
 public class JdbcSinkJob {
@@ -104,121 +108,109 @@ public class JdbcSinkJob {
         );
     }
 
-    private static JdbcSink<User> createJdbcSink(Properties sinkProperties) {
 
 
-        return JdbcSink.builder()
-                .buildAtLeastOnce();
+    /**
+     * Create a JDBC Sink for PostgreSQL using NamedParameterPreparedStatement from axiomalaska library
+     *
+     * @param jdbcProperties Properties from the "JdbcSink" property group
+     * @return an instance of SinkFunction for StockPrice objects
+     */
+    private static SinkFunction<StockPrice> createJdbcSink(Properties jdbcProperties) {
+        String jdbcUrl = Preconditions.checkNotNull(
+                jdbcProperties.getProperty("url"),
+                "JDBC URL is required"
+        );
+        String username = Preconditions.checkNotNull(
+                jdbcProperties.getProperty("username"),
+                "JDBC username is required"
+        );
+        String password = Preconditions.checkNotNull(
+                jdbcProperties.getProperty("password"),
+                "JDBC password is required"
+        );
+        String tableName = jdbcProperties.getProperty("table.name", "prices");
+
+        // SQL statement leveraging PostgreSQL UPSERT syntax
+        String namedSQL = String.format(
+                "INSERT INTO %s (symbol, timestamp, price) VALUES (:symbol, :timestamp, :price) " +
+                        "ON CONFLICT(symbol) DO UPDATE SET price = :price, timestamp = :timestamp",
+                tableName
+        );
+
+        LOG.info("Named SQL: {}", namedSQL);
+
+        // JDBC connection options
+        JdbcConnectionOptions connectionOptions = new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
+                .withUrl(jdbcUrl)
+                .withDriverName("org.postgresql.Driver")
+                .withUsername(username)
+                .withPassword(password)
+                .build();
+
+        // JDBC execution options
+        JdbcExecutionOptions executionOptions = JdbcExecutionOptions.builder()
+                .withBatchSize(1000)
+                .withBatchIntervalMs(200)
+                .withMaxRetries(5)
+                .build();
+
+        // JDBC statement builder using NamedParameterPreparedStatement from axiomalaska
+        JdbcStatementBuilder<StockPrice> statementBuilder = new JdbcStatementBuilder<StockPrice>() {
+            @Override
+            public void accept(PreparedStatement preparedStatement, StockPrice stockPrice) throws SQLException {
+                // Get the connection from the PreparedStatement
+                Connection connection = preparedStatement.getConnection();
+                
+                // Create NamedParameterPreparedStatement using the axiomalaska library
+                // This library creates its own PreparedStatement internally from the connection and named SQL
+                try (NamedParameterPreparedStatement namedStmt = NamedParameterPreparedStatement.createNamedParameterPreparedStatement(connection, namedSQL)) {
+                    
+                    // Set parameters by name using the axiomalaska library
+                    namedStmt.setString("symbol", stockPrice.getSymbol());
+                    
+                    // Parse the ISO timestamp and convert to SQL Timestamp
+                    LocalDateTime dateTime = LocalDateTime.parse(stockPrice.getTimestamp(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                    namedStmt.setTimestamp("timestamp", Timestamp.valueOf(dateTime));
+                    
+                    namedStmt.setBigDecimal("price", stockPrice.getPrice());
+                    
+                    // Execute the statement
+                    namedStmt.executeUpdate();
+                }
+            }
+        };
+
+        // We need to provide a dummy SQL for Flink's JDBC sink since we're handling execution ourselves
+        // The actual SQL execution is done by NamedParameterPreparedStatement in the statement builder
+        String dummySQL = "SELECT 1";
+        
+        // Use the deprecated but working JdbcSink.sink() method
+        return JdbcSink.sink(dummySQL, statementBuilder, executionOptions, connectionOptions);
     }
-
-
-//    /**
-//     * Create a JDBC Sink for PostgreSQL using the non-deprecated API
-//     *
-//     * @param jdbcProperties Properties from the "JdbcSink" property group
-//     * @return an instance of SinkFunction for User objects
-//     */
-//    private static SinkFunction<User> createJdbcSink(Properties jdbcProperties) {
-//        String jdbcUrl = Preconditions.checkNotNull(
-//                jdbcProperties.getProperty("url"),
-//                "JDBC URL is required"
-//        );
-//        String username = Preconditions.checkNotNull(
-//                jdbcProperties.getProperty("username"),
-//                "JDBC username is required"
-//        );
-//        String password = Preconditions.checkNotNull(
-//                jdbcProperties.getProperty("password"),
-//                "JDBC password is required"
-//        );
-//        String tableName = jdbcProperties.getProperty("table.name", "users");
-//
-//        // SQL statement for inserting user data with all fields
-//        String insertSQL = String.format(
-//                "INSERT INTO %s (user_id, first_name, last_name, email, phone_number, address, city, country, job_title, company, date_of_birth, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-//                tableName
-//        );
-//
-//        // JDBC statement builder
-//        JdbcStatementBuilder<User> statementBuilder = new JdbcStatementBuilder<User>() {
-//            @Override
-//            public void accept(PreparedStatement preparedStatement, User user) throws SQLException {
-//                preparedStatement.setInt(1, user.getUserId());
-//                preparedStatement.setString(2, user.getFirstName());
-//                preparedStatement.setString(3, user.getLastName());
-//                preparedStatement.setString(4, user.getEmail());
-//                preparedStatement.setString(5, user.getPhoneNumber());
-//                preparedStatement.setString(6, user.getAddress());
-//                preparedStatement.setString(7, user.getCity());
-//                preparedStatement.setString(8, user.getCountry());
-//                preparedStatement.setString(9, user.getJobTitle());
-//                preparedStatement.setString(10, user.getCompany());
-//
-//                // Parse the date of birth and convert to SQL Date
-//                if (user.getDateOfBirth() != null && !user.getDateOfBirth().isEmpty()) {
-//                    java.time.LocalDate birthDate = java.time.LocalDate.parse(user.getDateOfBirth(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-//                    preparedStatement.setDate(11, java.sql.Date.valueOf(birthDate));
-//                } else {
-//                    preparedStatement.setDate(11, null);
-//                }
-//
-//                // Parse the ISO timestamp and convert to SQL Timestamp
-//                LocalDateTime dateTime = LocalDateTime.parse(user.getCreatedAt(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-//                preparedStatement.setTimestamp(12, Timestamp.valueOf(dateTime));
-//            }
-//        };
-//
-//        // JDBC connection options
-//        JdbcConnectionOptions connectionOptions = new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-//                .withUrl(jdbcUrl)
-//                .withDriverName("org.postgresql.Driver")
-//                .withUsername(username)
-//                .withPassword(password)
-//                .build();
-//
-//        // JDBC execution options
-//        JdbcExecutionOptions executionOptions = JdbcExecutionOptions.builder()
-//                .withBatchSize(1000)
-//                .withBatchIntervalMs(200)
-//                .withMaxRetries(5)
-//                .build();
-//
-//        // Use the non-deprecated JdbcSink from org.apache.flink.connector.jdbc.sink
-//        return JdbcSink.<User>builder()
-//                .setJdbcConnectionOptions(connectionOptions)
-//                .setJdbcExecutionOptions(executionOptions)
-//                .setJdbcStatementBuilder(statementBuilder)
-//                .setSql(insertSQL)
-//                .build();
-//    }
 
     public static void main(String[] args) throws Exception {
         // Set up the streaming execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        // Allows Flink to reuse objects across forwarded operators, as opposed to do a deep copy
-        // (this is safe because record objects are never mutated or passed by reference)
-        env.getConfig().enableObjectReuse();
-
-        LOG.info("Starting Flink JDBC Sink Job");
 
         // Load application properties
         final Map<String, Properties> applicationProperties = loadApplicationProperties(env);
         LOG.info("Application properties: {}", applicationProperties);
 
-        // Create a DataGeneratorSource that generates User objects
-        DataGeneratorSource<User> source = createDataGeneratorSource(
+        // Create a DataGeneratorSource that generates StockPrice objects
+        DataGeneratorSource<StockPrice> source = createDataGeneratorSource(
                 applicationProperties.get("DataGen"),
-                new UserGeneratorFunction(),
-                TypeInformation.of(User.class)
+                new StockPriceGeneratorFunction(),
+                TypeInformation.of(StockPrice.class)
         );
 
         // Create the data stream from the source
-        DataStream<User> userStream = env.fromSource(
+        DataStream<StockPrice> stockPriceStream = env.fromSource(
                 source,
                 WatermarkStrategy.noWatermarks(),
-                "User Data Generator"
-        ).uid("user-data-generator");
+                "Stock Price Data Generator"
+        ).uid("stock-price-data-generator");
 
         // Check if JDBC sink is configured
         Properties jdbcProperties = applicationProperties.get("JdbcSink");
@@ -228,18 +220,18 @@ public class JdbcSinkJob {
         }
 
         // Create JDBC sink
-        JdbcSink<User> jdbcSink = createJdbcSink(jdbcProperties);
-        userStream.sinkTo(jdbcSink).uid("jdbc-sink").name("PostgreSQL Sink");
+        SinkFunction<StockPrice> jdbcSink = createJdbcSink(jdbcProperties);
+        stockPriceStream.addSink(jdbcSink).uid("jdbc-sink").name("PostgreSQL Sink");
 
         // Add print sink for local testing
         if (isLocal(env)) {
-            userStream.print().uid("print-sink").name("Print Sink");
+            stockPriceStream.print().uid("print-sink").name("Print Sink");
             LOG.info("Print sink configured for local testing");
         }
 
         LOG.info("JDBC sink configured");
 
         // Execute the job
-        env.execute("Flink JDBC Sink Job");
+        env.execute("Flink JDBC Sink Job - Stock Prices");
     }
 }

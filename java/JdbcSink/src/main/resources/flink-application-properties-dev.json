@@ -11,7 +11,7 @@
       "url": "jdbc:postgresql://localhost:5432/testdb",
       "username": "flinkuser",
       "password": "flinkpassword",
-      "table.name": "users"
+      "table.name": "prices"
     }
   }
 ]

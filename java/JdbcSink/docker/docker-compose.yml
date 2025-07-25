@@ -2,7 +2,7 @@ services:
   # PostgreSQL database
   postgres:
     image: postgres:15
-    container_name: postgres_jdbc_sink
+    container_name: postgres
     restart: always
     environment:
       POSTGRES_DB: testdb
