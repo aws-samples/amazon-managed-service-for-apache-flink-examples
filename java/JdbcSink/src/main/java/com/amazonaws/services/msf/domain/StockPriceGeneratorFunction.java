@@ -5,6 +5,7 @@ import org.apache.flink.connector.datagen.source.GeneratorFunction;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -18,13 +19,9 @@ public class StockPriceGeneratorFunction implements GeneratorFunction<Long, Stoc
     // JavaFaker instance for generating fake data
     private static final Faker faker = new Faker(Locale.ENGLISH);
     
-    // Date formatter for ISO format timestamps
-    private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-    
+
     @Override
     public StockPrice map(Long value) throws Exception {
-        // Generate current timestamp in ISO format
-        String timestamp = LocalDateTime.now().format(ISO_FORMATTER);
         
         // Use JavaFaker's Stock class to generate realistic NASDAQ ticker symbolsy
         String symbol = faker.stock().nsdqSymbol();
@@ -41,7 +38,8 @@ public class StockPriceGeneratorFunction implements GeneratorFunction<Long, Stoc
         // Ensure price is positive and round to 2 decimal places
         finalPrice = Math.max(0.01, finalPrice);
         BigDecimal price = BigDecimal.valueOf(finalPrice).setScale(2, RoundingMode.HALF_UP);
-        
+
+        Instant timestamp = Instant.now();
         return new StockPrice(symbol, timestamp, price);
     }
 }

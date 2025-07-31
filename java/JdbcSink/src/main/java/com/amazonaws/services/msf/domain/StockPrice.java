@@ -1,18 +1,19 @@
 package com.amazonaws.services.msf.domain;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Objects;
 
 public class StockPrice {
     private String symbol;
     
-    private String timestamp;
+    private Instant timestamp;
     
     private BigDecimal price;
 
     public StockPrice() {}
 
-    public StockPrice(String symbol, String timestamp, BigDecimal price) {
+    public StockPrice(String symbol, Instant timestamp, BigDecimal price) {
         this.symbol = symbol;
         this.timestamp = timestamp;
         this.price = price;
@@ -26,11 +27,11 @@ public class StockPrice {
         this.symbol = symbol;
     }
 
-    public String getTimestamp() {
+    public Instant getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(String timestamp) {
+    public void setTimestamp(Instant timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -61,7 +62,7 @@ public class StockPrice {
     public String toString() {
         return "StockPrice{" +
                 "symbol='" + symbol + '\'' +
-                ", timestamp='" + timestamp + '\'' +
+                ", timestamp='" + timestamp.toString() + '\'' +
                 ", price=" + price +
                 '}';
     }

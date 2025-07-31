@@ -3,7 +3,7 @@ package com.amazonaws.services.msf;
 import com.amazonaws.services.kinesisanalytics.runtime.KinesisAnalyticsRuntime;
 import com.amazonaws.services.msf.domain.StockPrice;
 import com.amazonaws.services.msf.domain.StockPriceGeneratorFunction;
-import com.axiomalaska.jdbc.NamedParameterPreparedStatement;
+import com.amazonaws.services.msf.jdbc.StockPricePostgresUpsertQueryStatement;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;
@@ -11,24 +11,16 @@ import org.apache.flink.connector.datagen.source.DataGeneratorSource;
 import org.apache.flink.connector.datagen.source.GeneratorFunction;
 import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
-import org.apache.flink.connector.jdbc.JdbcStatementBuilder;
-import org.apache.flink.connector.jdbc.JdbcSink;
+import org.apache.flink.connector.jdbc.core.datastream.sink.JdbcSink;
+import org.apache.flink.connector.jdbc.datasource.connections.SimpleJdbcConnectionProvider;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Properties;
 
@@ -66,12 +58,6 @@ public class JdbcSinkJob {
 
     /**
      * Create a DataGeneratorSource with configurable rate from DataGen properties
-     *
-     * @param dataGenProperties Properties from the "DataGen" property group
-     * @param generatorFunction The generator function to use for data generation
-     * @param typeInformation   Type information for the generated data type
-     * @param <T>               The type of data to generate
-     * @return Configured DataGeneratorSource
      */
     private static <T> DataGeneratorSource<T> createDataGeneratorSource(
             Properties dataGenProperties,
@@ -109,85 +95,52 @@ public class JdbcSinkJob {
     }
 
 
-
     /**
-     * Create a JDBC Sink for PostgreSQL using NamedParameterPreparedStatement from axiomalaska library
-     *
-     * @param jdbcProperties Properties from the "JdbcSink" property group
-     * @return an instance of SinkFunction for StockPrice objects
+     * Create the JDBC Sink
      */
-    private static SinkFunction<StockPrice> createJdbcSink(Properties jdbcProperties) {
+    private static JdbcSink<StockPrice> createUpsertJdbcSink(Properties sinkProperties) {
+        Preconditions.checkNotNull(sinkProperties, "JdbcSink configuration group missing");
+
+        // This example is designed for PostgreSQL. Switching to a different RDBMS requires modifying the JdbcQueryStatement
+        // implementation which depends on the upsert syntax of the specific RDBMS.
+        String jdbcDriver = "org.postgresql.Driver";
+
+
         String jdbcUrl = Preconditions.checkNotNull(
-                jdbcProperties.getProperty("url"),
+                sinkProperties.getProperty("url"),
                 "JDBC URL is required"
         );
-        String username = Preconditions.checkNotNull(
-                jdbcProperties.getProperty("username"),
+        String dbUser = Preconditions.checkNotNull(
+                sinkProperties.getProperty("username"),
                 "JDBC username is required"
         );
-        String password = Preconditions.checkNotNull(
-                jdbcProperties.getProperty("password"),
+        // In the real application the password should have been encrypted or fetched at runtime
+        String dbPassword = Preconditions.checkNotNull(
+                sinkProperties.getProperty("password"),
                 "JDBC password is required"
         );
-        String tableName = jdbcProperties.getProperty("table.name", "prices");
 
-        // SQL statement leveraging PostgreSQL UPSERT syntax
-        String namedSQL = String.format(
-                "INSERT INTO %s (symbol, timestamp, price) VALUES (:symbol, :timestamp, :price) " +
-                        "ON CONFLICT(symbol) DO UPDATE SET price = :price, timestamp = :timestamp",
-                tableName
-        );
+        String tableName = sinkProperties.getProperty("table.name", "prices");
 
-        LOG.info("Named SQL: {}", namedSQL);
-
-        // JDBC connection options
-        JdbcConnectionOptions connectionOptions = new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                .withUrl(jdbcUrl)
-                .withDriverName("org.postgresql.Driver")
-                .withUsername(username)
-                .withPassword(password)
-                .build();
-
-        // JDBC execution options
-        JdbcExecutionOptions executionOptions = JdbcExecutionOptions.builder()
-                .withBatchSize(1000)
-                .withBatchIntervalMs(200)
-                .withMaxRetries(5)
-                .build();
-
-        // JDBC statement builder using NamedParameterPreparedStatement from axiomalaska
-        JdbcStatementBuilder<StockPrice> statementBuilder = new JdbcStatementBuilder<StockPrice>() {
-            @Override
-            public void accept(PreparedStatement preparedStatement, StockPrice stockPrice) throws SQLException {
-                // Get the connection from the PreparedStatement
-                Connection connection = preparedStatement.getConnection();
-                
-                // Create NamedParameterPreparedStatement using the axiomalaska library
-                // This library creates its own PreparedStatement internally from the connection and named SQL
-                try (NamedParameterPreparedStatement namedStmt = NamedParameterPreparedStatement.createNamedParameterPreparedStatement(connection, namedSQL)) {
-                    
-                    // Set parameters by name using the axiomalaska library
-                    namedStmt.setString("symbol", stockPrice.getSymbol());
-                    
-                    // Parse the ISO timestamp and convert to SQL Timestamp
-                    LocalDateTime dateTime = LocalDateTime.parse(stockPrice.getTimestamp(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-                    namedStmt.setTimestamp("timestamp", Timestamp.valueOf(dateTime));
-                    
-                    namedStmt.setBigDecimal("price", stockPrice.getPrice());
-                    
-                    // Execute the statement
-                    namedStmt.executeUpdate();
-                }
-            }
-        };
-
-        // We need to provide a dummy SQL for Flink's JDBC sink since we're handling execution ourselves
-        // The actual SQL execution is done by NamedParameterPreparedStatement in the statement builder
-        String dummySQL = "SELECT 1";
-        
-        // Use the deprecated but working JdbcSink.sink() method
-        return JdbcSink.sink(dummySQL, statementBuilder, executionOptions, connectionOptions);
+        return JdbcSink.<StockPrice>builder()
+                // The JdbcQueryStatement implementation provides the SQL statement template and converts the input record
+                // into parameters passed to the statement.
+                .withQueryStatement(new StockPricePostgresUpsertQueryStatement(tableName))
+                .withExecutionOptions(JdbcExecutionOptions.builder()
+                        .withBatchSize(100)
+                        .withBatchIntervalMs(200L)
+                        .withMaxRetries(5)
+                        .build())
+                // Using a simple connection provider which does not reuse connection
+                .buildAtLeastOnce(new SimpleJdbcConnectionProvider(new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
+                        .withUrl(jdbcUrl)
+                        .withDriverName(jdbcDriver)
+                        .withUsername(dbUser)
+                        .withPassword(dbPassword)
+                        .build())
+                );
     }
+
 
     public static void main(String[] args) throws Exception {
         // Set up the streaming execution environment
@@ -199,8 +152,9 @@ public class JdbcSinkJob {
         LOG.info("Application properties: {}", applicationProperties);
 
         // Create a DataGeneratorSource that generates StockPrice objects
+        Properties dataGenProperties = applicationProperties.get("DataGen");
         DataGeneratorSource<StockPrice> source = createDataGeneratorSource(
-                applicationProperties.get("DataGen"),
+                dataGenProperties,
                 new StockPriceGeneratorFunction(),
                 TypeInformation.of(StockPrice.class)
         );
@@ -212,16 +166,12 @@ public class JdbcSinkJob {
                 "Stock Price Data Generator"
         ).uid("stock-price-data-generator");
 
-        // Check if JDBC sink is configured
-        Properties jdbcProperties = applicationProperties.get("JdbcSink");
-        if (jdbcProperties == null) {
-            throw new IllegalArgumentException(
-                    "JdbcSink configuration is required. Please provide 'JdbcSink' configuration group.");
-        }
+        // Create the JDBC sink
+        Properties sinkProperties = applicationProperties.get("JdbcSink");
+        JdbcSink<StockPrice> jdbcSink = createUpsertJdbcSink(sinkProperties);
 
-        // Create JDBC sink
-        SinkFunction<StockPrice> jdbcSink = createJdbcSink(jdbcProperties);
-        stockPriceStream.addSink(jdbcSink).uid("jdbc-sink").name("PostgreSQL Sink");
+        // Attach the sink
+        stockPriceStream.sinkTo(jdbcSink).uid("jdbc-sink").name("PostgreSQL Sink");
 
         // Add print sink for local testing
         if (isLocal(env)) {
