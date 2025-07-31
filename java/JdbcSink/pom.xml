@@ -86,13 +86,6 @@
             <version>${postgresql.jdbc.driver.version}</version>
         </dependency>
 
-        <!-- JDBC Named Parameters -->
-        <dependency>
-            <groupId>com.axiomalaska</groupId>
-            <artifactId>jdbc-named-parameters</artifactId>
-            <version>1.1</version>
-        </dependency>
-
         <!-- JavaFaker for generating fake data -->
         <dependency>
             <groupId>com.github.javafaker</groupId>
@@ -100,12 +93,6 @@
             <version>1.0.2</version>
         </dependency>
 
-        <!-- Jackson for JSON annotations -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>2.15.2</version>
-        </dependency>
 
         <!-- Add logging framework, to produce console output when running in the IDE. -->
         <!-- These dependencies are excluded from the application JAR by default. -->

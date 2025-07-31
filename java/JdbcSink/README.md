@@ -8,22 +8,42 @@ The example leverages the UPSERT functionality of PostgreSQL.
 * Language: Java (11)
 * Flink connectors: JDBC sink, DataGen
 
-### Generated Data Schema
+### Data
 
 The application generates comprehensive `StockPrice` objects with realistic fake data:
 
 ```json
 {
-  "price_id": 1,
   "symbol": "AAPL",
   "timestamp": "2024-07-25T10:30:45",
   "price": 150.25
 }
 ```
 
+This data are written doing upsert in the following database table, containing the latest price for every symbol.
+
+```sql
+CREATE TABLE prices (
+    symbol VARCHAR(10) PRIMARY KEY,
+    timestamp TIMESTAMP NOT NULL,
+    price DECIMAL(10,2) NOT NULL
+);
+```
+
+The sink uses the PostgreSQL upsert syntax:
+
+```
+INSERT INTO prices (symbol, price, timestamp) VALUES (?, ?, ?)
+  ON CONFLICT(symbol) DO UPDATE SET price = ?, timestamp = ?
+```
+
+This is specific to PostgreSQL, but the code can be adjusted to other databases as long as the SQL syntax support doing
+an upsert with a single SQL statement.
+
 ### Database prerequisites
 
-When running on Amazon Managed Service for Apache Flink and with databases on AWS, you need to set up the database manually, ensuring you set up all the following:
+When running on Amazon Managed Service for Apache Flink and with databases on AWS, you need to set up the database manually, 
+ensuring you set up all the following:
 
 > You can find the SQL script that sets up the dockerized database by checking out the init script for 
 > [PostgreSQL](docker/postgres-init/init.sql).
