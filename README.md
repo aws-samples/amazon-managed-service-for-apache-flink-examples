@@ -20,6 +20,7 @@ Example applications in Java, Python, Scala and SQL for Amazon Managed Service f
 - [**SQS Sink**](./java/SQSSink) - Writing data to Amazon SQS
 - [**Prometheus Sink**](./java/PrometheusSink) - Sending metrics to Prometheus
 - [**Flink CDC**](./java/FlinkCDC) - Change Data Capture examples using Flink CDC
+- [**JdbcSink**](./java/JdbcSink) - Writes to a relational database executing upsert statements
 
 #### Reading and writing files and transactional data lake formats
 - [**Iceberg**](./java/Iceberg) - Working with Apache Iceberg and Amazon S3 Tables
