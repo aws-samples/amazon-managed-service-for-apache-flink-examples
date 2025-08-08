@@ -1,6 +1,6 @@
 ## Flink JDBC Sink 
 
-This example demonstrates how to use the DataStream API JdbcSink to write into a relational database.
+This example demonstrates how to use the DataStream API JdbcSink to write to a relational database.
 
 * Flink version: 1.20
 * Flink API: DataStream
@@ -14,11 +14,11 @@ an append-only sink, with an INSERT INTO statement.
 #### Which JdbcSink? 
 
 At the moment of publishing this example (August 2025) there are two different DataStream API JdbcSink implementations, 
-available with the `org.apache.flink:flink-connector-jdbc:3.3.0-1.20` dependency.
+available with the version `3.3.0-1.20` of the JDBC connector.
 
 1. The new `org.apache.flink.connector.jdbc.core.datastream.sink.JdbcSink` which uses the Sink API V2 and 
    is initialized using a builder: `JdbcSink.<StockPrice>builder()..build()`
-2. The legacy `org.apache.flink.connector.jdbc.JdbcSink` which uses the legacy `SinkFunction` API now deprecated.
+2. The legacy `org.apache.flink.connector.jdbc.JdbcSink` which uses the legacy `SinkFunction` API, now deprecated.
    The legacy sink is initialized with the syntax `JdbcSink.sink(...)`
 
 This example uses the new sink.
@@ -72,7 +72,7 @@ Runtime parameters:
 
 ### Database prerequisites
 
-When running on Amazon Managed Service for Apache Flink and with databases on AWS, you need to set up the database manually, 
+When running on Amazon Managed Service for Apache Flink with databases on AWS, you need to set up the database manually, 
 ensuring you set up all the following:
 
 > You can find the SQL script that sets up the dockerized database by checking out the init script for 
@@ -115,7 +115,7 @@ See [Running examples locally](../running-examples-locally.md) for details about
 
 ### Running on Amazon Managed Service for Apache Flink
 
-To run the application in Amazon Managed Service for Apache Flink make sure the application configuration has the following:
+To run the application in Amazon Managed Service for Apache Flink ensure the application configuration has the following:
 * VPC networking
 * The selected Subnets can route traffic to the PostgreSQL database
 * The Security Group allows traffic from the application to the database
@@ -125,10 +125,10 @@ To run the application in Amazon Managed Service for Apache Flink make sure the 
 
 For production deployments:
 1. Store database credentials in AWS Secrets Manager.
-2. Use VPC endpoints for secure database connectivity
-3. Enable SSL/TLS for database connections
+2. Use VPC endpoints for secure database connectivity.
+3. Enable SSL/TLS for database connections.
 
-> ⚠️ **Password rotation**: if the password of your database is rotated, the JdbcSink fails causing the job to restart. 
+> ⚠️ **Password rotation**: if the password of your database is rotated, the JdbcSink fails, causing the job to restart. 
 > If you fetch the password dynamically on application start (when you create the JdbcSink object) the job will be able
 > to restart with the new password. Fetching the password on start is not shown in this example.
 
@@ -162,8 +162,7 @@ workload.
 
 #### Which flink-connector-jdbc-* dependency?
 
-For using JdbcSink in DataStream API you need  `flink-connector-jdbc-core` and the JDBC Driver of the  
-specific database. For example
+To use JdbcSink in DataStream API, you need `flink-connector-jdbc-core` and the JDBC driver of the specific database. For example:
 ```
 <dependency>
    <groupId>org.apache.flink</groupId>
@@ -178,5 +177,4 @@ specific database. For example
 </dependency>
 ```
 
-Including `flink-connector-jdbc` would bring in unnecessary dependencies, and make the uber-jar file increasing the size 
-of the uber-jar.
+Including `flink-connector-jdbc` would bring in unnecessary dependencies and increase the size of the uber-jar file.
