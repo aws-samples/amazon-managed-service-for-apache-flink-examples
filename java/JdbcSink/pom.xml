@@ -73,9 +73,12 @@
         </dependency>
 
         <!-- JDBC connector -->
+        <!-- For DataStream API flink-connector-jdbc-core is sufficient.
+             Using flink-connector-jdbc would also include all the db-specific dialects which are not necessary for DataStream
+             and would increase the size of the uber-JAR -->
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-jdbc</artifactId>
+            <artifactId>flink-connector-jdbc-core</artifactId>
             <version>${flink.jdbc.connector.version}</version>
         </dependency>
 

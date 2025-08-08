@@ -128,6 +128,10 @@ For production deployments:
 2. Use VPC endpoints for secure database connectivity
 3. Enable SSL/TLS for database connections
 
+> ⚠️ **Password rotation**: if the password of your database is rotated, the JdbcSink fails causing the job to restart. 
+> If you fetch the password dynamically on application start (when you create the JdbcSink object) the job will be able
+> to restart with the new password. Fetching the password on start is not shown in this example.
+
 ### Implementation considerations
 
 #### At-least-once or exactly-once
@@ -154,3 +158,25 @@ The batch size and interval used in this example are for demonstrational purpose
 
 You should test your actual application with a realistic throughput and realistic data to optimize these values for your 
 workload.
+
+
+#### Which flink-connector-jdbc-* dependency?
+
+For using JdbcSink in DataStream API you need  `flink-connector-jdbc-core` and the JDBC Driver of the  
+specific database. For example
+```
+<dependency>
+   <groupId>org.apache.flink</groupId>
+   <artifactId>flink-connector-jdbc-core</artifactId>
+   <version>3.3.0-1.20</version>
+</dependency>
+
+<dependency>
+   <groupId>org.postgresql</groupId>
+   <artifactId>postgresql</artifactId>
+   <version>42.7.2</version>
+</dependency>
+```
+
+Including `flink-connector-jdbc` would bring in unnecessary dependencies, and make the uber-jar file increasing the size 
+of the uber-jar.
