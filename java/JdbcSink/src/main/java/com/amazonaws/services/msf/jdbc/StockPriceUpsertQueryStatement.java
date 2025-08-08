@@ -10,13 +10,16 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 /**
- * Query statement for an upsert of a StockPrice, leveraging the PostgreSQL upsert syntax.
+ * Query statement for an upsert of a StockPrice, leveraging the PostgreSQL upsert syntax INSERT INTO...ON CONFLICT...DO UPDATE...
+ * <p>
+ * You can adapt this class to the upsert syntaxes of other databases, such as INSERT INTO...ON DUPLICATE KEY UPDATE... for
+ * MySQL, or MERGE INTO... for SQL Server.
  * <p>
  * This class wraps both the parametrized SQL statement to be executed and replacing the parameters in the prepared statement.
  * <p>
  * The table name can be decided when the sink is instantiated.
  */
-public class StockPricePostgresUpsertQueryStatement implements JdbcQueryStatement<StockPrice> {
+public class StockPriceUpsertQueryStatement implements JdbcQueryStatement<StockPrice> {
 
     /**
      * Template for the SQL statement executing the upsert. Depends on the specific RDBMS syntax.
@@ -43,7 +46,7 @@ public class StockPricePostgresUpsertQueryStatement implements JdbcQueryStatemen
             Timestamp timestamp = Timestamp.from(stockPrice.getTimestamp());
             BigDecimal price = stockPrice.getPrice();
 
-            // Replace the parameters positionally
+            // Replace the parameters positionally (note that some parameters are repeated in the SQL statement)
             preparedStatement.setString(1, symbol);
             preparedStatement.setBigDecimal(2, price);
             preparedStatement.setTimestamp(3, timestamp);
@@ -59,7 +62,7 @@ public class StockPricePostgresUpsertQueryStatement implements JdbcQueryStatemen
      *
      * @param tableName name of the table
      */
-    public StockPricePostgresUpsertQueryStatement(String tableName) {
+    public StockPriceUpsertQueryStatement(String tableName) {
         this.sql = String.format(UPSERT_QUERY_TEMPLATE, tableName);
     }
 

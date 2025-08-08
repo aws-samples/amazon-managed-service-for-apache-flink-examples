@@ -3,7 +3,7 @@ package com.amazonaws.services.msf;
 import com.amazonaws.services.kinesisanalytics.runtime.KinesisAnalyticsRuntime;
 import com.amazonaws.services.msf.domain.StockPrice;
 import com.amazonaws.services.msf.domain.StockPriceGeneratorFunction;
-import com.amazonaws.services.msf.jdbc.StockPricePostgresUpsertQueryStatement;
+import com.amazonaws.services.msf.jdbc.StockPriceUpsertQueryStatement;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;
@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 
+import static com.amazonaws.services.msf.ConfigurationHelper.*;
+
 /**
  * A Flink application that generates random stock price data using DataGeneratorSource
  * and writes it to a PostgreSQL database using the JDBC connector.
@@ -36,6 +38,9 @@ public class JdbcSinkJob {
 
     // Default values for configuration
     private static final int DEFAULT_RECORDS_PER_SECOND = 10;
+    private static final int DEFAULT_BATCH_SIZE = 100;
+    private static final long DEFAULT_BATCH_INTERVAL_MS = 200L;
+    private static final int DEFAULT_MAX_RETRIES = 5;
 
     private static boolean isLocal(StreamExecutionEnvironment env) {
         return env instanceof LocalStreamEnvironment;
@@ -64,27 +69,10 @@ public class JdbcSinkJob {
             GeneratorFunction<Long, T> generatorFunction,
             TypeInformation<T> typeInformation) {
 
-        int recordsPerSecond;
-        if (dataGenProperties != null) {
-            String recordsPerSecondStr = dataGenProperties.getProperty("records.per.second");
-            if (recordsPerSecondStr != null && !recordsPerSecondStr.trim().isEmpty()) {
-                try {
-                    recordsPerSecond = Integer.parseInt(recordsPerSecondStr.trim());
-                } catch (NumberFormatException e) {
-                    LOG.error("Invalid records.per.second value: '{}'. Must be a valid integer. ", recordsPerSecondStr);
-                    throw e;
-                }
-            } else {
-                LOG.info("No records.per.second configured. Using default: {}", DEFAULT_RECORDS_PER_SECOND);
-                recordsPerSecond = DEFAULT_RECORDS_PER_SECOND;
-            }
-        } else {
-            LOG.info("No DataGen properties found. Using default records per second: {}", DEFAULT_RECORDS_PER_SECOND);
-            recordsPerSecond = DEFAULT_RECORDS_PER_SECOND;
-        }
+        Preconditions.checkNotNull(dataGenProperties, "DataGen configuration group missing");
 
-        Preconditions.checkArgument(recordsPerSecond > 0,
-                "Invalid records.per.second value. Must be positive.");
+        int recordsPerSecond = extractIntParameter(dataGenProperties, "records.per.second", DEFAULT_RECORDS_PER_SECOND);
+
 
         return new DataGeneratorSource<T>(
                 generatorFunction,
@@ -101,37 +89,35 @@ public class JdbcSinkJob {
     private static JdbcSink<StockPrice> createUpsertJdbcSink(Properties sinkProperties) {
         Preconditions.checkNotNull(sinkProperties, "JdbcSink configuration group missing");
 
-        // This example is designed for PostgreSQL. Switching to a different RDBMS requires modifying the JdbcQueryStatement
-        // implementation which depends on the upsert syntax of the specific RDBMS.
+        // This example is designed for PostgreSQL. Switching to a different RDBMS requires modifying
+        // StockPriceUpsertQueryStatement implementation which depends on the upsert syntax of the specific RDBMS.
         String jdbcDriver = "org.postgresql.Driver";
 
-
-        String jdbcUrl = Preconditions.checkNotNull(
-                sinkProperties.getProperty("url"),
-                "JDBC URL is required"
-        );
-        String dbUser = Preconditions.checkNotNull(
-                sinkProperties.getProperty("username"),
-                "JDBC username is required"
-        );
+        String jdbcUrl = extractRequiredStringParameter(sinkProperties, "url", "JDBC URL is required");
+        String dbUser = extractRequiredStringParameter(sinkProperties, "username", "JDBC username is required");
         // In the real application the password should have been encrypted or fetched at runtime
-        String dbPassword = Preconditions.checkNotNull(
-                sinkProperties.getProperty("password"),
-                "JDBC password is required"
-        );
+        String dbPassword = extractRequiredStringParameter(sinkProperties, "password", "JDBC password is required");
 
-        String tableName = sinkProperties.getProperty("table.name", "prices");
+        String tableName = extractStringParameter(sinkProperties, "table.name", "prices");
+
+        int batchSize = extractIntParameter(sinkProperties, "batch.size", DEFAULT_BATCH_SIZE);
+        long batchIntervalMs = extractLongParameter(sinkProperties, "batch.interval.ms", DEFAULT_BATCH_INTERVAL_MS);
+        int maxRetries = extractIntParameter(sinkProperties, "max.retries", DEFAULT_MAX_RETRIES);
+
+        LOG.info("JDBC Sink configuration - batchSize: {}, batchIntervalMs: {}, maxRetries: {}",
+                batchSize, batchIntervalMs, maxRetries);
 
         return JdbcSink.<StockPrice>builder()
                 // The JdbcQueryStatement implementation provides the SQL statement template and converts the input record
                 // into parameters passed to the statement.
-                .withQueryStatement(new StockPricePostgresUpsertQueryStatement(tableName))
+                .withQueryStatement(new StockPriceUpsertQueryStatement(tableName))
                 .withExecutionOptions(JdbcExecutionOptions.builder()
-                        .withBatchSize(100)
-                        .withBatchIntervalMs(200L)
-                        .withMaxRetries(5)
+                        .withBatchSize(batchSize)
+                        .withBatchIntervalMs(batchIntervalMs)
+                        .withMaxRetries(maxRetries)
                         .build())
-                // Using a simple connection provider which does not reuse connection
+                // The SimpleJdbcConnectionProvider is good enough in this case. The connector will open one db connection per parallelism
+                // and reuse the same connection on every write. There is no need of a connection pooler
                 .buildAtLeastOnce(new SimpleJdbcConnectionProvider(new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
                         .withUrl(jdbcUrl)
                         .withDriverName(jdbcDriver)

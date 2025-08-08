@@ -11,7 +11,10 @@
       "url": "jdbc:postgresql://localhost:5432/testdb",
       "username": "flinkuser",
       "password": "flinkpassword",
-      "table.name": "prices"
+      "table.name": "prices",
+      "batch.size": "100",
+      "batch.interval.ms": "200",
+      "max.retries": "5"
     }
   }
 ]

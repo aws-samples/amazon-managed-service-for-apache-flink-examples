@@ -1,12 +1,30 @@
 ## Flink JDBC Sink 
 
-This example demonstrates how to use Apache Flink's DataStream API JDBC Sink to execute UPSERT into a relational database.
-The example leverages the UPSERT functionality of PostgreSQL.
+This example demonstrates how to use the DataStream API JdbcSink to write into a relational database.
 
 * Flink version: 1.20
 * Flink API: DataStream
 * Language: Java (11)
 * Flink connectors: JDBC sink, DataGen
+
+This example demonstrates how to do UPSERT into a relational database.
+The example uses the UPSERT syntax of PostgreSQL, but it can be easily adapted to the syntaxes of other databases or into
+an append-only sink, with an INSERT INTO statement.
+
+#### Which JdbcSink? 
+
+At the moment of publishing this example (August 2025) there are two different DataStream API JdbcSink implementations, 
+available with the `org.apache.flink:flink-connector-jdbc:3.3.0-1.20` dependency.
+
+1. The new `org.apache.flink.connector.jdbc.core.datastream.sink.JdbcSink` which uses the Sink API V2 and 
+   is initialized using a builder: `JdbcSink.<StockPrice>builder()..build()`
+2. The legacy `org.apache.flink.connector.jdbc.JdbcSink` which uses the legacy `SinkFunction` API now deprecated.
+   The legacy sink is initialized with the syntax `JdbcSink.sink(...)`
+
+This example uses the new sink.
+
+At the moment of publishing this example (August 2025) the Apache Flink documentation 
+[still refers to the deprecated sink](https://nightlies.apache.org/flink/flink-docs-lts/docs/connectors/datastream/jdbc/#jdbcsinksink).
 
 ### Data
 
@@ -15,20 +33,12 @@ The application generates comprehensive `StockPrice` objects with realistic fake
 ```json
 {
   "symbol": "AAPL",
-  "timestamp": "2024-07-25T10:30:45",
+  "timestamp": "2025-08-07T10:30:45",
   "price": 150.25
 }
 ```
 
-This data are written doing upsert in the following database table, containing the latest price for every symbol.
-
-```sql
-CREATE TABLE prices (
-    symbol VARCHAR(10) PRIMARY KEY,
-    timestamp TIMESTAMP NOT NULL,
-    price DECIMAL(10,2) NOT NULL
-);
-```
+This data is written using upsert in the following database table, containing the latest price for every symbol.
 
 The sink uses the PostgreSQL upsert syntax:
 
@@ -37,8 +47,28 @@ INSERT INTO prices (symbol, price, timestamp) VALUES (?, ?, ?)
   ON CONFLICT(symbol) DO UPDATE SET price = ?, timestamp = ?
 ```
 
-This is specific to PostgreSQL, but the code can be adjusted to other databases as long as the SQL syntax support doing
+This is specific to PostgreSQL, but the code can be adjusted to other databases as long as the SQL syntax supports doing
 an upsert with a single SQL statement.
+
+### Runtime configuration
+
+When running on Amazon Managed Service for Apache Flink the runtime configuration is read from *Runtime Properties*.
+
+When running locally, the configuration is read from the [`resources/flink-application-properties-dev.json`](src/main/resources/flink-application-properties-dev.json) file located in the resources folder.
+
+Runtime parameters:
+
+| Group ID   | Key                  | Description                                                                                                                   | 
+|------------|----------------------|-------------------------------------------------------------------------------------------------------------------------------| 
+| `DataGen`  | `records.per.second` | Number of stock price records to generate per second (default: 10)                                                            |
+| `JdbcSink` | `url`                | PostgreSQL JDBC URL. e.g. `jdbc:postgresql://your-rds-endpoint:5432/your-database`. Note: the URL includes the database name. |
+| `JdbcSink` | `table.name`         | Destination table. e.g. `prices` (default: "prices")                                                                          |
+| `JdbcSink` | `username`           | Database user with INSERT and UPDATE permissions                                                                              |
+| `JdbcSink` | `password`           | Database password                                                                                                             |
+| `JdbcSink` | `batch.size`         | Number of records to batch before executing the SQL statement (default: 100)                                                  |
+| `JdbcSink` | `batch.interval.ms`  | Maximum time in milliseconds to wait before executing a batch (default: 200)                                                  |
+| `JdbcSink` | `max.retries`        | Maximum number of retries for failed database operations (default: 5)                                                         |
+
 
 ### Database prerequisites
 
@@ -61,7 +91,7 @@ ensuring you set up all the following:
    3. The database user must have SELECT, INSERT, and UPDATE permissions on the prices table
 
 
-## Testing with local database using Docker Compose
+### Testing with local database using Docker Compose
 
 This example can be run locally using Docker.
 
@@ -73,22 +103,6 @@ You can run the Flink application inside your IDE following the instructions in 
 To start the local database run `docker compose up -d` in the `./docker` folder.
 
 Use `docker compose down -v` to shut it down, also removing the data volumes.
-
-### Runtime configuration
-
-When running on Amazon Managed Service for Apache Flink the runtime configuration is read from *Runtime Properties*.
-
-When running locally, the configuration is read from the [`resources/flink-application-properties-dev.json`](src/main/resources/flink-application-properties-dev.json) file located in the resources folder.
-
-Runtime parameters:
-
-| Group ID   | Key                | Description                                                                                                                | 
-|------------|--------------------|----------------------------------------------------------------------------------------------------------------------------| 
-| `DataGen`  | `records.per.second` | Number of stock price records to generate per second (default: 10)                                                        |
-| `JdbcSink` | `url`              | PostgreSQL JDBC URL. e.g. `jdbc:postgresql://your-rds-endpoint:5432/your-database`. Note: the URL includes the database name. |
-| `JdbcSink` | `table.name`       | Destination table. e.g. `prices` (default: "prices")                                                                      |
-| `JdbcSink` | `username`         | Database user with INSERT and UPDATE permissions                                                                           |
-| `JdbcSink` | `password`         | Database password                                                                                                          |
 
 
 ### Running in IntelliJ
@@ -110,8 +124,33 @@ To run the application in Amazon Managed Service for Apache Flink make sure the 
 ### Security Considerations
 
 For production deployments:
-1. Store database credentials in AWS Secrets Manager
+1. Store database credentials in AWS Secrets Manager.
 2. Use VPC endpoints for secure database connectivity
 3. Enable SSL/TLS for database connections
-4. Configure appropriate IAM roles and policies
-5. Use RDS with encryption at rest and in transit
+
+### Implementation considerations
+
+#### At-least-once or exactly-once
+
+This implementation leverages the at-least-once mode of the JdbcSink. This is normally sufficient when the sink is 
+executing a single idempotent statement such as an UPSERT: any duplicate will just overwrite the same record.
+
+The JdbcSink also supports exactly-once mode which leverages XA transactions synchronized with Flink checkpoints, 
+and relies on XADataSource. This prevents duplicate writes in case of failure and restart from checkpoint. Note that it 
+does not prevent duplicates if you restart the application from an older Snapshot (Flink Savepoint), unless your SQL statement
+implements some form of idempotency.
+
+#### No connection pooler?
+
+The JdbcSink does not support using any database connection pooler, such as HikariCP. 
+
+The reason is that no connection pooling is required. The sink will open one database connection per parallelism (one per subtask),
+and reuse these connections unless they get closed.
+
+#### Batching
+
+The JdbcSink batches writes to reduce the number of requests to the database.
+The batch size and interval used in this example are for demonstrational purposes only.
+
+You should test your actual application with a realistic throughput and realistic data to optimize these values for your 
+workload.
