@@ -1,0 +1,22 @@
+[
+  {
+    "PropertyGroupId": "Output0",
+    "PropertyMap": {
+      "bootstrap.servers": "localhost:9092",
+      "topic": "temperature-samples"
+    }
+  },
+  {
+    "PropertyGroupId": "SchemaRegistry",
+    "PropertyMap": {
+      "name": "temperature-schema-registry",
+      "region": "us-east-1"
+    }
+  },
+  {
+    "PropertyGroupId": "DataGen",
+    "PropertyMap": {
+      "samples.per.second": "10"
+    }
+  }
+]
