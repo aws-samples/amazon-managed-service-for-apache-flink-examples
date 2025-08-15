@@ -53,12 +53,10 @@ If you are connecting with no-auth and no SSL, above will work. Else you need ad
 ### For IAM Auth
 
 When using IAM Auth, the following Runtime Properties are expected at the Group ID `AuthProperties`:
-* `sasl.mechanism` AWS_MSK_IAM
+* `sasl.mechanism` = `AWS_MSK_IAM
 * `sasl.client.callback.handler.class` software.amazon.msk.auth.iam.IAMClientCallbackHandler
 * `sasl.jaas.config` "software.amazon.msk.auth.iam.IAMLoginModule required;"
 * `security.protocol` SASL_SSL
-* `ssl.truststore.location` /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts
-* `ssl.truststore.password` changeit
 
 
 ## Running locally in IntelliJ
