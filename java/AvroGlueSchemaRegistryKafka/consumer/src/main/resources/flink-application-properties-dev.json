@@ -1,0 +1,17 @@
+[
+  {
+    "PropertyGroupId": "Input0",
+    "PropertyMap": {
+      "bootstrap.servers": "localhost:9092",
+      "topic": "temperature-samples",
+      "group.id": "flink-avro-consumer"
+    }
+  },
+  {
+    "PropertyGroupId": "SchemaRegistry",
+    "PropertyMap": {
+      "name": "temperature-schema-registry",
+      "region": "us-east-1"
+    }
+  }
+]
