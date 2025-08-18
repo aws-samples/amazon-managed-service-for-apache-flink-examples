@@ -1,9 +1,9 @@
 package com.amazonaws.services.msf;
 
 import com.amazonaws.services.kinesisanalytics.runtime.KinesisAnalyticsRuntime;
+import com.amazonaws.services.msf.domain.StockPrice;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
-import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.connector.base.DeliveryGuarantee;
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
@@ -76,7 +76,7 @@ public class KafkaStreamingJob {
                 .setBootstrapServers(outputProperties.getProperty("bootstrap.servers"))
                 .setKafkaProducerConfig(outputProperties)
                 .setRecordSerializer(recordSerializationSchema)
-                .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
+                .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
                 .build();
     }
 
@@ -89,7 +89,13 @@ public class KafkaStreamingJob {
     public static void main(String[] args) throws Exception {
         // Set up the streaming execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.enableCheckpointing(1000);
+
+        if( isLocal(env)) {
+            env.enableCheckpointing(10_000);
+            env.setParallelism(3);
+        }
+
+
 
         // Load the application properties
         final Map<String, Properties> applicationProperties = loadApplicationProperties(env);
@@ -104,10 +110,10 @@ public class KafkaStreamingJob {
         Properties outputProperties = mergeProperties(applicationProperties.get("Output0"), authProperties);
 
         // Create and add the Source
-        KafkaSource<Stock> source = createKafkaSource(inputProperties, new JsonDeserializationSchema<>(Stock.class));
-        DataStream<Stock> input = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka source");
+        KafkaSource<StockPrice> source = createKafkaSource(inputProperties, new JsonDeserializationSchema<>(StockPrice.class));
+        DataStream<StockPrice> input = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka source");
 
-        KafkaRecordSerializationSchema<Stock> recordSerializationSchema = KafkaRecordSerializationSchema.<Stock>builder()
+        KafkaRecordSerializationSchema<StockPrice> recordSerializationSchema = KafkaRecordSerializationSchema.<StockPrice>builder()
                 .setTopic(outputProperties.getProperty("topic", DEFAULT_SINK_TOPIC))
                 // Use a field as kafka record key
                 // Define no keySerializationSchema to publish kafka records with no key
@@ -118,7 +124,7 @@ public class KafkaStreamingJob {
 
 
         // Create and add the Sink
-        KafkaSink<Stock> sink = createKafkaSink(outputProperties, recordSerializationSchema);
+        KafkaSink<StockPrice> sink = createKafkaSink(outputProperties, recordSerializationSchema);
         input.sinkTo(sink);
 
         env.execute("Flink Kafka Source and Sink examples");
