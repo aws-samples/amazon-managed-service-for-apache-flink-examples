@@ -11,5 +11,11 @@
       "bootstrap.servers": "localhost:9092",
       "topic": "stock-prices"
     }
+  },
+  {
+    "PropertyGroupId": "AuthProperties",
+    "PropertyMap": {
+      "secret.name": "AmazonMSK_myCredentials"
+    }
   }
 ]

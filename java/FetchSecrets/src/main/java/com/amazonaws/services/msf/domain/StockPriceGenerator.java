@@ -2,8 +2,6 @@ package com.amazonaws.services.msf.domain;
 
 import org.apache.flink.connector.datagen.source.GeneratorFunction;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.Random;
 
@@ -16,9 +14,8 @@ public class StockPriceGenerator implements GeneratorFunction<Long, StockPrice> 
     public StockPrice map(Long value) throws Exception {
         String symbol = SYMBOLS[random.nextInt(SYMBOLS.length)];
         double price = 50 + random.nextDouble() * 450; // Price between $50-$500
-        BigDecimal priceDecimal = BigDecimal.valueOf(price).setScale(2, RoundingMode.HALF_UP);
-        Instant timestamp = Instant.now();
+        String timestamp = Instant.now().toString();
         
-        return new StockPrice(symbol, timestamp, priceDecimal);
+        return new StockPrice(symbol, timestamp, price);
     }
 }
