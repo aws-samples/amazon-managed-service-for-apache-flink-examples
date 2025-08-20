@@ -38,8 +38,9 @@ Example applications in Java, Python, Scala and SQL for Amazon Managed Service f
 - [**Serialization**](./java/Serialization) - Serialization of record and state
 - [**Windowing**](./java/Windowing) - Time-based window aggregation examples
 - [**Side Outputs**](./java/SideOutputs) - Using side outputs for data routing and filtering
-- [**Async I/O**](./java/AsyncIO) - Asynchronous I/O patterns with retries for external API calls\
+- [**Async I/O**](./java/AsyncIO) - Asynchronous I/O patterns with retries for external API calls
 - [**Custom Metrics**](./java/CustomMetrics) - Creating and publishing custom application metrics
+- [**Fetching credentials from Secrets Manager**](./java/FetchSecrets) - Dynamically fetching credentials from AWS Secrets Manager
 
 #### Utilities
 - [**Fink Data Generator (JSON)**](java/FlinkDataGenerator) - How to use a Flink application as data generator, for functional and load testing.
