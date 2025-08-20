@@ -146,7 +146,6 @@ Resources:
             Effect: Allow
             Principal:
               Service:
-                - 'kinesisanalytics.amazonaws.com'
                 - 'infrastructure.kinesisanalytics.amazonaws.com'
             Action: 'kms:CreateGrant'
             Resource: '*'
