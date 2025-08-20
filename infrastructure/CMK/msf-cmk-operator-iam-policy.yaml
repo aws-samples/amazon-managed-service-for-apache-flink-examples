@@ -10,7 +10,7 @@ Parameters:
     
   KmsKeyId:
     Type: String
-    Description: 'KMS Key ID (UUID format, not ARN or alias)'
+    Description: 'KMS Key ID (UUID format, NOT ARN or alias)'
     AllowedPattern: '^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$'
     ConstraintDescription: 'Must be a valid KMS Key ID in UUID format (e.g., 12345678-1234-1234-1234-123456789012)'
     
