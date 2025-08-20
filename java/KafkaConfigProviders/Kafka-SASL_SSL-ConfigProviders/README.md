@@ -12,6 +12,9 @@ For simplicity, the application generates random data internally, using the Data
 set up a KafkaSink with SASL/SCRAM authentication.
 The configuration of a KafkaSource is identical to the sink, for what regards SASL/SCRAM authentication.
 
+> Note: SASL/SCRAM authentication with MSK can also be implemented fetching the credentials from AWS Secrets Manager on application
+start, using AWS SDK, as demonstrated in the [Fetch Secrets](../FetchSecrets) example. 
+> MSK TLS uses a certificate signed with AWS CA which is recognized by JVM. Passing the truststore is not required.
 
 ### High level approach
 
