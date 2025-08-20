@@ -10,8 +10,7 @@ The provided CFN templates help creating the required IAM Policies and KMS Key w
 requires some additional steps which can be done manually, using the AWS CLI/API, the Console, or any automation tool
 
 
-For further information see the service documentation [**TODO link**] 
-and the blog post *Using Customer Managed Key in Amazon Managed Service for Apache Flink*  [**TODO link**].
+For further information see the service documentatio: [Key Management in Amazon Managed Service for Apache Flink](https://docs.aws.amazon.com/managed-flink/latest/java/key-management-flink.html).
 
 ### Background
 
