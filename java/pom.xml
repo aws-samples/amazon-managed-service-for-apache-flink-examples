@@ -46,5 +46,6 @@
         <module>FlinkCDC/FlinkCDCSQLServerSource</module>
         <module>FlinkDataGenerator</module>
         <module>JdbcSink</module>
+        <module>FetchSecrets</module>
     </modules>
 </project>
