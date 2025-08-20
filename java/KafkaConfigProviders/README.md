@@ -13,3 +13,7 @@ without embedding sensitive information in the application JAR, leveraging [MSK 
 
 ### SASL Authentication
 - [**Kafka SASL/SCRAM**](./Kafka-SASL_SSL-ConfigProviders) - Using Config Providers to fetch SASL/SCRAM credentials from AWS Secrets Manager
+
+Note: SASL/SCRAM authentication with MSK can also be implemented fetching the credentials from AWS Secrets Manager on application
+start, using AWS SDK, as demonstrated in the [Fetch Secrets](../FetchSecrets) example. 
+MSK TLS uses a certificate signed with AWS CA which is recognized by JVM. Passing the truststore is not required.

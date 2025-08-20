@@ -139,6 +139,15 @@ Runtime parameters:
 | `JdbcSink`  | `username`      | Destination database user                                                                                                  |
 | `JdbcSink`  | `password`      | Destination database password                                                                                              |
 
+
+#### Passing credentials
+
+For simplicity, this example passes the credentials of the database as runtime parameters.
+This is **not best practice** in production workload.
+
+We recommend to fetch credentials on application start, for example from AWS Secrets Manager, as demonstrated in the 
+[Fetch Secrets](../../FetchSecrets) example.
+
 ### Known limitations
 
 Using the SQL interface of Flink CDC Sources greatly simplifies the implementation of a passthrough application.

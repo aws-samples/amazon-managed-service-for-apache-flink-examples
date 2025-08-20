@@ -124,7 +124,8 @@ To run the application in Amazon Managed Service for Apache Flink ensure the app
 ### Security Considerations
 
 For production deployments:
-1. Store database credentials in AWS Secrets Manager.
+1. Store database credentials in AWS Secrets Manager. The [Fetch Secrets](../FetchSecrets) example shows how you can fetch
+   a secret on application start.
 2. Use VPC endpoints for secure database connectivity.
 3. Enable SSL/TLS for database connections.
 

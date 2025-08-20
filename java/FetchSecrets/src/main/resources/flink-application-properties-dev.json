@@ -1,0 +1,21 @@
+[
+  {
+    "PropertyGroupId": "DataGen",
+    "PropertyMap": {
+      "records.per.second": "5"
+    }
+  },
+  {
+    "PropertyGroupId": "Output0",
+    "PropertyMap": {
+      "bootstrap.servers": "localhost:9092",
+      "topic": "stock-prices"
+    }
+  },
+  {
+    "PropertyGroupId": "AuthProperties",
+    "PropertyMap": {
+      "secret.name": "AmazonMSK_myCredentials"
+    }
+  }
+]
