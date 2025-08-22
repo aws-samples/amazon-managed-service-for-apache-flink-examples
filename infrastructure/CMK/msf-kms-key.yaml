@@ -60,33 +60,21 @@ Resources:
             Condition:
               StringEquals:
                 'kms:ViaService': !Sub 'kinesisanalytics.${AWS::Region}.amazonaws.com'
-                
-          - Sid: 'Allow Operator to use key for durable state via Managed Flink'
+
+          - Sid: 'Allow Operator to use key for application state via Managed Flink'
             Effect: Allow
             Principal:
               AWS: !Ref OperatorUserArn
             Action:
               - 'kms:Decrypt'
-              - 'kms:GenerateDataKey'
-            Resource: '*'
-            Condition:
-              StringEquals:
-                'kms:EncryptionContext:aws:kinesisanalytics:arn': !Sub 'arn:aws:kinesisanalytics:${AWS::Region}:${AWS::AccountId}:application/${ApplicationName}'
-                'kms:ViaService': !Sub 'kinesisanalytics.${AWS::Region}.amazonaws.com'
-                
-          - Sid: 'Allow Operator to use key for running state via Managed Flink'
-            Effect: Allow
-            Principal:
-              AWS: !Ref OperatorUserArn
-            Action:
-              - 'kms:Decrypt'
+              - 'kms:GenerateDataKey'              
               - 'kms:GenerateDataKeyWithoutPlaintext'
             Resource: '*'
             Condition:
               StringEquals:
                 'kms:EncryptionContext:aws:kinesisanalytics:arn': !Sub 'arn:aws:kinesisanalytics:${AWS::Region}:${AWS::AccountId}:application/${ApplicationName}'
-                'kms:ViaService': !Sub 'kinesisanalytics.${AWS::Region}.amazonaws.com'
-                
+                'kms:ViaService': !Sub 'kinesisanalytics.${AWS::Region}.amazonaws.com'                
+
           - Sid: 'Allow Operator to create grants for running state via Managed Flink'
             Effect: Allow
             Principal:
