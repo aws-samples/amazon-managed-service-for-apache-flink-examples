@@ -86,7 +86,7 @@ If you want to use CMK with a single user having broad permissions acting both a
                   "infrastructure.kinesisanalytics.amazonaws.com"
                 ]
             },
-            "Action": "kms:*",
+            "Action":[ "kms:DescribeKey", "kms:Decrypt", "kms:GenerateDataKey", "kms:GenerateDataKeyWithoutPlaintext", "kms:CreateGrant" ],
             "Resource": "*"
         }
     ]
