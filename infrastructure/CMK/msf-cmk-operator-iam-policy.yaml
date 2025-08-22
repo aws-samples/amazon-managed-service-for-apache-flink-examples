@@ -1,0 +1,144 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CMK IAM Policy for Managed Service for Apache Flink Operator with KMS permissions'
+
+Parameters:
+  ApplicationName:
+    Type: String
+    Description: 'Name of the Managed Flink application'
+    AllowedPattern: '^[a-zA-Z0-9_-]+$'
+    ConstraintDescription: 'Must contain only alphanumeric characters, hyphens, and underscores'
+    
+  KmsKeyId:
+    Type: String
+    Description: 'KMS Key ID (UUID format, NOT ARN or alias)'
+    AllowedPattern: '^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$'
+    ConstraintDescription: 'Must be a valid KMS Key ID in UUID format (e.g., 12345678-1234-1234-1234-123456789012)'
+    
+  PolicyName:
+    Type: String
+    Description: 'Name for the IAM Policy'
+    Default: 'MsfCmkApplicationOperator'
+    AllowedPattern: '^[a-zA-Z0-9+=,.@_-]+$'
+    ConstraintDescription: 'Must be a valid IAM policy name'
+    
+  PolicyDescription:
+    Type: String
+    Description: 'Description for the IAM Policy'
+    Default: 'IAM policy for Managed Flink Application Operator with KMS permissions for CMK'
+    MaxLength: 1000
+
+Resources:
+  MSFCMKOperatorPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Ref PolicyName
+      Description: !Sub '${PolicyDescription} - Application: ${ApplicationName}, Region: ${AWS::Region}, KMS Key: ${KmsKeyId}'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowDescribeKey
+            Effect: Allow
+            Action:
+              - 'kms:DescribeKey'
+            Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/${KmsKeyId}'
+            Condition:
+              StringEquals:
+                'kms:ViaService': !Sub 'kinesisanalytics.${AWS::Region}.amazonaws.com'
+                
+          - Sid: AllowGenerateDataKeyAndDecryptForDurableState
+            Effect: Allow
+            Action:
+              - 'kms:Decrypt'
+              - 'kms:GenerateDataKey'
+            Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/${KmsKeyId}'
+            Condition:
+              StringEquals:
+                'kms:ViaService': !Sub 'kinesisanalytics.${AWS::Region}.amazonaws.com'
+                'kms:EncryptionContext:aws:kinesisanalytics:arn': !Sub 'arn:aws:kinesisanalytics:${AWS::Region}:${AWS::AccountId}:application/${ApplicationName}'
+                
+          - Sid: AllowKmsOperationsForRunningState
+            Effect: Allow
+            Action:
+              - 'kms:Encrypt'
+              - 'kms:Decrypt'
+              - 'kms:GenerateDataKeyWithoutPlaintext'
+            Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/${KmsKeyId}'
+            Condition:
+              StringEquals:
+                'kms:ViaService': !Sub 'kinesisanalytics.${AWS::Region}.amazonaws.com'
+                'kms:EncryptionContext:aws:kinesisanalytics:arn': !Sub 'arn:aws:kinesisanalytics:${AWS::Region}:${AWS::AccountId}:application/${ApplicationName}'
+                
+          - Sid: AllowCreateGrantPermissionForRunningState
+            Effect: Allow
+            Action: 'kms:CreateGrant'
+            Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/${KmsKeyId}'
+            Condition:
+              ForAllValues:StringEquals:
+                'kms:GrantOperations': 'Decrypt'
+              StringEquals:
+                'kms:ViaService': !Sub 'kinesisanalytics.${AWS::Region}.amazonaws.com'
+                'kms:EncryptionContext:aws:kinesisanalytics:arn': !Sub 'arn:aws:kinesisanalytics:${AWS::Region}:${AWS::AccountId}:application/${ApplicationName}'
+                'kms:GrantConstraintType': 'EncryptionContextSubset'
+
+Outputs:
+  PolicyArn:
+    Description: 'ARN of the created CMK MSF Operator IAM Policy'
+    Value: !Ref MSFCMKOperatorPolicy
+    Export:
+      Name: !Sub '${AWS::StackName}-PolicyArn'
+      
+  PolicyName:
+    Description: 'Name of the created CMK MSF Operator IAM Policy'
+    Value: !Ref PolicyName
+    Export:
+      Name: !Sub '${AWS::StackName}-PolicyName'
+      
+  ApplicationArn:
+    Description: 'ARN of the MSF Application (for reference)'
+    Value: !Sub 'arn:aws:kinesisanalytics:${AWS::Region}:${AWS::AccountId}:application/${ApplicationName}'
+    Export:
+      Name: !Sub '${AWS::StackName}-ApplicationArn'
+      
+  KmsKeyArn:
+    Description: 'ARN of the KMS Key (for reference)'
+    Value: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/${KmsKeyId}'
+    Export:
+      Name: !Sub '${AWS::StackName}-KmsKeyArn'
+      
+  AccountId:
+    Description: 'AWS Account ID where the policy was created'
+    Value: !Ref 'AWS::AccountId'
+    Export:
+      Name: !Sub '${AWS::StackName}-AccountId'
+      
+  Region:
+    Description: 'AWS Region where the policy was created'
+    Value: !Ref 'AWS::Region'
+    Export:
+      Name: !Sub '${AWS::StackName}-Region'
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Application Configuration"
+        Parameters:
+          - ApplicationName
+      - Label:
+          default: "KMS Configuration"
+        Parameters:
+          - KmsKeyId
+      - Label:
+          default: "Policy Configuration"
+        Parameters:
+          - PolicyName
+          - PolicyDescription
+    ParameterLabels:
+      PolicyName:
+        default: "IAM Policy Name"
+      PolicyDescription:
+        default: "Policy Description"
+      ApplicationName:
+        default: "Managed Flink Application Name"
+      KmsKeyId:
+        default: "KMS Key ID"

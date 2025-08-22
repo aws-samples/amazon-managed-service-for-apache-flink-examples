@@ -1,0 +1,215 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Create CMK in KMS to be used for Amazon Managed Serivce for Apache Flink encryption'
+
+Parameters:
+  KeyAlias:
+    Type: String
+    Description: 'Alias for the KMS key (without alias/ prefix)'
+    AllowedPattern: '^[a-zA-Z0-9/_-]+$'
+    ConstraintDescription: 'Must contain only alphanumeric characters, forward slashes, underscores, and hyphens'
+    
+  ApplicationName:
+    Type: String
+    Description: 'Name of the Managed Flink application that will use this key'
+    AllowedPattern: '^[a-zA-Z0-9_-]+$'
+    ConstraintDescription: 'Must contain only alphanumeric characters, hyphens, and underscores'
+    
+  KeyAdministratorArn:
+    Type: String
+    Description: 'ARN of the IAM role or user that will have full administrative access to the key'
+    AllowedPattern: '^arn:aws:iam::[0-9]{12}:(role|user)/.+$'
+    ConstraintDescription: 'Must be a valid IAM role or user ARN'
+    
+  OperatorUserArn:
+    Type: String
+    Description: 'ARN of the IAM user or IAM role that will operate the Managed Flink application'
+    AllowedPattern: '^arn:aws:iam::[0-9]{12}:(user|role)/.+$'
+    ConstraintDescription: 'Must be a valid IAM user or role ARN'
+
+  KeyDescription:
+    Type: String
+    Description: 'Description for the KMS key'
+    Default: 'CMK for Managed Flink application encryption'
+    MaxLength: 8192
+
+Resources:
+  MSFKMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: !Ref KeyDescription
+      KeyUsage: ENCRYPT_DECRYPT
+      KeySpec: SYMMETRIC_DEFAULT
+      EnableKeyRotation: false
+      KeyPolicy:
+        Version: '2012-10-17'
+        Id: 'msf-cmk-key-policy'
+        Statement:
+          - Sid: 'Enable IAM User Permissions'
+            Effect: Allow
+            Principal:
+              AWS: !Ref KeyAdministratorArn
+            Action: 'kms:*'
+            Resource: '*'
+            
+          - Sid: 'Allow Operator to describe key'
+            Effect: Allow
+            Principal:
+              AWS: !Ref OperatorUserArn
+            Action: 'kms:DescribeKey'
+            Resource: '*'
+            Condition:
+              StringEquals:
+                'kms:ViaService': !Sub 'kinesisanalytics.${AWS::Region}.amazonaws.com'
+
+          - Sid: 'Allow Operator to use key for application state via Managed Flink'
+            Effect: Allow
+            Principal:
+              AWS: !Ref OperatorUserArn
+            Action:
+              - 'kms:Decrypt'
+              - 'kms:GenerateDataKey'              
+              - 'kms:GenerateDataKeyWithoutPlaintext'
+            Resource: '*'
+            Condition:
+              StringEquals:
+                'kms:EncryptionContext:aws:kinesisanalytics:arn': !Sub 'arn:aws:kinesisanalytics:${AWS::Region}:${AWS::AccountId}:application/${ApplicationName}'
+                'kms:ViaService': !Sub 'kinesisanalytics.${AWS::Region}.amazonaws.com'                
+
+          - Sid: 'Allow Operator to create grants for running state via Managed Flink'
+            Effect: Allow
+            Principal:
+              AWS: !Ref OperatorUserArn
+            Action: 'kms:CreateGrant'
+            Resource: '*'
+            Condition:
+              StringEquals:
+                'kms:EncryptionContext:aws:kinesisanalytics:arn': !Sub 'arn:aws:kinesisanalytics:${AWS::Region}:${AWS::AccountId}:application/${ApplicationName}'
+                'kms:ViaService': !Sub 'kinesisanalytics.${AWS::Region}.amazonaws.com'
+                'kms:GrantConstraintType': 'EncryptionContextSubset'
+              ForAllValues:StringEquals:
+                'kms:GrantOperations': 'Decrypt'
+                
+          - Sid: 'Allow Managed Flink application to describe key'
+            Effect: Allow
+            Principal:
+              Service: 
+                - 'kinesisanalytics.amazonaws.com'
+                - 'infrastructure.kinesisanalytics.amazonaws.com'
+            Action: 'kms:DescribeKey'
+            Resource: '*'
+            Condition:
+              StringEquals:
+                'aws:SourceArn': !Sub 'arn:aws:kinesisanalytics:${AWS::Region}:${AWS::AccountId}:application/${ApplicationName}'
+                'aws:SourceAccount': !Ref 'AWS::AccountId'
+
+          - Sid: 'Allow Managed Flink application to generate data key for durable state storage'
+            Effect: Allow
+            Principal:
+              Service: 'kinesisanalytics.amazonaws.com'
+            Action:
+              - 'kms:GenerateDataKey'
+            Resource: '*'
+            Condition:
+              StringEquals:
+                'aws:SourceArn': !Sub 'arn:aws:kinesisanalytics:${AWS::Region}:${AWS::AccountId}:application/${ApplicationName}'
+                'kms:EncryptionContext:aws:kinesisanalytics:arn': !Sub 'arn:aws:kinesisanalytics:${AWS::Region}:${AWS::AccountId}:application/${ApplicationName}'
+                'aws:SourceAccount': !Ref 'AWS::AccountId'
+
+          - Sid: 'Allow Managed Flink application to decrypt durable state storage'
+            Effect: Allow
+            Principal:
+              Service: 'kinesisanalytics.amazonaws.com'
+            Action:
+              - 'kms:Decrypt'
+            Resource: '*'
+            Condition:
+              StringEquals:
+                'kms:EncryptionContext:aws:kinesisanalytics:arn': !Sub 'arn:aws:kinesisanalytics:${AWS::Region}:${AWS::AccountId}:application/${ApplicationName}'
+
+          - Sid: 'Allow Managed Flink application to use key for decrypting running application storage'
+            Effect: Allow
+            Principal:
+              Service:
+                - 'infrastructure.kinesisanalytics.amazonaws.com'
+            Action:
+              - 'kms:Decrypt'
+              - 'kms:GenerateDataKeyWithoutPlaintext'
+            Resource: '*'
+            Condition:
+              StringEquals:
+                'kms:EncryptionContext:aws:kinesisanalytics:arn': !Sub 'arn:aws:kinesisanalytics:${AWS::Region}:${AWS::AccountId}:application/${ApplicationName}'
+                
+          - Sid: 'Allow Managed Flink application permission used for running application storage'
+            Effect: Allow
+            Principal:
+              Service:
+                - 'infrastructure.kinesisanalytics.amazonaws.com'
+            Action: 'kms:CreateGrant'
+            Resource: '*'
+            Condition:
+              StringEquals:
+                'kms:EncryptionContext:aws:kinesisanalytics:arn': !Sub 'arn:aws:kinesisanalytics:${AWS::Region}:${AWS::AccountId}:application/${ApplicationName}'
+                'kms:GrantConstraintType': 'EncryptionContextSubset'
+              ForAllValues:StringEquals:
+                'kms:GrantOperations': 'Decrypt'
+
+  MSFKMSKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub 'alias/${KeyAlias}'
+      TargetKeyId: !Ref MSFKMSKey
+
+Outputs:
+  KeyId:
+    Description: 'KMS Key ID'
+    Value: !Ref MSFKMSKey
+    Export:
+      Name: !Sub '${AWS::StackName}-KeyId'
+      
+  KeyArn:
+    Description: 'KMS Key ARN'
+    Value: !GetAtt MSFKMSKey.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-KeyArn'
+      
+  KeyAlias:
+    Description: 'KMS Key Alias'
+    Value: !Ref MSFKMSKeyAlias
+    Export:
+      Name: !Sub '${AWS::StackName}-KeyAlias'
+      
+  ApplicationArn:
+    Description: 'Managed Flink Application ARN (for reference)'
+    Value: !Sub 'arn:aws:kinesisanalytics:${AWS::Region}:${AWS::AccountId}:application/${ApplicationName}'
+    Export:
+      Name: !Sub '${AWS::StackName}-ApplicationArn'
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Key Configuration"
+        Parameters:
+          - KeyAlias
+          - KeyDescription
+          - EnableKeyRotation
+      - Label:
+          default: "Application Configuration"
+        Parameters:
+          - ApplicationName
+      - Label:
+          default: "Access Control"
+        Parameters:
+          - KeyAdministratorArn
+          - OperatorUserArn
+    ParameterLabels:
+      KeyAlias:
+        default: "KMS Key Alias"
+      KeyDescription:
+        default: "Key Description"
+      ApplicationName:
+        default: "Managed Flink Application Name"
+      KeyAdministratorArn:
+        default: "Key Administrator IAM User or Role ARN"
+      OperatorUserArn:
+        default: "Operator IAM User or Role ARN"

@@ -1,0 +1,75 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Base IAM Policy for Managed Service for Apache Flink Operator with core MSF permissions'
+
+Parameters:
+  PolicyName:
+    Type: String
+    Description: 'Name for the IAM Policy'
+    Default: 'MsfBaseApplicationOperator'
+    AllowedPattern: '^[a-zA-Z0-9+=,.@_-]+$'
+    ConstraintDescription: 'Must be a valid IAM policy name'
+    
+  PolicyDescription:
+    Type: String
+    Description: 'Description for the IAM Policy'
+    Default: 'Base IAM policy for Managed Flink Application Operator allowing application lifecycle operations'
+    MaxLength: 1000
+
+Resources:
+  MSFBaseOperatorPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Ref PolicyName
+      Description: !Ref PolicyDescription
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowMsfApiCalls
+            Effect: Allow
+            Action: 'kinesisanalytics:*'
+            Resource: '*'
+            
+          - Sid: AllowPassingServiceExecutionRole
+            Effect: Allow
+            Action:
+              - 'iam:PassRole'
+            Resource: !Sub 'arn:aws:iam::${AWS::AccountId}:role/*'
+
+Outputs:
+  PolicyArn:
+    Description: 'ARN of the created Base MSF Operator IAM Policy'
+    Value: !Ref MSFBaseOperatorPolicy
+    Export:
+      Name: !Sub '${AWS::StackName}-PolicyArn'
+      
+  PolicyName:
+    Description: 'Name of the created Base MSF Operator IAM Policy'
+    Value: !Ref PolicyName
+    Export:
+      Name: !Sub '${AWS::StackName}-PolicyName'
+      
+  AccountId:
+    Description: 'AWS Account ID where the policy was created'
+    Value: !Ref 'AWS::AccountId'
+    Export:
+      Name: !Sub '${AWS::StackName}-AccountId'
+      
+  Region:
+    Description: 'AWS Region where the policy was created'
+    Value: !Ref 'AWS::Region'
+    Export:
+      Name: !Sub '${AWS::StackName}-Region'
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "IAM Policy Configuration"
+        Parameters:
+          - PolicyName
+          - PolicyDescription
+    ParameterLabels:
+      PolicyName:
+        default: "IAM Policy Name"
+      PolicyDescription:
+        default: "Policy Description"
