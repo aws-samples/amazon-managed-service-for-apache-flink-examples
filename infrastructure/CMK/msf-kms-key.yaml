@@ -102,7 +102,7 @@ Resources:
                 'aws:SourceArn': !Sub 'arn:aws:kinesisanalytics:${AWS::Region}:${AWS::AccountId}:application/${ApplicationName}'
                 'aws:SourceAccount': !Ref 'AWS::AccountId'
 
-          - Sid: 'FIXME Allow Managed Flink application to generate data key for durable state storage'
+          - Sid: 'Allow Managed Flink application to generate data key for durable state storage'
             Effect: Allow
             Principal:
               Service: 'kinesisanalytics.amazonaws.com'
@@ -126,7 +126,7 @@ Resources:
               StringEquals:
                 'kms:EncryptionContext:aws:kinesisanalytics:arn': !Sub 'arn:aws:kinesisanalytics:${AWS::Region}:${AWS::AccountId}:application/${ApplicationName}'
 
-          - Sid: 'Allow Managed Flink application to decrypt running application storage'
+          - Sid: 'Allow Managed Flink application to use key for decrypting running application storage'
             Effect: Allow
             Principal:
               Service:
