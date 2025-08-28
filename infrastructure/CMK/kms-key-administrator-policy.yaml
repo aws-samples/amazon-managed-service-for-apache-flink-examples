@@ -1,0 +1,132 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'IAM Policy for KMS Key Administrator with permissions to create, manage, tag, and rotate KMS keys'
+
+Parameters:
+  PolicyName:
+    Type: String
+    Description: 'Name for the IAM Policy'
+    Default: 'MsfCmkKeyAdministratorPolicy'
+    AllowedPattern: '^[a-zA-Z0-9+=,.@_-]+$'
+    ConstraintDescription: 'Must be a valid IAM policy name'
+    
+  PolicyDescription:
+    Type: String
+    Description: 'Description for the IAM Policy'
+    Default: 'Policy for KMS Key Administrator to create, manage, tag, and rotate CMK KMS keys'
+    MaxLength: 1000
+
+Resources:
+  KMSKeyAdministratorPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Ref PolicyName
+      Description: !Ref PolicyDescription
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowCreateKMSKey
+            Effect: Allow
+            Action:
+              - 'kms:CreateKey'
+            Resource: '*'
+            
+          - Sid: AllowListKeysAndAliases
+            Effect: Allow
+            Action:
+              - 'kms:ListKeys'
+              - 'kms:ListAliases'
+            Resource: '*'
+            
+          - Sid: AllowManageKeysInCurrentRegionAndAccount
+            Effect: Allow
+            Action:
+              - 'kms:DescribeKey'
+              - 'kms:GetKeyPolicy'
+              - 'kms:PutKeyPolicy'
+              - 'kms:ListKeyPolicies'
+              - 'kms:EnableKey'
+              - 'kms:DisableKey'
+              - 'kms:CancelKeyDeletion'
+              - 'kms:ScheduleKeyDeletion'
+              - 'kms:UpdateKeyDescription'
+            Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
+            
+          - Sid: AllowManageKeyAliasesInCurrentRegionAndAccount
+            Effect: Allow
+            Action:
+              - 'kms:CreateAlias'
+              - 'kms:DeleteAlias'
+              - 'kms:UpdateAlias'
+            Resource: 
+              - !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
+              - !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/*'
+            
+          - Sid: AllowTagKMSKeysInCurrentRegionAndAccount
+            Effect: Allow
+            Action:
+              - 'kms:TagResource'
+              - 'kms:UntagResource'
+              - 'kms:ListResourceTags'
+            Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
+            
+          - Sid: AllowRotateKMSKeysInCurrentRegionAndAccount
+            Effect: Allow
+            Action:
+              - 'kms:GetKeyRotationStatus'
+              - 'kms:RotateKeyOnDemand'
+              - 'kms:ListKeyRotations'
+            Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
+            
+          - Sid: AllowKeyUsageForTestingInCurrentRegionAndAccount
+            Effect: Allow
+            Action:
+              - 'kms:Encrypt'
+              - 'kms:Decrypt'
+              - 'kms:ReEncrypt*'
+              - 'kms:GenerateDataKey*'
+              - 'kms:CreateGrant'
+              - 'kms:ListGrants'
+              - 'kms:RevokeGrant'
+            Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
+            Condition:
+              StringEquals:
+                'kms:ViaService': !Sub 'kinesisanalytics.${AWS::Region}.amazonaws.com'
+
+Outputs:
+  PolicyArn:
+    Description: 'ARN of the created KMS Key Administrator IAM Policy'
+    Value: !Ref KMSKeyAdministratorPolicy
+    Export:
+      Name: !Sub '${AWS::StackName}-PolicyArn'
+      
+  PolicyName:
+    Description: 'Name of the created KMS Key Administrator IAM Policy'
+    Value: !Ref PolicyName
+    Export:
+      Name: !Sub '${AWS::StackName}-PolicyName'
+      
+  AccountId:
+    Description: 'AWS Account ID where the policy was created'
+    Value: !Ref 'AWS::AccountId'
+    Export:
+      Name: !Sub '${AWS::StackName}-AccountId'
+      
+  Region:
+    Description: 'AWS Region where the policy was created'
+    Value: !Ref 'AWS::Region'
+    Export:
+      Name: !Sub '${AWS::StackName}-Region'
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "IAM Policy Configuration"
+        Parameters:
+          - PolicyName
+          - PolicyDescription
+    ParameterLabels:
+      PolicyName:
+        default: "IAM Policy Name"
+      PolicyDescription:
+        default: "Policy Description"
