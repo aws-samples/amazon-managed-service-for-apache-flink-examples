@@ -192,7 +192,7 @@ public class DataGeneratorJob {
             KinesisStreamsSink<StockPrice> kinesisSink = createKinesisSink(
                     kinesisProperties,
                     // Serialize the Kinesis record as JSON
-                    new JsonSerializationSchema<>(),
+                    new JsonSerializationSchema<StockPrice>(),
                     // Shard by `ticker`
                     partitionKeyGenerator
             );
@@ -203,7 +203,7 @@ public class DataGeneratorJob {
         // Create Kafka sink with JSON serialization (only if configured)
         if (hasKafkaSink) {
             String kafkaTopic = Preconditions.checkNotNull(StringUtils.trimToNull(kafkaProperties.getProperty("topic")), "Kafka topic not defined");
-            SerializationSchema<StockPrice> valueSerializationSchema = new JsonSerializationSchema<>();
+            SerializationSchema<StockPrice> valueSerializationSchema = new JsonSerializationSchema<StockPrice>();
             SerializationSchema<StockPrice> keySerializationSchema = (stockPrice) -> stockPrice.getTicker().getBytes();
             KafkaRecordSerializationSchema<StockPrice> kafkaRecordSerializationSchema =
                     KafkaRecordSerializationSchema.<StockPrice>builder()

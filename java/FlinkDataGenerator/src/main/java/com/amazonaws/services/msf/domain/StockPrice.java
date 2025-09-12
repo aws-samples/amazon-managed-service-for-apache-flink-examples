@@ -1,13 +1,12 @@
 package com.amazonaws.services.msf.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
 public class StockPrice {
-    // This annotation as well as the associated jackson2 import is needed to correctly map the JSON input key to the
-    // appropriate POJO property name to ensure event_time isn't missed in serialization and deserialization
-    @JsonProperty("event_time")
+    // IMPORTANT: you must use the shaded Jackson annotations (under org.apache.flink.shaded.jackson2.com.fasterxml...)
+    // otherwise JsonSerializationSchema, which is also shaded, will not honor it.
+    @org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty("event_time")
     private String eventTime;
     private String ticker;
     private float price;

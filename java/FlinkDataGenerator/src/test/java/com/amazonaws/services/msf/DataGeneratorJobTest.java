@@ -7,8 +7,8 @@ import org.apache.flink.connector.datagen.source.DataGeneratorSource;
 import org.apache.flink.connector.datagen.source.GeneratorFunction;
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 import java.util.Properties;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,20 +33,20 @@ public class DataGeneratorJobTest {
         DataGeneratorSource<StockPrice> source = (DataGeneratorSource<StockPrice>) createDataGeneratorSourceMethod.invoke(
             null, dataGenProps, generatorFunction, typeInfo);
         
-        assertNotNull("DataGeneratorSource should not be null", source);
+        assertNotNull(source, "DataGeneratorSource should not be null");
 
         // Test with null properties (should use default rate)
         source = (DataGeneratorSource<StockPrice>) createDataGeneratorSourceMethod.invoke(
             null, null, generatorFunction, typeInfo);
         
-        assertNotNull("DataGeneratorSource should not be null with null properties", source);
+        assertNotNull(source, "DataGeneratorSource should not be null with null properties");
 
         // Test with empty properties (should use default rate)
         Properties emptyProps = new Properties();
         source = (DataGeneratorSource<StockPrice>) createDataGeneratorSourceMethod.invoke(
             null, emptyProps, generatorFunction, typeInfo);
         
-        assertNotNull("DataGeneratorSource should not be null with empty properties", source);
+        assertNotNull(source, "DataGeneratorSource should not be null with empty properties");
     }
 
     @Test
@@ -72,7 +72,7 @@ public class DataGeneratorJobTest {
         KafkaSink<StockPrice> kafkaSink = (KafkaSink<StockPrice>) createKafkaSinkMethod.invoke(
             null, kafkaProps, recordSerializationSchema);
         
-        assertNotNull("KafkaSink should not be null", kafkaSink);
+        assertNotNull(kafkaSink, "KafkaSink should not be null");
     }
 
     @Test
@@ -85,20 +85,18 @@ public class DataGeneratorJobTest {
         byte[] key1 = stock1.getTicker().getBytes();
         byte[] key2 = stock2.getTicker().getBytes();
         
-        assertNotNull("Kafka key should not be null", key1);
-        assertNotNull("Kafka key should not be null", key2);
-        assertTrue("Kafka key should not be empty", key1.length > 0);
-        assertTrue("Kafka key should not be empty", key2.length > 0);
+        assertNotNull(key1, "Kafka key should not be null");
+        assertNotNull(key2, "Kafka key should not be null");
+        assertTrue(key1.length > 0, "Kafka key should not be empty");
+        assertTrue(key2.length > 0, "Kafka key should not be empty");
         
         // Test that different tickers produce different keys
-        assertFalse("Different tickers should produce different keys", 
-                   java.util.Arrays.equals(key1, key2));
+        assertFalse(java.util.Arrays.equals(key1, key2), "Different tickers should produce different keys");
         
         // Test that same ticker produces same key
         StockPrice stock3 = new StockPrice("2024-01-15T10:30:47", "AAPL", 175.50f);
         byte[] key3 = stock3.getTicker().getBytes();
-        assertTrue("Same ticker should produce same key", 
-                  java.util.Arrays.equals(key1, key3));
+        assertTrue(java.util.Arrays.equals(key1, key3), "Same ticker should produce same key");
     }
 
     @Test
@@ -109,9 +107,9 @@ public class DataGeneratorJobTest {
         // Test with no sinks configured - should be invalid
         boolean hasKinesis = appProperties.get("KinesisSink") != null;
         boolean hasKafka = appProperties.get("KafkaSink") != null;
-        assertFalse("Should not have Kinesis sink when not configured", hasKinesis);
-        assertFalse("Should not have Kafka sink when not configured", hasKafka);
-        assertTrue("Should require at least one sink", !hasKinesis && !hasKafka);
+        assertFalse(hasKinesis, "Should not have Kinesis sink when not configured");
+        assertFalse(hasKafka, "Should not have Kafka sink when not configured");
+        assertTrue(!hasKinesis && !hasKafka, "Should require at least one sink");
         
         // Test with only Kinesis configured - should be valid
         Properties kinesisProps = new Properties();
@@ -121,9 +119,9 @@ public class DataGeneratorJobTest {
         
         hasKinesis = appProperties.get("KinesisSink") != null;
         hasKafka = appProperties.get("KafkaSink") != null;
-        assertTrue("Should have Kinesis sink when configured", hasKinesis);
-        assertFalse("Should not have Kafka sink when not configured", hasKafka);
-        assertTrue("Should be valid with one sink", hasKinesis || hasKafka);
+        assertTrue(hasKinesis, "Should have Kinesis sink when configured");
+        assertFalse(hasKafka, "Should not have Kafka sink when not configured");
+        assertTrue(hasKinesis || hasKafka, "Should be valid with one sink");
         
         // Test with only Kafka configured - should be valid
         appProperties.clear();
@@ -134,17 +132,17 @@ public class DataGeneratorJobTest {
         
         hasKinesis = appProperties.get("KinesisSink") != null;
         hasKafka = appProperties.get("KafkaSink") != null;
-        assertFalse("Should not have Kinesis sink when not configured", hasKinesis);
-        assertTrue("Should have Kafka sink when configured", hasKafka);
-        assertTrue("Should be valid with one sink", hasKinesis || hasKafka);
+        assertFalse(hasKinesis, "Should not have Kinesis sink when not configured");
+        assertTrue(hasKafka, "Should have Kafka sink when configured");
+        assertTrue(hasKinesis || hasKafka, "Should be valid with one sink");
         
         // Test with both configured - should be valid
         appProperties.put("KinesisSink", kinesisProps);
         
         hasKinesis = appProperties.get("KinesisSink") != null;
         hasKafka = appProperties.get("KafkaSink") != null;
-        assertTrue("Should have Kinesis sink when configured", hasKinesis);
-        assertTrue("Should have Kafka sink when configured", hasKafka);
-        assertTrue("Should be valid with both sinks", hasKinesis || hasKafka);
+        assertTrue(hasKinesis, "Should have Kinesis sink when configured");
+        assertTrue(hasKafka, "Should have Kafka sink when configured");
+        assertTrue(hasKinesis || hasKafka, "Should be valid with both sinks");
     }
 }

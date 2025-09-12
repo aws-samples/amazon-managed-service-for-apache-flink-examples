@@ -1,7 +1,7 @@
 package com.amazonaws.services.msf.domain;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,19 +45,18 @@ public class StockPriceGeneratorFunctionTest {
         
         // Verify ticker is one of the expected values
         List<String> expectedTickers = Arrays.asList(TICKERS);
-        assertTrue("Ticker should be one of the expected values", 
-                   expectedTickers.contains(stock.getTicker()));
+        assertTrue(expectedTickers.contains(stock.getTicker()), "Ticker should be one of the expected values");
         
         // Verify price is within expected range (0 to 100)
-        assertTrue("Price should be >= 0", stock.getPrice() >= 0);
-        assertTrue("Price should be <= 100", stock.getPrice() <= 100);
+        assertTrue(stock.getPrice() >= 0, "Price should be >= 0");
+        assertTrue(stock.getPrice() <= 100, "Price should be <= 100");
         
         // Verify price has at most 2 decimal places
         String priceStr = String.valueOf(stock.getPrice());
         int decimalIndex = priceStr.indexOf('.');
         if (decimalIndex != -1) {
             int decimalPlaces = priceStr.length() - decimalIndex - 1;
-            assertTrue("Price should have at most 2 decimal places", decimalPlaces <= 2);
+            assertTrue(decimalPlaces <= 2, "Price should have at most 2 decimal places");
         }
     }
 
