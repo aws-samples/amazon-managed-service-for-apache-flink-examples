@@ -1,0 +1,28 @@
+# Maven build artifacts
+target/
+dependency-reduced-pom.xml
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Deployment configuration files
+update-config.json

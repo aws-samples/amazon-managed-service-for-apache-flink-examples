@@ -1,0 +1,19 @@
+[
+  {
+    "PropertyGroupId": "kinesis.analytics.flink.run.options",
+    "PropertyMap": {
+      "python": "main.py",
+      "jarfile": "lib/pyflink-dependencies.jar"
+    }
+  },
+  {
+    "PropertyGroupId": "HudiTable0",
+    "PropertyMap": {
+      "catalog.name": "glue_catalog",
+      "warehouse.path": "s3a://<bucket-name>/my_warehouse",
+      "database.name": "my_database",
+      "table.name": "my_table",
+      "aws.region": "us-east-1"
+    }
+  }
+]

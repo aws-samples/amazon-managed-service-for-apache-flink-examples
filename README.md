@@ -60,6 +60,7 @@ Example applications in Java, Python, Scala and SQL for Amazon Managed Service f
 - [**S3 Sink**](./python/S3Sink) - Writing data to Amazon S3 using PyFlink
 - [**Firehose Sink**](./python/FirehoseSink) - Writing data to Amazon Kinesis Data Firehose
 - [**Iceberg Sink**](./python/IcebergSink) - Writing data to Apache Iceberg tables
+- [**Hudi Sink**](./python/HudiSink) - Writing data to Apache Hudi tables
 
 #### Stream Processing Patterns
 - [**Windowing**](./python/Windowing) - Time-based window aggregation examples with PyFlink/SQL
