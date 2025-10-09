@@ -17,7 +17,7 @@
         <maven.compiler.source>${target.java.version}</maven.compiler.source>
         <maven.compiler.target>${target.java.version}</maven.compiler.target>
         <flink.version>1.20.0</flink.version>
-        <flink.cdc.version>3.4.0</flink.cdc.version>
+        <flink.cdc.version>3.5.0</flink.cdc.version>
         <flink.jdbc.connector.version>3.3.0-1.20</flink.jdbc.connector.version>
         <mysql.jdbc.driver.version>9.3.0</mysql.jdbc.driver.version>
         <postgresql.jdbc.driver.version>42.7.2</postgresql.jdbc.driver.version>
