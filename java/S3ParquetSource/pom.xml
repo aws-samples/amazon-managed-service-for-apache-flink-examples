@@ -20,7 +20,7 @@
         <flink.version>1.20.0</flink.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
         <avro.version>1.11.3</avro.version>
-        <parquet.avro.version>1.12.3</parquet.avro.version>
+        <parquet.avro.version>1.15.2</parquet.avro.version>
         <hadoop.version>3.3.4</hadoop.version> <!-- this is the version Flink 1.20.0 uses for FS plugin -->
         <aws.connector.version>5.0.0-1.20</aws.connector.version>
         <log4j.version>2.23.1</log4j.version>
