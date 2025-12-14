@@ -1,0 +1,16 @@
+[
+  {
+    "PropertyGroupId": "InputStream0",
+    "PropertyMap": {
+      "aws.region": "us-east-1",
+      "stream.name": "ExampleInputStream"
+    }
+  },
+  {
+    "PropertyGroupId": "OutputStream0",
+    "PropertyMap": {
+      "aws.region": "us-east-1",
+      "stream.name": "ExampleOutputStream"
+    }
+  }
+]
