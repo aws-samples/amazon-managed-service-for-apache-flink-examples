@@ -19,7 +19,7 @@
         <flink.version>1.20.0</flink.version>
         <aws.connector.version>5.0.0-1.20</aws.connector.version>
         <kda.runtime.version>1.2.0</kda.runtime.version>
-        <log4j.version>2.23.1</log4j.version>
+        <log4j.version>2.25.3</log4j.version>
         <junit5.version>5.8.1</junit5.version>
     </properties>
 
