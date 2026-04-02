@@ -2,10 +2,10 @@
 
 Skeleton project for a basic Flink Java application to run on Amazon Managed Service for Apache Flink.
 
-* Flink version: 1.20
+* Flink version: 2.2
 * Flink API: DataStream API
-* Language: Java (11)
-* Flink connectors: Kinesis Consumer, Kinesis Sink
+* Language: Java (17)
+* Flink connectors: Kinesis Streams Source, Kinesis Streams Sink
 
 The project can run both on Amazon Managed Service for Apache Flink, and locally for development.
 
@@ -19,12 +19,10 @@ When running locally, the configuration is read from the [`resources/flink-appli
 
 Runtime parameters:
 
-| Group ID        | Key           | Description               | 
-|-----------------|---------------|---------------------------|
-| `InputStream0`  | `stream.name` | Name of the input stream  |
-| `InputStream0`  | `aws.region`  | (optional) Region of the input stream. If not specified, it will use the application region or the default region of the AWS profile, when running locally. |
-| `OutputStream0` | `stream.name` | Name of the output stream |
-| `OutputStream0`  | `aws.region`  | (optional) Region of the output stream. If not specified, it will use the application region or the default region of the AWS profile, when running locally. |
+| Group ID        | Key          | Description               | 
+|-----------------|--------------|---------------------------|
+| `InputStream0`  | `stream.arn` | ARN of the input Kinesis stream  |
+| `OutputStream0` | `stream.arn` | ARN of the output Kinesis stream |
 
 All parameters are case-sensitive.
 
