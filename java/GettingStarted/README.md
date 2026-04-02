@@ -19,10 +19,11 @@ When running locally, the configuration is read from the [`resources/flink-appli
 
 Runtime parameters:
 
-| Group ID        | Key          | Description               | 
-|-----------------|--------------|---------------------------|
-| `InputStream0`  | `stream.arn` | ARN of the input Kinesis stream  |
-| `OutputStream0` | `stream.arn` | ARN of the output Kinesis stream |
+| Group ID        | Key           | Description                       | 
+|-----------------|---------------|-----------------------------------|
+| `InputStream0`  | `stream.arn`  | ARN of the input Kinesis stream   |
+| `OutputStream0` | `stream.name` | Name of the output Kinesis stream |
+| `OutputStream0` | `aws.region`  | Region of the output Kinesis stream |
 
 All parameters are case-sensitive.
 

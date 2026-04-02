@@ -50,10 +50,8 @@ public class BasicStreamingJob {
     }
 
     private static KinesisStreamsSink<String> createSink(Properties outputProperties) {
-        Properties sinkClientProperties = new Properties();
-        sinkClientProperties.put("aws.region", outputProperties.getProperty("aws.region"));
         return KinesisStreamsSink.<String>builder()
-                .setKinesisClientProperties(sinkClientProperties)
+                .setKinesisClientProperties(outputProperties)
                 .setStreamName(outputProperties.getProperty("stream.name"))
                 .setSerializationSchema(new SimpleStringSchema())
                 .setPartitionKeyGenerator(element -> String.valueOf(element.hashCode()))
