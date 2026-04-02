@@ -8,7 +8,8 @@
   {
     "PropertyGroupId": "OutputStream0",
     "PropertyMap": {
-      "stream.arn": "arn:aws:kinesis:us-east-1:123456789012:stream/ExampleOutputStream"
+      "stream.name": "ExampleOutputStream",
+      "aws.region": "us-east-1"
     }
   }
 ]

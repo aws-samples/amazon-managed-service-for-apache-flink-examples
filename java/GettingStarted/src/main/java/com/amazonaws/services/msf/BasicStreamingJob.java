@@ -50,13 +50,11 @@ public class BasicStreamingJob {
     }
 
     private static KinesisStreamsSink<String> createSink(Properties outputProperties) {
-        String streamArn = outputProperties.getProperty("stream.arn");
-        // The sink requires the region to be set explicitly via client properties
         Properties sinkClientProperties = new Properties();
-        sinkClientProperties.put("aws.region", streamArn.split(":")[3]);
+        sinkClientProperties.put("aws.region", outputProperties.getProperty("aws.region"));
         return KinesisStreamsSink.<String>builder()
                 .setKinesisClientProperties(sinkClientProperties)
-                .setStreamArn(streamArn)
+                .setStreamName(outputProperties.getProperty("stream.name"))
                 .setSerializationSchema(new SimpleStringSchema())
                 .setPartitionKeyGenerator(element -> String.valueOf(element.hashCode()))
                 .build();
