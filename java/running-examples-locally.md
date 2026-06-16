@@ -34,6 +34,12 @@ Use the [AWS toolkit](https://aws.amazon.com/intellij/) IntelliJ plugin to run t
 2. Create a *Run Configuration* for the main class of your application
 3. Edit *Run Configuration*:  under *AWS configuration*, select *Use the currently selected credential profile/region*.
 
+> **Note:** If the AWS Toolkit is not available or not working, you can alternatively set AWS credentials as environment variables in your Run Configuration:
+> - `AWS_ACCESS_KEY_ID`
+> - `AWS_SECRET_ACCESS_KEY` 
+> - `AWS_SESSION_TOKEN` (if using temporary credentials)
+
+
 
 #### Network access to VPC-networked services
 
