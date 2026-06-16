@@ -2,15 +2,14 @@
   {
     "PropertyGroupId": "InputStream0",
     "PropertyMap": {
-      "aws.region": "us-east-1",
-      "stream.name": "ExampleInputStream"
+      "stream.arn": "arn:aws:kinesis:us-east-1:<account-id>:stream/ExampleInputStream"
     }
   },
   {
     "PropertyGroupId": "OutputStream0",
     "PropertyMap": {
-      "aws.region": "us-east-1",
-      "stream.name": "ExampleOutputStream"
+      "stream.name": "ExampleOutputStream",
+      "aws.region": "us-east-1"
     }
   }
 ]
