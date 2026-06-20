@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="all" type="CompoundRunConfigurationType">
+    <toRun name="flink-consumer" type="Application" />
+    <toRun name="producer-app" type="Application" />
+    <method v="2" />
+  </configuration>
+</component>
