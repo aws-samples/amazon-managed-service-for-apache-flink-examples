@@ -27,7 +27,7 @@
         <hadoop.version>3.3.4</hadoop.version>
         <jackson.version>2.13.5</jackson.version>
         <aws.sdk.version>1.12.261</aws.sdk.version>
-        <commons.configuration2.version>2.8.0</commons.configuration2.version>
+        <commons.configuration2.version>2.10.1</commons.configuration2.version>
         
         <!-- Maven plugin versions - centralized for consistency -->
         <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
